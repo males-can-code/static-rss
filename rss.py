@@ -64,7 +64,7 @@ class RSS(object):
             f.write(data)
             f.close()
         except IOError:
-            log.error('Failed to write to file: %s'%path)
+            self.log.error('Failed to write to file: %s'%path)
 
 
     def parse_feed(self, feed):
@@ -77,17 +77,39 @@ class RSS(object):
             return False
 
 
+    def get_dir_contents(self, path):
+        contents = []
+        for filename in os.walk(path):
+            contents.append(filename)
+        return contents[0][2]
+
+
     def parse_feedlist(self, feedlist):
+        # parse the feedlist and write new entries to file in feedhash/unread/titlehash
         feeds = {}
         for feed_url in feedlist:
             feed_parsed = self.parse_feed(feed_url)
             if feed_parsed:
-                feed_url = self.encode(feed_url)
-                feed_hash = self.hash(feed_url)
-                feeds[feed_hash] = feed_parsed
-                print(self.color.blue + feed_hash + self.color.reset)
-                for f in feeds[feed_hash].entries:
-                    print(self.color.red, f['title'], self.color.reset)
+                feed_url_hashed = self.hash(feed_url)
+                feed_path = self.feeds_path + '/' + feed_url_hashed
+                feed_read_path = self.feeds_path + '/' + feed_url_hashed + '/read'
+                feed_unread_path = self.feeds_path + '/' + feed_url_hashed + '/unread'
+
+                self.check_dir(feed_path)
+                self.check_dir(feed_read_path)
+                self.check_dir(feed_unread_path)
+
+                feed_read = self.get_dir_contents(feed_read_path)
+                feed_unread = self.get_dir_contents(feed_unread_path)
+
+                for f in feed_parsed.entries:
+                    feed_title_hashed = self.hash(f['title'])
+                    if feed_title_hashed not in feed_unread and feed_title_hashed not in feed_read:
+                        self.log.debug('New title', feed_title_hashed)
+                        self.write_to_file(self.feeds_path + '/' + feed_url_hashed + '/unread/' + feed_title_hashed, f['summary'])
+
+                feeds[feed_url_hashed] = feed_parsed
+
         return feeds
 
 
@@ -98,21 +120,18 @@ class RSS(object):
 
 
     def decode(self, data):
-        data = self.sanitize(data)
         data = data.decode('utf-8')
-        data = self.sanitize(data)
         return data
 
 
     def encode(self, data):
-        data = self.sanitize(data)
         data = data.encode('utf-8')
-        data = self.sanitize(data)
         return data
 
 
     def hash(self, data):
         data = self.sanitize(data)
+        data = self.encode(data)
         hashed = hashlib.sha224(data).hexdigest()
         return hashed
 
@@ -124,16 +143,6 @@ class RSS(object):
 
         feedlist = self.get_feedlist(self.feedlist_path)
         self.feeds = self.parse_feedlist(feedlist)
-
-        # Create dirs for every feed to contain the new messages
-        for hash in self.feeds.keys():
-            self.check_dir(self.feeds_path + '/' + hash)
-            self.check_dir(self.feeds_path + '/' + hash + '/read')
-            self.check_dir(self.feeds_path + '/' + hash + '/unread')
-
-
-
-
 
 
 app = RSS()
