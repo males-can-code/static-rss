@@ -24,13 +24,13 @@ class GenerateHTML(object):
         for path,dirs,files in os.walk(path):
             return dirs
 
+
     def read_file(self, path):
         file_content = []
         with open(path, 'r') as f:
             for line in f:
                 file_content.append(line)
         return file_content
-            
 
 
     def generate_HTML(self):
@@ -119,9 +119,8 @@ class RSS():
 
     def get_dir_contents(self, path):
         contents = []
-        for filename in os.walk(path):
-            contents.append(filename)
-        return contents[0][2]
+        for path,dirs,files in os.walk(path):
+            return files
 
 
     def parse_feedlist(self, feedlist):
@@ -130,6 +129,7 @@ class RSS():
         for feed_url in feedlist:
             feed_parsed = self.parse_feed(feed_url)
             if feed_parsed:
+
                 feed_url_hashed = self.hash(feed_url)
                 feed_path = self.feeds_path + '/' + feed_url_hashed
                 feed_read_path = self.feeds_path + '/' + feed_url_hashed + '/read'
@@ -139,14 +139,24 @@ class RSS():
                 self.check_dir(feed_read_path)
                 self.check_dir(feed_unread_path)
 
-                feed_read = self.get_dir_contents(feed_read_path)
-                feed_unread = self.get_dir_contents(feed_unread_path)
+                items_read = self.get_dir_contents(feed_read_path)
+                items_unread = self.get_dir_contents(feed_unread_path)
+                items_read_hashes = []
+                items_unread_hashes = []
+                for item in items_read:
+                    x,item_read_hash = item.split('|')
+                    item_read_hash = self.sanitize(item_read_hash)
+                    items_read_hashes.append(item_read_hash)
+                for item in items_unread:
+                    x,item_unread_hash = item.split('|')
+                    item_unread_hash = self.sanitize(item_unread_hash)
+                    items_unread_hashes.append(item_unread_hash)
 
-                for f in feed_parsed.entries:
-                    feed_title_hashed = self.hash(f['title'])
-                    if feed_title_hashed not in feed_unread and feed_title_hashed not in feed_read:
-                        self.log.debug('New title', feed_title_hashed)
-                        self.write_to_file(self.feeds_path + '/' + feed_url_hashed + '/unread/' + feed_title_hashed, f['summary'])
+                for item in feed_parsed.entries:
+                    item_title_hashed = self.hash(item['title'])
+                    if item_title_hashed not in items_unread_hashes and item_title_hashed not in items_read_hashes:
+                        self.log.debug('New title: ' + item_title_hashed)
+                        self.write_to_file(self.feeds_path + '/' + feed_url_hashed + '/unread/' + self.get_timestamp() + '|' + item_title_hashed, item['summary'])
 
                 feeds[feed_url_hashed] = feed_parsed
 
@@ -178,6 +188,7 @@ class RSS():
 
     def run(self):
         self.check_dir(self.feeds_path)
+        self.check_dir(self.template_path)
         if not self.check_file(self.feedlist_path):
             self.log.error('No feedlist found at: %s... Quitting'%self.feedlist_path)
 
