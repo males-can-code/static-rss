@@ -10,46 +10,20 @@ import sqlite3
 
 
 class GenerateHTML(object):
-    def __init__(self, templ_path, src_path, dest_path):
-        self.templ_path = templ_path
-        self.src_path = src_path
-        self.dest_path = dest_path
-
-
     def get_files(self, path):
         for path,dirs,files in os.walk(path):
             return files
 
 
-    def get_dirs(self, path):
-        for path,dirs,files in os.walk(path):
-            return dirs
-
-
-    def read_file(self, path):
-        file_content = []
-        with open(path, 'r') as f:
-            for line in f:
-                file_content.append(line)
-        return file_content
-
-
     def generate_HTML(self):
-        pass
+        feeds = self.get_table('feeds')
+        for feed in feeds:
+            entries = self.get_entries_by_hash('entries', str(self.get_hash(feed['feed_url']))) 
+            for entry in entries:
+                print(entry['title'])
 
+            # generate this shit
 
-    def run(self):
-        feed_dirs = self.get_dirs(self.src_path)
-        for feed_dir in feed_dirs:
-            
-            for item in self.get_files(self.src_path + '/' + feed_dir + '/read'):
-                content = self.read_file(self.src_path + '/' + feed_dir + '/read/' + item)
-            for item in self.get_files(self.src_path + '/' + feed_dir + '/unread'):
-                content = self.read_file(self.src_path + '/' + feed_dir + '/unread/' + item)
-
-            # now write stuff with help from template files to html
-            # next would probably be the php file for marking everything as read
-        
 
 class Database(object):
     def create_tables(self):
@@ -98,6 +72,28 @@ class Database(object):
         return table_export
 
 
+    def get_entries_by_hash(self, table, feed_hash):
+        db = sqlite3.connect(self.db_path)
+        rows = []
+        cols = []
+        table_export = []
+
+        for row in db.execute('select * from %s where "feed_hash" is "%s"'%(table, feed_hash)):
+            rows.append(row)
+
+        for row in db.execute('PRAGMA table_info(%s)'%table):
+            cols.append(row[1])
+
+        for row in rows:
+            row_export = {}
+            for x in range(1,len(cols)):
+                row_export[cols[x]] = row[x]
+            table_export.append(row_export)
+
+        db.close()
+        return table_export
+
+
     def insert_row(self, table, row):
         db = sqlite3.connect(self.db_path)
         values = []
@@ -105,15 +101,28 @@ class Database(object):
             values.append(row[key])
         keys = ','.join(row.keys())
         query = 'INSERT INTO %s(%s) VALUES(%s)'%(table, keys, ','.join(['?'] * len(row)))
-        db.execute(query,values)
-        db.commit()
-        self.log.debug('Row inserted')
+        try:
+            db.execute(query,values)
+            db.commit()
+            self.log.debug('Row inserted')
+            db.close()
+        except:
+            self.log.error('Failed to insert row')
+            db.close()
+
+
+    def check_in_table(self, table, value):
+        db = sqlite3.connect(self.db_path)
+        for data in db.execute('select * from %s where hash = ?'%table, (value,)):
+            if data:
+                db.close()
+                return True
         db.close()
+        return False
         
 
 
-
-class RSS(Database):
+class RSS(Database, GenerateHTML):
     def __init__(self):
         self.db_path = '/home/eco/bin/apps/rss/rss.db'
         self.HTML_path = '/home/eco/bin/apps/rss/html'
@@ -153,14 +162,24 @@ class RSS(Database):
         return hashed
 
 
-    def parse_feed(self, feed):
-        self.log.info('Parsing: %s'%feed)
+    def parse_feed(self, url):
+        self.log.info('Parsing: %s'%url)
         try:
-            feed = feedparser.parse(feed)
-            return feed
+            parsed_feed = feedparser.parse(url)
+            return parsed_feed
         except:
-            self.log.error('Failed to parse feed: %s'%feed)
-            return False
+            self.log.error('Failed to parse feed: %s'%url)
+            return false
+
+
+    def parse_feeds(self):
+        feeds = self.get_table('feeds')
+        for feed in feeds:
+            parsed_feed = self.parse_feed(feed['feed_url'])
+            if parsed_feed:
+                for entry in parsed_feed.entries:
+                    if not self.check_in_table('entries',str(self.get_hash(entry['title']))):
+                        self.add_entry(entry, feed['feed_url'])
 
 
     def sanitize(self, var):
@@ -180,24 +199,25 @@ class RSS(Database):
 
 
     def add_feed(self, url):
-        feed = self.parse_feed(url)
+        self.log.info('Adding feed: %s'%url)
         feed_insert = {}
+        feed = self.parse_feed(url)
         if feed:
             feed_insert['hash'] = str(self.get_hash(url))
             feed_insert['title'] = str(feed.feed['title'])
             feed_insert['date_entered'] = str(self.get_timestamp())
             feed_insert['feed_url'] = str(url)
-            feed_insert['icon_url'] = str('None')
-            feed_insert['last_updated'] = str('None')
-            feed_insert['group_id'] = str(0)
+            feed_insert['icon_url'] = 'None'
+            feed_insert['last_updated'] = 'None'
+            feed_insert['group_id'] = '0'
 
-            print(feed_insert)
             self.insert_row('feeds', feed_insert)
 
 
     def add_entry(self, entry, url):
+        self.log.info('Inserting new entry: %s'%entry['title'])
         entry_insert = {}
-        entry_insert['hash'] = str(self.get_hash(entry['published'] + entry['title']))
+        entry_insert['hash'] = str(self.get_hash(entry['title']))
         entry_insert['content'] = str(entry['summary'])
         entry_insert['read'] = 'False'
         entry_insert['title'] = str(entry['title'])
@@ -207,20 +227,20 @@ class RSS(Database):
         self.insert_row('entries', entry_insert)
 
 
+    def insert_test_feeds(self):
+        urls = ['http://inconsolation.wordpress.com/feed/', 'http://iloveubuntu.net/rss.xml', 'http://feeds.bbci.co.uk/news/rss.xml']
+        for url in urls:
+            if not self.check_in_table('feeds',str(self.get_hash(url))):
+                self.add_feed(url)
+
+
     def run(self):
         self.create_tables()
-        self.add_feed('http://inconsolation.wordpress.com/feed/')
-        self.add_feed('http://iloveubuntu.net/rss.xml')
+        self.insert_test_feeds()
+        self.parse_feeds()
+        self.generate_HTML()
 
 
-        feeds = self.get_table('feeds')
-        for feed in feeds:
-            parsed_feed = self.parse_feed(feed['feed_url'])
-            for entry in parsed_feed.entries:
-                self.add_entry(entry, feed['feed_url'])
 
-        entries = self.get_table('entries')
-        for entry in entries:
-            print('>>>',entry['title'])
 app = RSS()
 app.run()
