@@ -64,8 +64,9 @@ class Database(object):
 
         db.execute("create table if not exists entries (hash          text    unique  ,"
                                                         "content      text            ,"
+                                                        "read         text            ,"
                                                         "date_entered text            ,"
-                                                        "feed         text            )")
+                                                        "feed_hash    text            )")
 
         db.execute("create table if not exists groups (name        text            )")
 
@@ -74,29 +75,40 @@ class Database(object):
 
 
     def get_table(self, table):
-    # Spits out the complete database into a list of dictionaries
+    # Spits out the complete table into a list of dictionaries
         db = sqlite3.connect(self.db_path)
         rows = []
-        for row in db.execute('select ROWID,* from %s order by ROWID'%table):
+        cols = []
+        table_export = []
+
+        for row in db.execute('select * from %s order by ROWID'%table):
             rows.append(row)
+
+        for row in db.execute('PRAGMA table_info(%s)'%table):
+            cols.append(row[1])
+
+        for row in rows:
+            row_export = {}
+            for x in range(1,len(cols)):
+                row_export[cols[x]] = row[x]
+            table_export.append(row_export)
+
         db.close()
-        return rows
+        return table_export
 
 
     def insert_row(self, table, row):
-        # insert a group
         db = sqlite3.connect(self.db_path)
         values = []
         for key in row:
             values.append(row[key])
-        query = 'INSERT INTO %s VALUES(%s)'%(table, ','.join(['?'] * len(row)))
-        for k in row.keys():
-            print(query)
-            #db.execute("insert or ignore into %s(%s) values('%s')"%(table, k, str(row[k])))
-            db.execute(query,values)
+        keys = ','.join(row.keys())
+        query = 'INSERT INTO %s(%s) VALUES(%s)'%(table, keys, ','.join(['?'] * len(row)))
+        db.execute(query,values)
         db.commit()
         self.log.debug('Row inserted')
         db.close()
+        
 
 
 
@@ -128,49 +140,16 @@ class RSS(Database):
         self.feeds_group_id_field         = 5
 
 
-    def get_feedlist(self, path):
-        # Return a dictionary with name => url
-        feedlist = []
-        with open(path, 'r') as f:
-            for line in f:
-                feedlist.append(self.sanitize(line))
-        return feedlist
-
-
     def get_timestamp(self):
         timestamp = strftime("%Y%m%d%H%M%S")
         return timestamp
 
 
-    def check_file(self, filename):
-        try:
-            with open(filename) as f: pass
-            return True
-        except IOError as e:
-            self.log.info('Failed to open file: %s'%filename)
-            return False
-
-
-    def check_dir(self, path):
-        if not os.path.exists(path):
-            self.log.info('dir doesn\'t exist, creating dir: %s'%path)
-            try:
-                os.makedirs(path)
-                return True
-            except IOError as e:
-                self.log.error('Failed to create dir: %s'%path)
-                sys.exit()
-        else:
-            return True
-
-
-    def write_to_file(self, path, data):
-        try:
-            f = open(path, 'w')
-            f.write(data)
-            f.close()
-        except IOError:
-            self.log.error('Failed to write to file: %s'%path)
+    def get_hash(self, data):
+        data = self.sanitize(data)
+        data = self.encode(data)
+        hashed = hashlib.sha224(data).hexdigest()
+        return hashed
 
 
     def parse_feed(self, feed):
@@ -181,46 +160,6 @@ class RSS(Database):
         except:
             self.log.error('Failed to parse feed: %s'%feed)
             return False
-
-
-    def parse_feedlist(self, feedlist):
-        # parse the feedlist and write new entries to file in feedhash/unread/titlehash
-        feeds = {}
-        for feed_url in feedlist:
-            feed_parsed = self.parse_feed(feed_url)
-            if feed_parsed:
-
-                feed_url_hashed = self.hash(feed_url)
-                feed_path = self.feeds_path + '/' + feed_url_hashed
-                feed_read_path = self.feeds_path + '/' + feed_url_hashed + '/read'
-                feed_unread_path = self.feeds_path + '/' + feed_url_hashed + '/unread'
-
-                self.check_dir(feed_path)
-                self.check_dir(feed_read_path)
-                self.check_dir(feed_unread_path)
-
-                items_read = self.get_dir_contents(feed_read_path)
-                items_unread = self.get_dir_contents(feed_unread_path)
-                items_read_hashes = []
-                items_unread_hashes = []
-                for item in items_read:
-                    x,item_read_hash = item.split('|')
-                    item_read_hash = self.sanitize(item_read_hash)
-                    items_read_hashes.append(item_read_hash)
-                for item in items_unread:
-                    x,item_unread_hash = item.split('|')
-                    item_unread_hash = self.sanitize(item_unread_hash)
-                    items_unread_hashes.append(item_unread_hash)
-
-                for item in feed_parsed.entries:
-                    item_title_hashed = self.hash(item['title'])
-                    if item_title_hashed not in items_unread_hashes and item_title_hashed not in items_read_hashes:
-                        self.log.debug('New title: ' + item_title_hashed)
-                        self.write_to_file(self.feeds_path + '/' + feed_url_hashed + '/unread/' + self.get_timestamp() + '|' + item_title_hashed, item['summary'])
-
-                feeds[feed_url_hashed] = feed_parsed
-
-        return feeds
 
 
     def sanitize(self, var):
@@ -239,13 +178,6 @@ class RSS(Database):
         return data
 
 
-    def get_hash(self, data):
-        data = self.sanitize(data)
-        data = self.encode(data)
-        hashed = hashlib.sha224(data).hexdigest()
-        return hashed
-
-
     def add_feed(self, url):
         feed = self.parse_feed(url)
         feed_insert = {}
@@ -262,24 +194,33 @@ class RSS(Database):
             self.insert_row('feeds', feed_insert)
 
 
+    def add_entry(self, entry, url):
+        entry_insert = {}
+        read = 'False'
+
+        #print(self.color.red + 'title >>', entry['title'], self.color.reset)
+        #print(self.color.red + 'published >>', entry['published'], self.color.reset)
+        #print(self.color.red + 'id >>', entry['id'], self.color.reset)
+        #print('summary >>', entry['summary'])
             
-        
+        entry_insert['hash'] = str(self.get_hash(entry['published'] + entry['title']))
+        entry_insert['content'] = str(entry['summary'])
+        entry_insert['read'] = str(read)
+        entry_insert['date_entered'] = str(self.get_timestamp())
+        entry_insert['feed_hash'] = str(self.get_hash(url))
+        print(entry_insert.keys())
+        self.insert_row('entries', entry_insert)
+
 
 
     def run(self):
-        #self.check_dir(self.feeds_path)
-        #self.check_dir(self.template_path)
-        #if not self.check_file(self.feedlist_path):
-        #    self.log.error('No feedlist found at: %s... Quitting'%self.feedlist_path)
-
-        #feedlist = self.get_feedlist(self.feedlist_path)
-        #self.feeds = self.parse_feedlist(feedlist)
-        #html = GenerateHTML(self.template_path, self.feeds_path, self.HTML_path)
-        #html.run()
         self.create_tables()
-        self.add_feed('http://iloveubuntu.net/rss.xml')
-        self.get_table('feeds')
-
+        feeds = self.get_table('feeds')
+        for feed in feeds:
+            parsed_feed = self.parse_feed(feed['feed_url'])
+            for entry in parsed_feed.entries:
+                self.add_entry(entry, feed['feed_url'])
+        feeds = self.get_table('entries')
 
 app = RSS()
 app.run()
