@@ -9,14 +9,54 @@ from time import strftime
 
 
 class GenerateHTML(object):
-    def __init__(self, data):
+    def __init__(self, templ_path, src_path, dest_path):
+        self.templ_path = templ_path
+        self.src_path = src_path
+        self.dest_path = dest_path
+
+
+    def get_files(self, path):
+        for path,dirs,files in os.walk(path):
+            return files
+
+
+    def get_dirs(self, path):
+        for path,dirs,files in os.walk(path):
+            return dirs
+
+    def read_file(self, path):
+        file_content = []
+        with open(path, 'r') as f:
+            for line in f:
+                file_content.append(line)
+        return file_content
+            
+
+
+    def generate_HTML(self):
         pass
 
 
-class RSS(object):
+    def run(self):
+        feed_dirs = self.get_dirs(self.src_path)
+        for feed_dir in feed_dirs:
+            
+            for item in self.get_files(self.src_path + '/' + feed_dir + '/read'):
+                content = self.read_file(self.src_path + '/' + feed_dir + '/read/' + item)
+            for item in self.get_files(self.src_path + '/' + feed_dir + '/unread'):
+                content = self.read_file(self.src_path + '/' + feed_dir + '/unread/' + item)
+
+            # now write stuff with help from template files to html
+            # next would probably be the php file for marking everything as read
+        
+
+
+class RSS():
     def __init__(self):
+        self.HTML_path = '/home/eco/bin/apps/rss/html'
         self.feedlist_path = '/home/eco/bin/apps/rss/feedslist'
         self.feeds_path = '/home/eco/bin/apps/rss/feeds'
+        self.template_path = '/home/eco/bin/apps/rss/templates/feed'
         self.feeds = {}     # Contains feeds: key: hashed url, value: parsed feed object
         self.log = Log()
         self.color = Color()
@@ -143,6 +183,8 @@ class RSS(object):
 
         feedlist = self.get_feedlist(self.feedlist_path)
         self.feeds = self.parse_feedlist(feedlist)
+        html = GenerateHTML(self.template_path, self.feeds_path, self.HTML_path)
+        html.run()
 
 
 app = RSS()
