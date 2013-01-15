@@ -70,29 +70,40 @@ class GenerateHTML(object):
         f.close()
 
 
-    def parse_feed_template(self, template_path, entry):
-        data = self.get_file(template_path)
+    def parse_template(self, template_path, data):
         filled_template = []
+        template = self.get_file(template_path)
 
-        if data:
-            for line in data:
+        if template:
+            for line in template:
                 replaced = False
-                for key in entry.keys():
+                for key in data.keys():
                     if '$' + key in line:
-                        line = Template(line).substitute({key:entry[key]})
+                        line = Template(line).substitute({key:data[key]})
                 filled_template.append(line)
         return filled_template
 
 
+
     def generate_HTML(self):
         templates = []
+        feed_urls = []
+        feed_url = {}
+
         feeds = self.get_table('feeds')
         for feed in feeds:
             entries = self.get_entries_by_hash('entries', str(self.get_hash(feed['feed_url']))) 
             for entry in entries:
-                filled_template = self.parse_feed_template(self.feed_template_path, entry)
-                templates.append(filled_template)
-            self.write_to_file('/home/eco/bin/apps/rss/html/index.html', templates)
+                feed_template = self.parse_template(self.feed_template_path, entry)
+                templates.append(feed_template)
+
+            feed_url['title'] = feed['title'] 
+            feed_url['feed_url'] = feed['feed_url']
+            feed_urls_template = self.parse_template(self.feed_urls_template_path, feed_url)
+            feed_urls.append(feed_urls_template)
+
+        self.write_to_file('/home/eco/bin/apps/rss/html/index.html', templates)
+        self.write_to_file('/home/eco/bin/apps/rss/html/index.html', feed_urls)
 
 
 
@@ -200,6 +211,7 @@ class RSS(Database, GenerateHTML):
         self.db_path = '/home/eco/bin/apps/rss/rss.db'
         self.HTML_path = '/home/eco/bin/apps/rss/html'
         self.feed_template_path = '/home/eco/bin/apps/rss/templates/feed.html'
+        self.feed_urls_template_path = '/home/eco/bin/apps/rss/templates/feed_urls.html'
         self.feeds = {}     # Contains feeds: key: hashed url, value: parsed feed object
         self.log = Log()
         self.color = Color()
