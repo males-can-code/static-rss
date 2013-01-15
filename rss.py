@@ -64,6 +64,7 @@ class Database(object):
 
         db.execute("create table if not exists entries (hash          text    unique  ,"
                                                         "content      text            ,"
+                                                        "title        text            ,"
                                                         "read         text            ,"
                                                         "date_entered text            ,"
                                                         "feed_hash    text            )")
@@ -196,31 +197,30 @@ class RSS(Database):
 
     def add_entry(self, entry, url):
         entry_insert = {}
-        read = 'False'
-
-        #print(self.color.red + 'title >>', entry['title'], self.color.reset)
-        #print(self.color.red + 'published >>', entry['published'], self.color.reset)
-        #print(self.color.red + 'id >>', entry['id'], self.color.reset)
-        #print('summary >>', entry['summary'])
-            
         entry_insert['hash'] = str(self.get_hash(entry['published'] + entry['title']))
         entry_insert['content'] = str(entry['summary'])
-        entry_insert['read'] = str(read)
+        entry_insert['read'] = 'False'
+        entry_insert['title'] = str(entry['title'])
         entry_insert['date_entered'] = str(self.get_timestamp())
         entry_insert['feed_hash'] = str(self.get_hash(url))
-        print(entry_insert.keys())
-        self.insert_row('entries', entry_insert)
 
+        self.insert_row('entries', entry_insert)
 
 
     def run(self):
         self.create_tables()
+        self.add_feed('http://inconsolation.wordpress.com/feed/')
+        self.add_feed('http://iloveubuntu.net/rss.xml')
+
+
         feeds = self.get_table('feeds')
         for feed in feeds:
             parsed_feed = self.parse_feed(feed['feed_url'])
             for entry in parsed_feed.entries:
                 self.add_entry(entry, feed['feed_url'])
-        feeds = self.get_table('entries')
 
+        entries = self.get_table('entries')
+        for entry in entries:
+            print('>>>',entry['title'])
 app = RSS()
 app.run()
