@@ -6,6 +6,7 @@ import hashlib
 from log import Log
 from color import Color
 from time import strftime
+from string import Template
 import sqlite3
 
 
@@ -15,14 +16,86 @@ class GenerateHTML(object):
             return files
 
 
+    def check_dir(self, directory):
+        if not os.path.exists(directory):
+            self.log.info('dir doesn\'t exist, creating dir: %s'%directory)
+            try:
+                os.makedirs(directory)
+                return True
+            except IOError as e:
+                self.log.error('Failed to create dir: %s'%directory)
+                sys.exit()
+        else:
+            self.log.info('path exists: %s'%directory)
+            return True
+
+
+    def check_file(self, filename):
+        try:
+            with open(filename) as f: pass
+            return True
+        except IOError as e:
+            self.log.info('Failed to open file: %s'%filename)
+            return False
+        
+
+    def get_file(self, filename):
+        contents = []
+        if self.check_file(filename):
+            try:
+                f = open(filename, 'r')
+            except IOError as e:
+                self.log.info('Failed to open file: %s'%filename)
+                return False
+
+            for line in f:
+                contents.append(self.sanitize(line))
+            f.close()
+            return contents
+        else:
+            return False
+            
+
+    def write_to_file(self, path, templates):
+        write_data = ''
+        try:
+            f = open(path, 'w')
+        except IOError:
+            self.log.error('Failed to write to file: %s'%path)
+
+        for template in templates:
+            for x in template:
+                write_data = write_data + x
+        f.write(write_data)
+        f.close()
+
+
+    def parse_feed_template(self, template_path, entry):
+        data = self.get_file(template_path)
+        filled_template = []
+
+        if data:
+            for line in data:
+                replaced = False
+                for key in entry.keys():
+                    if '$' + key in line:
+                        line = Template(line).substitute({key:entry[key]})
+                filled_template.append(line)
+        return filled_template
+
+
     def generate_HTML(self):
+        templates = []
         feeds = self.get_table('feeds')
         for feed in feeds:
             entries = self.get_entries_by_hash('entries', str(self.get_hash(feed['feed_url']))) 
             for entry in entries:
-                print(entry['title'])
+                filled_template = self.parse_feed_template(self.feed_template_path, entry)
+                templates.append(filled_template)
+            self.write_to_file('/home/eco/bin/apps/rss/html/index.html', templates)
 
-            # generate this shit
+
+
 
 
 class Database(object):
@@ -38,6 +111,7 @@ class Database(object):
 
         db.execute("create table if not exists entries (hash          text    unique  ,"
                                                         "content      text            ,"
+                                                        "entry_url    text            ,"
                                                         "title        text            ,"
                                                         "read         text            ,"
                                                         "date_entered text            ,"
@@ -104,7 +178,6 @@ class Database(object):
         try:
             db.execute(query,values)
             db.commit()
-            self.log.debug('Row inserted')
             db.close()
         except:
             self.log.error('Failed to insert row')
@@ -126,28 +199,10 @@ class RSS(Database, GenerateHTML):
     def __init__(self):
         self.db_path = '/home/eco/bin/apps/rss/rss.db'
         self.HTML_path = '/home/eco/bin/apps/rss/html'
-        self.feedlist_path = '/home/eco/bin/apps/rss/feedslist'
-        self.feeds_path = '/home/eco/bin/apps/rss/feeds'
-        self.template_path = '/home/eco/bin/apps/rss/templates/feed'
+        self.feed_template_path = '/home/eco/bin/apps/rss/templates/feed.html'
         self.feeds = {}     # Contains feeds: key: hashed url, value: parsed feed object
         self.log = Log()
         self.color = Color()
-
-        # Map fields in tables to index in list so it's easier to change the order
-        self.group_id_field               = 0
-        self.group_title_field            = 1
-
-        self.entries_hash_field           = 0
-        self.entries_content_field        = 1
-        self.entries_date_entered_field   = 2
-        self.entries_feed_field           = 3
-
-        self.feeds_hash_field             = 0
-        self.feeds_title_field            = 1
-        self.feeds_date_entered_field     = 2
-        self.feeds_feed_url_field         = 3
-        self.feeds_last_updated_field     = 4
-        self.feeds_group_id_field         = 5
 
 
     def get_timestamp(self):
@@ -219,6 +274,7 @@ class RSS(Database, GenerateHTML):
         entry_insert = {}
         entry_insert['hash'] = str(self.get_hash(entry['title']))
         entry_insert['content'] = str(entry['summary'])
+        entry_insert['entry_url'] = str(entry['link'])
         entry_insert['read'] = 'False'
         entry_insert['title'] = str(entry['title'])
         entry_insert['date_entered'] = str(self.get_timestamp())
