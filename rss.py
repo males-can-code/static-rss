@@ -81,9 +81,9 @@ class GenerateHTML(object):
     def generate_feed_urls(self, feeds):
         filled_urls_template = ''
         feed_url = {}
-        c = 0
         
         for feed in feeds:
+            c = 0
             # Count unread entries per feed
             entries = self.get_entries_by_hash('entries', str(self.get_hash(feed['feed_url']))) 
             for entry in entries:
@@ -95,7 +95,10 @@ class GenerateHTML(object):
             feed_url['counter'] = c
 
             # Parse template
-            filled_url_template = self.parse_template(self.feed_urls_template_path, feed_url)
+            if c > 0:
+                filled_url_template = self.parse_template(self.feed_urls_unread_template_path, feed_url)
+            else:
+                filled_url_template = self.parse_template(self.feed_urls_read_template_path, feed_url)
             filled_urls_template = filled_urls_template + filled_url_template + '\n'
         return filled_urls_template
 
@@ -194,7 +197,7 @@ class Database(object):
         cols = []
         table_export = []
 
-        for row in db.execute('select * from %s where "feed_hash" is "%s"'%(table, feed_hash)):
+        for row in db.execute('select * from %s where "feed_hash" is "%s" order by "date_entered" desc'%(table, feed_hash)):
             rows.append(row)
 
         for row in db.execute('PRAGMA table_info(%s)'%table):
@@ -202,7 +205,7 @@ class Database(object):
 
         for row in rows:
             row_export = {}
-            for x in range(1,len(cols)):
+            for x in range(0,len(cols)):
                 row_export[cols[x]] = row[x]
             table_export.append(row_export)
 
@@ -251,7 +254,8 @@ class RSS(Database, GenerateHTML):
         self.read_entry_template_path = '/home/eco/bin/apps/rss/templates/read_entry.html'
         self.unread_entry_template_path = '/home/eco/bin/apps/rss/templates/unread_entry.html'
         self.feed_template_path = '/home/eco/bin/apps/rss/templates/feed.html'
-        self.feed_urls_template_path = '/home/eco/bin/apps/rss/templates/feed_urls.html'
+        self.feed_urls_read_template_path = '/home/eco/bin/apps/rss/templates/feed_urls_read.html'
+        self.feed_urls_unread_template_path = '/home/eco/bin/apps/rss/templates/feed_urls_unread.html'
         self.css_path = '/home/eco/bin/apps/rss/css/stylesheet.css'
         self.feeds = {}     # Contains feeds: key: hashed url, value: parsed feed object
         self.log = Log()
@@ -353,6 +357,10 @@ class RSS(Database, GenerateHTML):
                 feeds = self.get_table('feeds')
                 for feed in feeds:
                     self.mark_read(feed)
+
+            if sys.argv[1] == '--gen':
+                self.generate_HTML()
+                sys.exit()
 
         self.create_tables()
         self.insert_test_feeds()
