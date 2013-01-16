@@ -19,7 +19,6 @@ class GenerateHTML(object):
 
     def check_dir(self, directory):
         if not os.path.exists(directory):
-            self.log.info('dir doesn\'t exist, creating dir: %s'%directory)
             try:
                 os.makedirs(directory)
                 return True
@@ -27,7 +26,6 @@ class GenerateHTML(object):
                 self.log.error('Failed to create dir: %s'%directory)
                 sys.exit()
         else:
-            self.log.info('path exists: %s'%directory)
             return True
 
 
@@ -118,6 +116,7 @@ class GenerateHTML(object):
 
 
     def generate_HTML(self):
+        self.log.info('Generating HTML')
         shutil.rmtree(self.export_html_path)
         self.check_dir(self.export_html_path)
         self.check_dir(self.export_html_path + '/feeds')
@@ -227,6 +226,13 @@ class Database(object):
             db.close()
 
 
+    def update_row(self, table, field, string, hash):
+        db = sqlite3.connect(self.db_path)
+        db.execute('update %s set "%s" = "%s" where "%s"'%(str(table), str(field), str(string), str(hash)))
+        db.commit()
+        db.close()
+
+
     def check_in_table(self, table, value):
         db = sqlite3.connect(self.db_path)
         for data in db.execute('select * from %s where hash = ?'%table, (value,)):
@@ -330,6 +336,10 @@ class RSS(Database, GenerateHTML):
         self.insert_row('entries', entry_insert)
 
 
+    def mark_read(self, feed):
+        self.log.info('Marking feed %s as read'%feed['title'])
+        self.update_row('entries', 'read', 'True', feed['hash'])
+
     def insert_test_feeds(self):
         urls = ['http://inconsolation.wordpress.com/feed/', 'http://iloveubuntu.net/rss.xml', 'http://feeds.bbci.co.uk/news/rss.xml']
         for url in urls:
@@ -338,6 +348,12 @@ class RSS(Database, GenerateHTML):
 
 
     def run(self):
+        if len(sys.argv) > 1:
+            if sys.argv[1] == '--mark-read':
+                feeds = self.get_table('feeds')
+                for feed in feeds:
+                    self.mark_read(feed)
+
         self.create_tables()
         self.insert_test_feeds()
         self.parse_feeds()
