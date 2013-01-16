@@ -57,23 +57,17 @@ class GenerateHTML(object):
             return False
             
 
-    def write_to_file(self, path, templates):
-        write_data = ''
+    def write_to_file(self, path, data):
         try:
-            f = open(path, 'w')
+            with open(path, 'w') as f:
+                f.write(data)
         except IOError:
             self.log.error('Failed to write to file: %s'%path)
-
-        for template in templates:
-            for x in template:
-                write_data = write_data + x
-        f.write(write_data)
-        f.close()
 
 
     def parse_template(self, template_path, data):
     # Parse a template file and return a list
-        filled_template = []
+        filled_template = ''
         template = self.get_file(template_path)
 
         if template:
@@ -81,12 +75,13 @@ class GenerateHTML(object):
                 for key in data.keys():
                     if '$' + key in line:
                         line = Template(line).safe_substitute({key:data[key]})
-                filled_template.append(line)
+                filled_template = filled_template + line + '\n'
+
         return filled_template
 
 
     def generate_feed_urls(self, feeds):
-        filled_urls_template = []
+        filled_urls_template = ''
         feed_url = {}
         c = 0
         
@@ -102,22 +97,23 @@ class GenerateHTML(object):
             feed_url['counter'] = c
 
             # Parse template
-            feed_urls_template = self.parse_template(self.feed_urls_template_path, feed_url)
-            filled_urls_template.append(feed_urls_template)
+            filled_url_template = self.parse_template(self.feed_urls_template_path, feed_url)
+            filled_urls_template = filled_urls_template + filled_url_template + '\n'
         return filled_urls_template
 
 
     def generate_entries(self, feed):
-        filled_entries_template = []
+        filled_entries_template = ''
         entries = self.get_entries_by_hash('entries', str(self.get_hash(feed['feed_url']))) 
         for entry in entries:
             # Use different template for read/unread entries
             if entry['read'] == 'True':
                 filled_entry_template = self.parse_template(self.read_entry_template_path, entry)
-                filled_entries_template.append(filled_entry_template)
             elif entry['read'] == 'False':
                 filled_entry_template = self.parse_template(self.unread_entry_template_path, entry)
-                filled_entries_template.append(filled_entry_template)
+
+            filled_entries_template = filled_entries_template + filled_entry_template + '\n'
+
         return filled_entries_template
 
 
@@ -127,14 +123,21 @@ class GenerateHTML(object):
         self.check_dir(self.export_html_path + '/feeds')
 
         feeds = self.get_table('feeds')
-        feed_urls = self.generate_feed_urls(feeds)
+
+        feed_template = {}
+        feed_template['css'] = self.css_path
+        feed_template['feed_urls'] = self.generate_feed_urls(feeds)
 
         for feed in feeds:
-            filled_entries_template = self.generate_entries(feed)
+            feed_template['content'] = self.generate_entries(feed)
+            feed_template['title'] = feed['title']
+            filled_feed_template = self.parse_template(self.feed_template_path, feed_template)
+
             self.check_dir(self.export_html_path + '/feeds/' + feed['hash'])
-            self.write_to_file(self.export_html_path + '/feeds/' + feed['hash'] + '/feed.html', feed_urls + filled_entries_template)
+            self.write_to_file(self.export_html_path + '/feeds/' + feed['hash'] + '/feed.html', filled_feed_template)
+
             if feed == feeds[0]:
-                self.write_to_file(self.export_html_path + '/index.html', feed_urls + filled_entries_template)
+                self.write_to_file(self.export_html_path + '/index.html', filled_feed_template)
 
 
 
@@ -241,7 +244,9 @@ class RSS(Database, GenerateHTML):
         self.export_html_path = '/home/eco/bin/apps/rss/html'
         self.read_entry_template_path = '/home/eco/bin/apps/rss/templates/read_entry.html'
         self.unread_entry_template_path = '/home/eco/bin/apps/rss/templates/unread_entry.html'
+        self.feed_template_path = '/home/eco/bin/apps/rss/templates/feed.html'
         self.feed_urls_template_path = '/home/eco/bin/apps/rss/templates/feed_urls.html'
+        self.css_path = '/home/eco/bin/apps/rss/css/stylesheet.css'
         self.feeds = {}     # Contains feeds: key: hashed url, value: parsed feed object
         self.log = Log()
         self.color = Color()
