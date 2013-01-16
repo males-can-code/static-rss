@@ -3,11 +3,12 @@
 import os,sys
 import feedparser
 import hashlib
+import sqlite3
+import shutil
 from log import Log
 from color import Color
 from time import strftime
 from string import Template
-import sqlite3
 
 
 class GenerateHTML(object):
@@ -71,47 +72,75 @@ class GenerateHTML(object):
 
 
     def parse_template(self, template_path, data):
+    # Parse a template file and return a list
         filled_template = []
         template = self.get_file(template_path)
 
         if template:
             for line in template:
-                replaced = False
                 for key in data.keys():
                     if '$' + key in line:
-                        line = Template(line).substitute({key:data[key]})
+                        line = Template(line).safe_substitute({key:data[key]})
                 filled_template.append(line)
         return filled_template
 
 
-
-    def generate_HTML(self):
-        templates = []
-        feed_urls = []
+    def generate_feed_urls(self, feeds):
+        filled_urls_template = []
         feed_url = {}
-
-        feeds = self.get_table('feeds')
+        c = 0
+        
         for feed in feeds:
+            # Count unread entries per feed
             entries = self.get_entries_by_hash('entries', str(self.get_hash(feed['feed_url']))) 
             for entry in entries:
-                feed_template = self.parse_template(self.feed_template_path, entry)
-                templates.append(feed_template)
+                if entry['read'] == 'False':
+                    c = c + 1
 
             feed_url['title'] = feed['title'] 
-            feed_url['feed_url'] = feed['feed_url']
+            feed_url['feed_url'] = self.export_html_path + '/feeds/' + feed['hash'] + '/feed.html'
+            feed_url['counter'] = c
+
+            # Parse template
             feed_urls_template = self.parse_template(self.feed_urls_template_path, feed_url)
-            feed_urls.append(feed_urls_template)
-
-        self.write_to_file('/home/eco/bin/apps/rss/html/index.html', templates)
-        self.write_to_file('/home/eco/bin/apps/rss/html/index.html', feed_urls)
+            filled_urls_template.append(feed_urls_template)
+        return filled_urls_template
 
 
+    def generate_entries(self, feed):
+        filled_entries_template = []
+        entries = self.get_entries_by_hash('entries', str(self.get_hash(feed['feed_url']))) 
+        for entry in entries:
+            # Use different template for read/unread entries
+            if entry['read'] == 'True':
+                filled_entry_template = self.parse_template(self.read_entry_template_path, entry)
+                filled_entries_template.append(filled_entry_template)
+            elif entry['read'] == 'False':
+                filled_entry_template = self.parse_template(self.unread_entry_template_path, entry)
+                filled_entries_template.append(filled_entry_template)
+        return filled_entries_template
+
+
+    def generate_HTML(self):
+        shutil.rmtree(self.export_html_path)
+        self.check_dir(self.export_html_path)
+        self.check_dir(self.export_html_path + '/feeds')
+
+        feeds = self.get_table('feeds')
+        feed_urls = self.generate_feed_urls(feeds)
+
+        for feed in feeds:
+            filled_entries_template = self.generate_entries(feed)
+            self.check_dir(self.export_html_path + '/feeds/' + feed['hash'])
+            self.write_to_file(self.export_html_path + '/feeds/' + feed['hash'] + '/feed.html', feed_urls + filled_entries_template)
+            if feed == feeds[0]:
+                self.write_to_file(self.export_html_path + '/index.html', feed_urls + filled_entries_template)
 
 
 
 class Database(object):
-    def create_tables(self):
-        db = sqlite3.connect(self.db_path)
+    def create_tables(self): 
+        db = sqlite3.connect( self.db_path)
         db.execute("create table if not exists feeds (hash          text    unique  ,"
                                                      "title         text            ,"
                                                      "date_entered  text            ,"
@@ -149,7 +178,7 @@ class Database(object):
 
         for row in rows:
             row_export = {}
-            for x in range(1,len(cols)):
+            for x in range(0,len(cols)):
                 row_export[cols[x]] = row[x]
             table_export.append(row_export)
 
@@ -209,8 +238,9 @@ class Database(object):
 class RSS(Database, GenerateHTML):
     def __init__(self):
         self.db_path = '/home/eco/bin/apps/rss/rss.db'
-        self.HTML_path = '/home/eco/bin/apps/rss/html'
-        self.feed_template_path = '/home/eco/bin/apps/rss/templates/feed.html'
+        self.export_html_path = '/home/eco/bin/apps/rss/html'
+        self.read_entry_template_path = '/home/eco/bin/apps/rss/templates/read_entry.html'
+        self.unread_entry_template_path = '/home/eco/bin/apps/rss/templates/unread_entry.html'
         self.feed_urls_template_path = '/home/eco/bin/apps/rss/templates/feed_urls.html'
         self.feeds = {}     # Contains feeds: key: hashed url, value: parsed feed object
         self.log = Log()
