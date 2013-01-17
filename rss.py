@@ -118,6 +118,19 @@ class GenerateHTML(object):
         return filled_entries_template
 
 
+    def generate_entry_list(self, feed):
+        titles = ''
+        title = {}
+        entries = self.get_entries_by_hash('entries', str(self.get_hash(feed['feed_url'])), 5) 
+        for entry in entries:
+            if entry['read'] == 'True':
+                filled_template = self.parse_template(self.entry_list_read_template_path, entry)
+            else:
+                filled_template = self.parse_template(self.entry_list_unread_template_path, entry)
+            titles = titles + filled_template + '\n'
+        return titles
+
+
     def generate_HTML(self):
         self.log.info('Generating HTML')
         shutil.rmtree(self.export_html_path)
@@ -131,6 +144,7 @@ class GenerateHTML(object):
         feed_template['feed_urls'] = self.generate_feed_urls(feeds)
 
         for feed in feeds:
+            feed_template['entry_list'] = self.generate_entry_list(feed)
             feed_template['content'] = self.generate_entries(feed)
             feed_template['title'] = feed['title']
             filled_feed_template = self.parse_template(self.feed_template_path, feed_template)
@@ -191,14 +205,17 @@ class Database(object):
         return table_export
 
 
-    def get_entries_by_hash(self, table, feed_hash):
+    def get_entries_by_hash(self, table, feed_hash, n='all'):
         db = sqlite3.connect(self.db_path)
         rows = []
         cols = []
         table_export = []
-
-        for row in db.execute('select * from %s where "feed_hash" is "%s" order by "date_entered" desc'%(table, feed_hash)):
-            rows.append(row)
+        if n == 'all':
+            for row in db.execute('select * from %s where "feed_hash" is "%s" order by "date_entered" desc'%(table, feed_hash)):
+                rows.append(row)
+        else:
+            for row in db.execute('select * from %s where "feed_hash" is "%s" order by "date_entered" desc limit %s'%(table, feed_hash, n)):
+                rows.append(row)
 
         for row in db.execute('PRAGMA table_info(%s)'%table):
             cols.append(row[1])
@@ -256,6 +273,8 @@ class RSS(Database, GenerateHTML):
         self.feed_template_path = '/home/eco/bin/apps/rss/templates/feed.html'
         self.feed_urls_read_template_path = '/home/eco/bin/apps/rss/templates/feed_urls_read.html'
         self.feed_urls_unread_template_path = '/home/eco/bin/apps/rss/templates/feed_urls_unread.html'
+        self.entry_list_read_template_path = '/home/eco/bin/apps/rss/templates/entry_list_read.html'
+        self.entry_list_unread_template_path = '/home/eco/bin/apps/rss/templates/entry_list_unread.html'
         self.css_path = '/home/eco/bin/apps/rss/css/stylesheet.css'
         self.feeds = {}     # Contains feeds: key: hashed url, value: parsed feed object
         self.log = Log()
@@ -345,7 +364,7 @@ class RSS(Database, GenerateHTML):
         self.update_row('entries', 'read', 'True', feed['hash'])
 
     def insert_test_feeds(self):
-        urls = ['http://inconsolation.wordpress.com/feed/', 'http://iloveubuntu.net/rss.xml', 'http://feeds.bbci.co.uk/news/rss.xml']
+        urls = ['http://www.webupd8.org/feeds/posts/default', 'http://www.raspberrypi.org/feed', 'http://www.nasa.gov/rss/lg_image_of_the_day.rss', 'http://www.osnews.com/files/recent.xml', 'http://inconsolation.wordpress.com/feed/', 'http://iloveubuntu.net/rss.xml', 'http://feeds.bbci.co.uk/news/rss.xml']
         for url in urls:
             if not self.check_in_table('feeds',str(self.get_hash(url))):
                 self.add_feed(url)
