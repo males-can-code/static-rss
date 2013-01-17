@@ -1,18 +1,29 @@
 <HTML>
     <link rel="stylesheet" type="text/css" href="$css" />
     <script type="text/javascript">
-    document.write("<meta http-equiv='refresh' content='30' >");
-</script>
+        document.write("<meta http-equiv='refresh' content='30' >");
+    </script>
     <BODY>
         <DIV id="main_wrapper">
-            <DIV id="sidebar">
-                $feed_urls
+            <DIV id="feed_sidebar">
+                <UL>
+                    $feed_urls
+                </UL>
             </DIV>
 
+            <DIV id="entry_sidebar"> 
+                <UL>
+                    $entry_list 
+                </UL>
+            </DIV>
             
             <DIV id="feed_wrapper">
-                <DIV id="feed_title">:: $title</DIV>
-                <DIV id="entry_list"> $entry_list </DIV>
+                <DIV id="feed_title">$title</DIV>
+                <DIV id="page_links">
+                    <A HREF=$page_prev><</A>
+                    $page_links
+                    <A HREF=$page_next>></A>
+                </DIV>
                 <DIV id="feed_content_wrapper">
                     $content
                 </DIV>
