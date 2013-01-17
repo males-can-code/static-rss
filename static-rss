@@ -6,9 +6,9 @@ import hashlib
 import sqlite3
 import shutil
 from log import Log
-from color import Color
 from time import strftime
 from string import Template
+from config import Config
 
 
 class GenerateHTML(object):
@@ -91,14 +91,14 @@ class GenerateHTML(object):
                     c = c + 1
 
             feed_url['title'] = feed['title'] 
-            feed_url['feed_url'] = self.export_html_path + '/feeds/' + feed['hash'] + '/page_1.html'
+            feed_url['feed_url'] = self.config.path_export_html + '/feeds/' + feed['hash'] + '/page_1.html'
             feed_url['counter'] = c
 
             # Parse template
             if c > 0:
-                filled_url_template = self.parse_template(self.feed_urls_unread_template_path, feed_url)
+                filled_url_template = self.parse_template(self.config.path_template_feed_list_unread, feed_url)
             else:
-                filled_url_template = self.parse_template(self.feed_urls_read_template_path, feed_url)
+                filled_url_template = self.parse_template(self.config.path_template_feed_list_read, feed_url)
             filled_urls_template = filled_urls_template + filled_url_template + '\n'
         return filled_urls_template
 
@@ -111,9 +111,9 @@ class GenerateHTML(object):
                 if hash == entry['hash']:
                     # Use different template for read/unread entries
                     if entry['read'] == 'True':
-                        filled_entry_template = self.parse_template(self.read_entry_template_path, entry)
+                        filled_entry_template = self.parse_template(self.config.path_template_entry_read, entry)
                     elif entry['read'] == 'False':
-                        filled_entry_template = self.parse_template(self.unread_entry_template_path, entry)
+                        filled_entry_template = self.parse_template(self.config.path_template_entry_unread, entry)
                     filled_entries_template = filled_entries_template + filled_entry_template + '\n'
 
         return filled_entries_template
@@ -128,13 +128,13 @@ class GenerateHTML(object):
             page_count = 1
             for page in pages:
                 if entry['hash'] in page:
-                    entry['entry_url'] = self.export_html_path + '/feeds/' + feed['hash'] + '/page_' + str(page_count) + '.html' 
+                    entry['entry_url'] = self.config.path_export_html + '/feeds/' + feed['hash'] + '/page_' + str(page_count) + '.html' 
                 page_count = page_count + 1
 
             if entry['read'] == 'True':
-                filled_template = self.parse_template(self.entry_list_read_template_path, entry)
+                filled_template = self.parse_template(self.config.path_template_entry_list_read, entry)
             else:
-                filled_template = self.parse_template(self.entry_list_unread_template_path, entry)
+                filled_template = self.parse_template(self.config.path_template_entry_list_unread, entry)
             titles = titles + filled_template + '\n'
         return titles
 
@@ -144,9 +144,9 @@ class GenerateHTML(object):
         page_links = ''
         for x in range(1,n_pages + 1):
             link = {}
-            link['page_url'] = self.export_html_path + '/feeds/' + feed_hash + '/page_' + str(x) + '.html'
+            link['page_url'] = self.config.path_export_html + '/feeds/' + feed_hash + '/page_' + str(x) + '.html'
             link['page'] = x
-            filled_template = self.parse_template(self.page_link_template_path, link)
+            filled_template = self.parse_template(self.config.path_template_page_link, link)
             page_links = page_links + filled_template + '\n'
         return page_links
 
@@ -173,14 +173,14 @@ class GenerateHTML(object):
 
     def generate_HTML(self):
         self.log.info('Generating HTML')
-        shutil.rmtree(self.export_html_path)
-        self.check_dir(self.export_html_path)
-        self.check_dir(self.export_html_path + '/feeds')
+        shutil.rmtree(self.config.path_export_html)
+        self.check_dir(self.config.path_export_html)
+        self.check_dir(self.config.path_export_html + '/feeds')
 
         feeds = self.get_table('feeds')
 
         feed_template = {}
-        feed_template['css'] = self.css_path
+        feed_template['css'] = self.config.path_css
         feed_template['feed_urls'] = self.generate_feed_urls(feeds)
 
         for feed in feeds:
@@ -192,20 +192,20 @@ class GenerateHTML(object):
             page_count = 1
             for page in pages:
                 if page_count == len(pages):
-                    feed_template['page_prev'] = self.export_html_path + '/feeds/' + feed['hash'] + '/page_' + str(page_count - 1) + '.html'
-                    feed_template['page_next'] = self.export_html_path + '/feeds/' + feed['hash'] + '/page_' + str(page_count) + '.html'
+                    feed_template['page_prev'] = self.config.path_export_html + '/feeds/' + feed['hash'] + '/page_' + str(page_count - 1) + '.html'
+                    feed_template['page_next'] = self.config.path_export_html + '/feeds/' + feed['hash'] + '/page_' + str(page_count) + '.html'
                 elif page_count > 0:
-                    feed_template['page_prev'] = self.export_html_path + '/feeds/' + feed['hash'] + '/page_' + str(page_count) + '.html'
-                    feed_template['page_next'] = self.export_html_path + '/feeds/' + feed['hash'] + '/page_' + str(page_count + 1) + '.html'
+                    feed_template['page_prev'] = self.config.path_export_html + '/feeds/' + feed['hash'] + '/page_' + str(page_count) + '.html'
+                    feed_template['page_next'] = self.config.path_export_html + '/feeds/' + feed['hash'] + '/page_' + str(page_count + 1) + '.html'
 
                 feed_template['content'] = self.generate_entries(feed, page)
-                filled_feed_template = self.parse_template(self.feed_template_path, feed_template)
+                filled_feed_template = self.parse_template(self.config.path_template_feed, feed_template)
 
-                self.check_dir(self.export_html_path + '/feeds/' + feed['hash'])
-                self.write_to_file(self.export_html_path + '/feeds/' + feed['hash'] + '/page_' + str(page_count) + '.html', filled_feed_template)
+                self.check_dir(self.config.path_export_html + '/feeds/' + feed['hash'])
+                self.write_to_file(self.config.path_export_html + '/feeds/' + feed['hash'] + '/page_' + str(page_count) + '.html', filled_feed_template)
 
                 if feed == feeds[0] and page_count == 1:
-                    self.write_to_file(self.export_html_path + '/index.html', filled_feed_template)
+                    self.write_to_file(self.config.path_export_html + '/index.html', filled_feed_template)
 
                 page_count = page_count + 1
 
@@ -213,7 +213,7 @@ class GenerateHTML(object):
 
 class Database(object):
     def create_tables(self): 
-        db = sqlite3.connect( self.db_path)
+        db = sqlite3.connect( self.config.path_db)
         db.execute("create table if not exists feeds (hash          text    unique  ,"
                                                      "title         text            ,"
                                                      "date_entered  text            ,"
@@ -230,7 +230,7 @@ class Database(object):
                                                         "date_entered text            ,"
                                                         "feed_hash    text            )")
 
-        db.execute("create table if not exists groups (name        text            )")
+        db.execute("create table if not exists groups (title        text         )")
 
         db.commit()
         db.close()
@@ -238,7 +238,7 @@ class Database(object):
 
     def get_table(self, table):
     # Spits out the complete table into a list of dictionaries
-        db = sqlite3.connect(self.db_path)
+        db = sqlite3.connect(self.config.path_db)
         rows = []
         cols = []
         table_export = []
@@ -260,7 +260,7 @@ class Database(object):
 
 
     def get_entries_by_hash(self, table, feed_hash, n='all'):
-        db = sqlite3.connect(self.db_path)
+        db = sqlite3.connect(self.config.path_db)
         rows = []
         cols = []
         table_export = []
@@ -285,7 +285,7 @@ class Database(object):
 
 
     def insert_row(self, table, row):
-        db = sqlite3.connect(self.db_path)
+        db = sqlite3.connect(self.config.path_db)
         values = []
         for key in row:
             values.append(row[key])
@@ -301,14 +301,14 @@ class Database(object):
 
 
     def update_row(self, table, field, string, hash):
-        db = sqlite3.connect(self.db_path)
+        db = sqlite3.connect(self.config.path_db)
         db.execute('update %s set "%s" = "%s" where "%s"'%(str(table), str(field), str(string), str(hash)))
         db.commit()
         db.close()
 
 
     def check_in_table(self, table, value):
-        db = sqlite3.connect(self.db_path)
+        db = sqlite3.connect(self.config.path_db)
         for data in db.execute('select * from %s where hash = ?'%table, (value,)):
             if data:
                 db.close()
@@ -320,20 +320,9 @@ class Database(object):
 
 class RSS(Database, GenerateHTML):
     def __init__(self):
-        self.db_path                            = '/home/eco/bin/apps/static-rss/rss.db'
-        self.export_html_path                   = '/home/eco/bin/apps/static-rss/html'
-        self.read_entry_template_path           = '/home/eco/bin/apps/static-rss/templates/read_entry.html'
-        self.unread_entry_template_path         = '/home/eco/bin/apps/static-rss/templates/unread_entry.html'
-        self.feed_template_path                 = '/home/eco/bin/apps/static-rss/templates/feed.html'
-        self.feed_urls_read_template_path       = '/home/eco/bin/apps/static-rss/templates/feed_urls_read.html'
-        self.feed_urls_unread_template_path     = '/home/eco/bin/apps/static-rss/templates/feed_urls_unread.html'
-        self.entry_list_read_template_path      = '/home/eco/bin/apps/static-rss/templates/entry_list_read.html'
-        self.entry_list_unread_template_path    = '/home/eco/bin/apps/static-rss/templates/entry_list_unread.html'
-        self.page_link_template_path            = '/home/eco/bin/apps/static-rss/templates/page_links.html'
-        self.css_path                           = '/home/eco/bin/apps/static-rss/css/stylesheet.css'
         self.feeds = {}     # Contains feeds: key: hashed url, value: parsed feed object
         self.log = Log()
-        self.color = Color()
+        self.config = Config()
 
 
     def get_timestamp(self):
@@ -418,17 +407,26 @@ class RSS(Database, GenerateHTML):
         self.log.info('Marking feed read: %s'%feed['title'])
         self.update_row('entries', 'read', 'True', feed['hash'])
 
+
     def insert_test_feeds(self):
-        urls = ['http://www.webupd8.org/feeds/posts/default', 'http://www.raspberrypi.org/feed', 'http://www.nasa.gov/rss/lg_image_of_the_day.rss', 'http://www.osnews.com/files/recent.xml', 'http://inconsolation.wordpress.com/feed/', 'http://iloveubuntu.net/rss.xml', 'http://feeds.bbci.co.uk/news/rss.xml']
-        for url in urls:
-            if not self.check_in_table('feeds',str(self.get_hash(url))):
-                self.add_feed(url)
+        for feed in self.config.feeds:
+            if not self.check_in_table('feeds',str(self.get_hash(feed))):
+                self.add_feed(feed)
+
 
     def usage(self):
         self.log.info('Usage')
 
 
     def run(self):
+        self.create_tables()
+        self.insert_test_feeds()
+        if self.check_in_table('groups', 'default'):
+            group = {}
+            group['title'] = 'default'
+            self.insert_row('groups', group)
+
+
         if len(sys.argv) > 1:
             if sys.argv[1] == '--mark-all-read':
                 feeds = self.get_table('feeds')
@@ -441,8 +439,6 @@ class RSS(Database, GenerateHTML):
             else:
                 self.usage()
 
-        self.create_tables()
-        self.insert_test_feeds()
         self.parse_feeds()
         self.generate_HTML()
 
