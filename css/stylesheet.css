@@ -11,11 +11,16 @@ body {
     font-size:12px;
 }
 
+img {
+    margin-top:20;
+    margin-bottom:20;
+} 
+
 /* Feeds */
 #main_wrapper {
     float: left;
     margin-left: 40px;
-    margin-top: 40px;
+    margin-top: 10px;
     width: 80%;
 }
 
@@ -40,6 +45,7 @@ body {
 #feed_title { 
     float;
     margin-bottom: 20px;
+    height: 30px;
     font-size: 16px; 
 	background-color:#232323;
     padding: 5px;
@@ -60,6 +66,7 @@ a.unread:active    {text-decoration:none;color:#FF7D35;}
 
 #entry_list {
     margin-bottom:20px;
+    padding-left: 5px;
 }
 
 #entry_title{ 

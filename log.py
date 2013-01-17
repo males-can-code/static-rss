@@ -27,6 +27,14 @@ class Log(object):
         self.color_listen = '\033[1;94m'      # blue
         self.color_connect = '\033[1;32m'     # green
 
+        self.color_magenta = '\033[1;35m'
+        self.color_green = '\033[1;32m'
+        self.color_cyan = '\033[1;36m'
+        self.color_red = '\033[1;31m'
+        self.color_blue = '\033[1;94m'
+        self.color_green = '\033[1;32m'
+        self.color_white = '\033[0;37m'
+
         if self.log_file:
             try:
                 with open(self.log_file) as f: pass
@@ -54,6 +62,10 @@ class Log(object):
         message = re.sub( '>>>', self.color_outbound + '>>>' + self.color_reset, message )
         message = re.sub( 'LISTEN', self.color_listen + 'LISTEN' + self.color_reset, message )
         message = re.sub( 'CONNECT', self.color_connect + 'CONNECT' + self.color_reset, message )
+        message = re.sub( 'Parsing:', self.color_blue + 'Parsing:' + self.color_white, message )
+        message = re.sub( 'Inserting new entry:', self.color_green + 'Inserting new entry:' + self.color_reset, message )
+        message = re.sub( 'Adding feed:', self.color_magenta + 'Adding feed:' + self.color_white, message )
+        message = re.sub( 'Marking feed read:', self.color_red + 'Marking feed read:' + self.color_white, message )
 
         address = re.findall( r'[0-9]+(?:\.[0-9]+){3}', message )
         if address:

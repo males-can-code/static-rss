@@ -64,7 +64,7 @@ class GenerateHTML(object):
 
 
     def parse_template(self, template_path, data):
-    # Parse a template file and return a list
+    # Parse a template file and return a string
         filled_template = ''
         template = self.get_file(template_path)
 
@@ -360,7 +360,7 @@ class RSS(Database, GenerateHTML):
 
 
     def mark_read(self, feed):
-        self.log.info('Marking feed %s as read'%feed['title'])
+        self.log.info('Marking feed read: %s'%feed['title'])
         self.update_row('entries', 'read', 'True', feed['hash'])
 
     def insert_test_feeds(self):
@@ -369,22 +369,27 @@ class RSS(Database, GenerateHTML):
             if not self.check_in_table('feeds',str(self.get_hash(url))):
                 self.add_feed(url)
 
+    def usage(self):
+        self.log.info('Usage')
+
 
     def run(self):
         if len(sys.argv) > 1:
-            if sys.argv[1] == '--mark-read':
+            if sys.argv[1] == '--mark-all-read':
                 feeds = self.get_table('feeds')
                 for feed in feeds:
                     self.mark_read(feed)
 
-            if sys.argv[1] == '--gen':
+            elif sys.argv[1] == '--gen-html':
                 self.generate_HTML()
                 sys.exit()
-
-        self.create_tables()
-        self.insert_test_feeds()
-        self.parse_feeds()
-        self.generate_HTML()
+            else:
+                self.usage()
+        else:
+            self.create_tables()
+            self.insert_test_feeds()
+            self.parse_feeds()
+            self.generate_HTML()
 
 
 
