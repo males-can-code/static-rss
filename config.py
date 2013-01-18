@@ -25,6 +25,8 @@ class Config(object):
                                                   'http://www.osnews.com/files/recent.xml', 
                                                   'http://inconsolation.wordpress.com/feed/', 
                                                   'http://iloveubuntu.net/rss.xml', 
+                                                  'https://bbs.archlinux.org/extern.php?action=feed&tid=92895&type=atom',
+                                                  'https://bbs.archlinux.org/extern.php?action=feed&tid=155476&type=atom',
                                                   'http://feeds.bbci.co.uk/news/rss.xml']
 
         self.groups                            = ['linux', 
