@@ -3,6 +3,9 @@ import os
 
 class Config(object):
     def __init__(self):
+
+        self.max_chars_per_page = 10000
+        self.max_entries_in_sidebar = 20
         self.config_dir                        = os.getenv('HOME') + '/bin/apps/static-rss'
 
         self.path_db                           = self.config_dir + '/rss.db'
