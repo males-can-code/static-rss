@@ -82,18 +82,14 @@ class GenerateHTML(object):
         filled_template = ''
         feed_url = {}
 
-        groups = self.get_table('groups')
-
-        for group in groups:
-            feeds = self.get_feeds_by_group('feeds', group['title'])
-            filled_group_template = self.parse_template(self.config.path_template_group, {'group_title' : group['title']})
+        for group in self.get_groups():
+            feeds = self.get_rows_by_value('feeds', 'groups',  group)
+            filled_group_template = self.parse_template(self.config.path_template_group, {'group_title' : group})
             filled_template = filled_template + filled_group_template + '\n'
         
             for feed in feeds:
-
-
                 # Count unread entries per feed
-                entries = self.get_entries_by_hash('entries', feed['hash']) 
+                entries = self.get_rows_by_value('entries', 'feed_hash', feed['hash']) 
                 unread_counter = 0
                 for entry in entries:
                     if entry['read'] == 'False':
@@ -116,7 +112,7 @@ class GenerateHTML(object):
 
     def generate_entries(self, feed, page):
         filled_entries_template = ''
-        entries = self.get_entries_by_hash('entries', str(self.get_hash(feed['feed_url']))) 
+        entries = self.get_rows_by_value('entries', 'feed_hash', str(feed['hash'])) 
         for entry in entries:
             for hash in page:
                 if hash == entry['hash']:
@@ -134,7 +130,7 @@ class GenerateHTML(object):
         titles = ''
         title = {}
         pages = self.calculate_pages(feed)
-        entries = self.get_entries_by_hash('entries', str(self.get_hash(feed['feed_url'])), 20) 
+        entries = self.get_rows_by_value('entries', 'feed_hash', str(feed['hash']), limit=20) 
         for entry in entries:
             page_count = 1
             for page in pages:
@@ -151,7 +147,6 @@ class GenerateHTML(object):
 
 
     def generate_page_links(self, feed_hash, n_pages):
-        link = {}
         page_links = ''
         for x in range(1,n_pages + 1):
             link = {}
@@ -169,7 +164,7 @@ class GenerateHTML(object):
         pages = []
         c = 1
 
-        entries = self.get_entries_by_hash('entries', str(self.get_hash(feed['feed_url']))) 
+        entries = self.get_rows_by_value('entries', 'feed_hash', feed['hash']) 
         for entry in entries:
             sum_chars = sum_chars + len(entry['content'])
             entry_hash_list.append(entry['hash'])
@@ -241,21 +236,18 @@ class Database(object):
                                                         "date_entered text            ,"
                                                         "date_published text            ,"
                                                         "feed_hash    text            )")
-
-        db.execute("create table if not exists groups (title        text         )")
-
         db.commit()
         db.close()
 
 
-    def get_table(self, table):
+    def get_table(self, table, order_by='ROWID'):
     # Spits out the complete table into a list of dictionaries
         db = sqlite3.connect(self.config.path_db)
         rows = []
         cols = []
         table_export = []
 
-        for row in db.execute('select * from %s order by ROWID'%table):
+        for row in db.execute('select * from %s order by %s'%(table,order_by)):
             rows.append(row)
 
         for row in db.execute('PRAGMA table_info(%s)'%table):
@@ -271,16 +263,16 @@ class Database(object):
         return table_export
 
 
-    def get_entries_by_hash(self, table, feed_hash, n='all'):
+    def get_rows_by_value(self, table, col, value, order_by='date_entered', limit='all'):
         db = sqlite3.connect(self.config.path_db)
         rows = []
         cols = []
-        table_export = []
-        if n == 'all':
-            for row in db.execute('select * from %s where "feed_hash" is "%s" order by "date_entered" desc'%(table, feed_hash)):
+        rows_export = []
+        if limit == 'all':
+            for row in db.execute('select * from %s where "%s" is "%s" order by "%s" desc'%(table, col, value, order_by)):
                 rows.append(row)
         else:
-            for row in db.execute('select * from %s where "feed_hash" is "%s" order by "date_entered" desc limit %s'%(table, feed_hash, n)):
+            for row in db.execute('select * from %s where "%s" is "%s" order by "%s" desc limit %s'%(table, col, value, order_by, limit)):
                 rows.append(row)
 
         for row in db.execute('PRAGMA table_info(%s)'%table):
@@ -290,35 +282,10 @@ class Database(object):
             row_export = {}
             for x in range(0,len(cols)):
                 row_export[cols[x]] = row[x]
-            table_export.append(row_export)
+            rows_export.append(row_export)
 
         db.close()
-        return table_export
-
-
-    def get_feeds_by_group(self, table, group, n='all'):
-        db = sqlite3.connect(self.config.path_db)
-        rows = []
-        cols = []
-        table_export = []
-        if n == 'all':
-            for row in db.execute('select * from %s where "groups" is "%s" order by "date_entered" desc'%(table, group)):
-                rows.append(row)
-        else:
-            for row in db.execute('select * from %s where "groups" is "%s" order by "date_entered" desc limit %s'%(table, group, n)):
-                rows.append(row)
-
-        for row in db.execute('PRAGMA table_info(%s)'%table):
-            cols.append(row[1])
-
-        for row in rows:
-            row_export = {}
-            for x in range(0,len(cols)):
-                row_export[cols[x]] = row[x]
-            table_export.append(row_export)
-
-        db.close()
-        return table_export
+        return rows_export
 
 
     def insert_row(self, table, row):
@@ -373,6 +340,15 @@ class RSS(Database, GenerateHTML):
         return hashed
 
 
+    def get_groups(self):
+        group_list = []
+        feeds = self.get_table('feeds')
+        for feed in feeds:
+            if feed['groups'] not in group_list:
+                group_list.append(feed['groups'])
+        return group_list
+
+
     def parse_feed(self, url):
         self.log.info('Parsing: %s'%url)
         try:
@@ -389,7 +365,8 @@ class RSS(Database, GenerateHTML):
             parsed_feed = self.parse_feed(feed['feed_url'])
             if parsed_feed:
                 for entry in parsed_feed.entries:
-                    if not self.check_in_table('entries', 'hash', str(self.get_hash(entry['title']))):
+                    sys.exit
+                    if not self.check_in_table('entries', 'hash', str(self.get_hash(entry['title'] + entry['summary']))):
                         self.add_entry(entry, feed['feed_url'])
 
 
@@ -409,18 +386,22 @@ class RSS(Database, GenerateHTML):
         return data
 
 
-    def add_feed(self, url):
-        self.log.info('Adding feed: %s'%url)
+    def add_feed(self, feed):
+        self.log.info('Adding feed: %s'%feed[0])
         feed_insert = {}
-        feed = self.parse_feed(url)
-        if feed:
-            feed_insert['hash'] = str(self.get_hash(url))
-            feed_insert['title'] = str(feed.feed['title'])
+        parsed_feed = self.parse_feed(feed[0])
+        if parsed_feed:
+            feed_insert['hash'] = str(self.get_hash(feed[0]))
             feed_insert['date_entered'] = str(self.get_timestamp())
-            feed_insert['feed_url'] = str(url)
+            feed_insert['feed_url'] = str(feed[0])
             feed_insert['icon_url'] = 'None'
             feed_insert['last_updated'] = 'None'
-            feed_insert['groups'] = 'default'
+            feed_insert['groups'] = feed[1]
+
+            if 'title' in parsed_feed.feed.keys():
+                feed_insert['title'] = str(parsed_feed.feed['title'])
+            else:
+                feed_insert['title'] = str(feed[0])
 
             self.insert_row('feeds', feed_insert)
 
@@ -428,15 +409,19 @@ class RSS(Database, GenerateHTML):
     def add_entry(self, entry, url):
         self.log.info('Inserting new entry: %s'%entry['title'])
         entry_insert = {}
-        entry_insert['hash']            = str(self.get_hash(entry['title']))
+        entry_insert['hash']            = str(self.get_hash(entry['title'] + entry['summary']))
         entry_insert['content']         = str(entry['summary'])
         entry_insert['entry_url']       = str(entry['link'])
         entry_insert['read']            = 'False'
-        entry_insert['title']           = str(entry['title'])
         entry_insert['date_entered']    = str(self.get_timestamp())
         entry_insert['feed_hash']       = str(self.get_hash(url))
 
-        if 'published' in entry:
+        if 'title' in entry.keys():
+            entry_insert['title']           = str(entry['title'])
+        else:
+            entry_insert['title']           = str(entry['link'])
+
+        if 'published' in entry.keys():
             entry_insert['date_published'] = str(entry.published)
         else:
             entry_insert['date_published'] = 'unknown'
@@ -452,17 +437,9 @@ class RSS(Database, GenerateHTML):
     def init(self):
         self.create_tables()
 
-        # Insert default group always '1'
-        if not self.check_in_table('groups', 'title', 'default'):
-            self.insert_row('groups', {'title' : 'default'})
-
         for feed in self.config.feeds:
-            if not self.check_in_table('feeds', 'hash', str(self.get_hash(feed))):
+            if not self.check_in_table('feeds', 'hash', str(self.get_hash(feed[0]))):
                 self.add_feed(feed)
-
-        for group in self.config.groups:
-            if not self.check_in_table('groups', 'title',  group):
-                self.insert_row('groups', {'title' : group})
 
 
     def usage(self):
@@ -471,7 +448,6 @@ class RSS(Database, GenerateHTML):
 
     def run(self):
         self.init()
-        print(self.get_table('groups'))
 
         if len(sys.argv) > 1:
             if sys.argv[1] == '--mark-all-read':
