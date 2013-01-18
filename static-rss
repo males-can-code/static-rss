@@ -204,7 +204,10 @@ class GenerateHTML(object):
         # every page of every feed 
         feed_template = {}
         feed_template['css'] = self.config.path_css
+        feed_template['update_interval'] = self.config.update_interval
+        feed_template['favicon'] = self.config.path_favicon
         feed_template['feed_urls'] = self.generate_feed_urls(feeds)
+        feed_template['domain'] = self.config.domain
 
         for feed in feeds:
             pages = self.calculate_pages(feed)

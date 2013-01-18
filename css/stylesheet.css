@@ -59,6 +59,11 @@ h1 h2 h3 h4 h5 {
     font-size:12px;
 }
 
+.nano { background: #bba; width: 500px; height: 500px; }
+.nano .content { padding: 10px; }
+.nano .pane   { background: #888; }
+.nano .slider { background: #111; }
+
 /* Feeds */
 #main_wrapper {
     float: left;
@@ -87,6 +92,7 @@ h1 h2 h3 h4 h5 {
     margin-top: 20px;
     padding: 5px;
 	background-color:#232323;
+    overflow: auto;
 }
 
 #feed_wrapper {

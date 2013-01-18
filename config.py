@@ -4,11 +4,14 @@ import os
 class Config(object):
     def __init__(self):
 
-        self.max_chars_per_page = 10000
+        self.max_chars_per_page     = 10000
         self.max_entries_in_sidebar = 20
-        self.config_dir                        = os.getenv('HOME') + '/bin/apps/static-rss'
+        self.update_interval        = 60
 
-        self.path_db                           = self.config_dir + '/rss.db'
+        self.domain     = os.getenv('HOME') + '/bin/apps/static-rss'
+        self.config_dir = os.getenv('HOME') + '/bin/apps/static-rss'
+
+        self.path_db                           = self.config_dir + '/static-rss.sqlite'
         self.path_export_html                  = self.config_dir + '/html'
         self.path_template_entry_read          = self.config_dir + '/templates/entry_read.html'
         self.path_template_entry_unread        = self.config_dir + '/templates/entry_unread.html'
@@ -19,7 +22,10 @@ class Config(object):
         self.path_template_entry_list_unread   = self.config_dir + '/templates/entry_list_unread.html'
         self.path_template_page_link           = self.config_dir + '/templates/page_links.html'
         self.path_template_group               = self.config_dir + '/templates/group.html'
-        self.path_css                          = self.config_dir + '/css/stylesheet.css'
+
+        self.path_css                          = '/css/stylesheet.css'
+        self.path_favicon                      = '/favicon.ico'
+
 
 
         self.feeds                             = [['http://www.webupd8.org/feeds/posts/default',                'linux'], 

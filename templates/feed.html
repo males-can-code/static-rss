@@ -1,8 +1,10 @@
 <HTML>
-    <link rel="stylesheet" type="text/css" href="$css" />
-    <script type="text/javascript">
-        document.write("<meta http-equiv='refresh' content='30' >");
-    </script>
+     <HEAD>
+        <TITLE>StaticRSS|$title</TITLE>
+        <link rel="shortcut icon" href="$domain/$favicon">
+        <link rel="stylesheet" type="text/css" href="$domain/$css" />
+        <script type="text/javascript"> document.write("<meta http-equiv='refresh' content='$update_interval' >"); </script>
+    </HEAD>
     <BODY>
         <DIV id="main_wrapper">
             <DIV id="feed_sidebar">
@@ -10,41 +12,28 @@
                     $feed_urls
                 </UL>
             </DIV>
-
             <DIV id="entry_sidebar"> 
-
                 <UL>
                     $entry_list 
                 </UL>
-
             </DIV>
-            
             <DIV id="feed_wrapper">
-
                 <DIV id="feed_title">
                     $title
                 </DIV>
-
                 <DIV id="page_links">
-
                     <A HREF=$page_prev><</A>
                     $page_links
                     <A HREF=$page_next>></A>
-
                 </DIV>
-
                 <DIV id="feed_content_wrapper">
                     $content
                 </DIV>
-
                 <DIV id="page_links">
-
                     <A HREF=$page_prev><</A>
                     $page_links
                     <A HREF=$page_next>></A>
-
                 </DIV>
-
             </DIV>
         </DIV>
     </BODY>
