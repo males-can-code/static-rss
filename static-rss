@@ -83,19 +83,19 @@ class GenerateHTML(object):
         feed_url = {}
         
         for feed in feeds:
-            c = 0
             # Count unread entries per feed
             entries = self.get_entries_by_hash('entries', str(self.get_hash(feed['feed_url']))) 
+            unread_counter = 0
             for entry in entries:
                 if entry['read'] == 'False':
-                    c = c + 1
+                    unread_counter = unread_counter + 1
 
             feed_url['title'] = feed['title'] 
             feed_url['feed_url'] = self.config.path_export_html + '/feeds/' + feed['hash'] + '/page_1.html'
-            feed_url['counter'] = c
+            feed_url['counter'] = unread_counter
 
             # Parse template
-            if c > 0:
+            if unread_counter > 0:
                 filled_url_template = self.parse_template(self.config.path_template_feed_list_unread, feed_url)
             else:
                 filled_url_template = self.parse_template(self.config.path_template_feed_list_read, feed_url)
@@ -317,6 +317,16 @@ class Database(object):
         return False
         
 
+    def check_group_in_table(self, table, value):
+        db = sqlite3.connect(self.config.path_db)
+        for data in db.execute('select * from %s where title = ?'%table, (value,)):
+            if data:
+                db.close()
+                return True
+        db.close()
+        return False
+
+
 
 class RSS(Database, GenerateHTML):
     def __init__(self):
@@ -408,10 +418,17 @@ class RSS(Database, GenerateHTML):
         self.update_row('entries', 'read', 'True', feed['hash'])
 
 
-    def insert_test_feeds(self):
+    def insert_test_values(self):
         for feed in self.config.feeds:
             if not self.check_in_table('feeds',str(self.get_hash(feed))):
                 self.add_feed(feed)
+
+        for group in self.config.groups:
+            if not self.check_group_in_table('groups', group):
+                print(group)
+                group_ins = {}
+                group_ins['title'] = group
+                self.insert_row('groups', group_ins)
 
 
     def usage(self):
@@ -419,13 +436,16 @@ class RSS(Database, GenerateHTML):
 
 
     def run(self):
-        self.create_tables()
-        self.insert_test_feeds()
-        if self.check_in_table('groups', 'default'):
+        # Insert first group
+        if not self.check_group_in_table('groups', 'default'):
             group = {}
             group['title'] = 'default'
             self.insert_row('groups', group)
 
+        self.create_tables()
+        self.insert_test_values()
+
+        print(self.get_table('groups'))
 
         if len(sys.argv) > 1:
             if sys.argv[1] == '--mark-all-read':
