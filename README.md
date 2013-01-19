@@ -4,7 +4,7 @@ StaticRSS
 StaticRSS is an rss reader that outputs static html files.
 It can be used on a server or you can just use it locally.
 
-Disclaimer: Although functional, this script is not done yet!!!
+Disclaimer: This script is a work in progress!!!
 This means it will probably make your computer explode ;)
 Use at your own risk!
 
