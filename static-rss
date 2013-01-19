@@ -26,6 +26,12 @@ class GenerateHTML(object):
             sys.exit()
 
 
+    def remove_dir(self, path):
+        try:
+            shutil.rmtree(path)
+        except:
+            pass
+
     def check_dir(self, directory):
         if not os.path.exists(directory):
             try:
@@ -105,7 +111,7 @@ class GenerateHTML(object):
                         unread_counter = unread_counter + 1
 
                 feed_url['title'] = feed['title'] 
-                feed_url['feed_url']= self.config.path_export_html + '/feeds/' + feed['hash'] + '/page_1.html'
+                feed_url['feed_url']= self.config.domain + '/feeds/' + feed['hash'] + '/page_1.html'
                 feed_url['counter'] = unread_counter
 
                 # Parse template
@@ -145,7 +151,7 @@ class GenerateHTML(object):
             page_count = 1
             for page in pages:
                 if entry['hash'] in page:
-                    entry['entry_url'] = self.config.path_export_html + '/feeds/' + feed['hash'] + '/page_' + str(page_count) + '.html' 
+                    entry['entry_url'] = self.config.domain + '/feeds/' + feed['hash'] + '/page_' + str(page_count) + '.html' 
                 page_count = page_count + 1
 
             if entry['read'] == 'True':
@@ -160,7 +166,7 @@ class GenerateHTML(object):
         page_links = ''
         for x in range(1,n_pages + 1):
             link = {}
-            link['page_url'] = self.config.path_export_html + '/feeds/' + feed_hash + '/page_' + str(x) + '.html'
+            link['page_url'] = self.config.domain + '/feeds/' + feed_hash + '/page_' + str(x) + '.html'
             link['page'] = x
             filled_template = self.parse_template(self.config.path_template_page_link, link)
             page_links = page_links + filled_template + '\n'
@@ -169,16 +175,16 @@ class GenerateHTML(object):
 
     def generate_prev_link(self, pages, feed, cur_page):
         if cur_page == len(pages):
-            return self.config.path_export_html + '/feeds/' + feed['hash'] + '/page_' + str(cur_page - 1) + '.html'
+            return self.config.domain + '/feeds/' + feed['hash'] + '/page_' + str(cur_page - 1) + '.html'
         elif cur_page > 0:
-            return self.config.path_export_html + '/feeds/' + feed['hash'] + '/page_' + str(cur_page) + '.html'
+            return self.config.domain + '/feeds/' + feed['hash'] + '/page_' + str(cur_page) + '.html'
 
 
     def generate_next_link(self, pages, feed, cur_page):
         if cur_page == len(pages):
-            return self.config.path_export_html + '/feeds/' + feed['hash'] + '/page_' + str(cur_page) + '.html'
+            return self.config.domain + '/feeds/' + feed['hash'] + '/page_' + str(cur_page) + '.html'
         elif cur_page > 0:
-            return self.config.path_export_html + '/feeds/' + feed['hash'] + '/page_' + str(cur_page + 1) + '.html'
+            return self.config.domain + '/feeds/' + feed['hash'] + '/page_' + str(cur_page + 1) + '.html'
 
 
     def calculate_pages(self, feed):
@@ -200,59 +206,56 @@ class GenerateHTML(object):
         return pages
 
 
-    def generate_HTML(self):
-        self.log.info('Generating HTML')
-
-        try:
-            shutil.rmtree(self.config.path_export_html)
-        except:
-            pass
+    def gen_init(self, feeds):
+        # Create/remove/copy dirs and files
+        self.remove_dir(self.config.path_export_html)
         self.check_dir(self.config.path_export_html)
         self.check_dir(self.config.path_export_html + '/feeds')
         self.check_dir(self.config.path_export_html + '/css')
         self.check_dir(self.config.path_export_html + '/php')
 
+        for feed in feeds:
+            self.check_dir(self.config.path_export_html + '/feeds/' + feed['hash'])
+
         self.copy_file(self.config.path_css, self.config.path_export_html + '/css')
         self.copy_file(self.config.path_php, self.config.path_export_html + '/php')
         self.copy_file(self.config.path_favicon, self.config.path_export_html)
 
-        feeds = self.get_table('feeds')
 
-        # This is the main content for the 'feed.html' template which will be generated for
-        # every page of every feed 
-        feed_template = {}
+    def generate_HTML(self):
+        self.log.info('Generating HTML')
+        feeds = self.get_table('feeds')     # Get a list of dicts containing information about a feed
+        self.gen_init(feeds)                # Remove/create and copy dirs and files
+
+        feed_template = {}                  # feed_template dict contains main content for the 'feed.html' template 
         feed_template['update_interval'] = self.config.update_interval
-        feed_template['feed_urls'] = self.generate_feed_urls(feeds)
-        feed_template['domain'] = self.config.domain
+        feed_template['feed_urls']       = self.generate_feed_urls(feeds)
+        feed_template['domain']          = self.config.domain
+        feed_template['favicon']         = self.config.domain + '/favicon.ico'
+        feed_template['css']             = self.config.domain + '/css/stylesheet.css'
 
+        # Create html pages for every page of every feed
         for feed in feeds:
-            self.check_dir(self.config.path_export_html + '/feeds/' + feed['hash'])
-
+            # Calculate in how many pages the entries fit
             pages = self.calculate_pages(feed)
 
             feed_template['page_links'] = self.generate_page_links(feed['hash'], len(pages))
             feed_template['entry_list'] = self.generate_entry_list(feed)
-            feed_template['title'] = feed['title']
-            feed_template['hash'] = feed['hash']
-            feed_template['favicon'] = self.config.domain + '/favicon.ico'
-            feed_template['css'] = self.config.domain + '/css/stylesheet.css'
+            feed_template['title']      = feed['title']
+            feed_template['hash']       = feed['hash']
 
             page_count = 1
             for page in pages:
                 feed_template['page_next'] = self.generate_next_link(pages, feed, page_count)
                 feed_template['page_prev'] = self.generate_prev_link(pages, feed, page_count)
-                feed_template['content'] = self.generate_entries(feed, page)
+                feed_template['content']   = self.generate_entries(feed, page)
 
+                # Parse the template and write to file
                 filled_feed_template = self.parse_template(self.config.path_template_feed, feed_template)
-
-
                 self.write_to_file('%s/feeds/%s/page_%s.html' %(self.config.path_export_html, feed['hash'], str(page_count)), filled_feed_template)
 
                 # First feed, first page will be index.html
                 if feed == feeds[0] and page_count == 1:
-                    feed_template['favicon'] = self.config.path_favicon
-                    feed_template['css'] = self.config.path_css
-                    filled_feed_template = self.parse_template(self.config.path_template_feed, feed_template)
                     self.write_to_file(self.config.path_export_html + '/index.html', filled_feed_template)
 
                 page_count = page_count + 1
