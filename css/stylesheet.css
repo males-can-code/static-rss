@@ -59,11 +59,6 @@ h1 h2 h3 h4 h5 {
     font-size:12px;
 }
 
-.nano { background: #bba; width: 500px; height: 500px; }
-.nano .content { padding: 10px; }
-.nano .pane   { background: #888; }
-.nano .slider { background: #111; }
-
 /* Feeds */
 #main_wrapper {
     float: left;
@@ -122,6 +117,7 @@ h1 h2 h3 h4 h5 {
     overflow: hidden;
 }
 
+
 #sidebar_link {
     float: left;
     border: solid 1px white;
@@ -131,7 +127,6 @@ h1 h2 h3 h4 h5 {
 
 #group_title {
    margin-top: 5px; 
-    
 }
 
 a.unread:link      {text-decoration:none;color:#FF7D35;}
@@ -139,20 +134,30 @@ a.unread:visited   {text-decoration:none;color:#FF7D35;}
 a.unread:hover     {text-decoration:underline;color:#FF7D35;}
 a.unread:active    {text-decoration:none;color:#FF7D35;}
 
-#feed_content_wrapper { }
-
 #entry_box { 
     margin-bottom: 40px;
 }
 
+#mark_read_button {
+    float: left;
+    text-align:left;
+    margin-bottom: 5px;
+    margin-left: 5px;
+}
+
 #page_links {
+    float: right;
     text-align:right;
     margin-bottom: 5px;
     margin-right: 5px;
 }
 
+#feed_content_wrapper { 
+}
+
 #entry_header_wrapper{ 
 	background-color:#232323;
+    margin-top:40px;
     margin-bottom: 5px;
     padding:5px;
     height: 13;

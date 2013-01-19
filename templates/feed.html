@@ -1,8 +1,8 @@
 <HTML>
      <HEAD>
         <TITLE>StaticRSS|$title</TITLE>
-        <link rel="shortcut icon" href="$domain/$favicon">
-        <link rel="stylesheet" type="text/css" href="$domain/$css" />
+        <link rel="shortcut icon" href="$favicon">
+        <link rel="stylesheet" type="text/css" href="$css" />
         <script type="text/javascript"> document.write("<meta http-equiv='refresh' content='$update_interval' >"); </script>
     </HEAD>
     <BODY>
@@ -17,18 +17,28 @@
                     $entry_list 
                 </UL>
             </DIV>
+
             <DIV id="feed_wrapper">
                 <DIV id="feed_title">
                     $title
                 </DIV>
+
+                <DIV id="mark_read_button">
+                    <A HREF=$domain/php/mark_read.php?hash=$hash>mark feed read</A>
+                    |
+                    <A HREF=$domain/php/mark_read.php?hash=all>mark all read</A>
+                </DIV>
+
                 <DIV id="page_links">
                     <A HREF=$page_prev><</A>
                     $page_links
                     <A HREF=$page_next>></A>
                 </DIV>
+
                 <DIV id="feed_content_wrapper">
                     $content
                 </DIV>
+
                 <DIV id="page_links">
                     <A HREF=$page_prev><</A>
                     $page_links

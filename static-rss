@@ -5,7 +5,7 @@ import feedparser
 import hashlib
 import sqlite3
 import shutil
-from log import Log
+from lib.log import Log
 from time import strftime
 from string import Template
 from config import Config
@@ -15,6 +15,15 @@ class GenerateHTML(object):
     def get_files(self, path):
         for path,dirs,files in os.walk(path):
             return files
+
+
+    def copy_file(self, src, dest):
+        try:
+            shutil.copy(src, dest)
+            return True
+        except IOError as e:
+            self.log.error('Failed to copy file: %s'%src)
+            sys.exit()
 
 
     def check_dir(self, directory):
@@ -194,26 +203,39 @@ class GenerateHTML(object):
     def generate_HTML(self):
         self.log.info('Generating HTML')
 
-        shutil.rmtree(self.config.path_export_html)
+        try:
+            shutil.rmtree(self.config.path_export_html)
+        except:
+            pass
         self.check_dir(self.config.path_export_html)
         self.check_dir(self.config.path_export_html + '/feeds')
+        self.check_dir(self.config.path_export_html + '/css')
+        self.check_dir(self.config.path_export_html + '/php')
+
+        self.copy_file(self.config.path_css, self.config.path_export_html + '/css')
+        self.copy_file(self.config.path_php, self.config.path_export_html + '/php')
+        self.copy_file(self.config.path_favicon, self.config.path_export_html)
 
         feeds = self.get_table('feeds')
 
         # This is the main content for the 'feed.html' template which will be generated for
         # every page of every feed 
         feed_template = {}
-        feed_template['css'] = self.config.path_css
         feed_template['update_interval'] = self.config.update_interval
-        feed_template['favicon'] = self.config.path_favicon
         feed_template['feed_urls'] = self.generate_feed_urls(feeds)
         feed_template['domain'] = self.config.domain
 
         for feed in feeds:
+            self.check_dir(self.config.path_export_html + '/feeds/' + feed['hash'])
+
             pages = self.calculate_pages(feed)
+
             feed_template['page_links'] = self.generate_page_links(feed['hash'], len(pages))
             feed_template['entry_list'] = self.generate_entry_list(feed)
             feed_template['title'] = feed['title']
+            feed_template['hash'] = feed['hash']
+            feed_template['favicon'] = self.config.domain + '/favicon.ico'
+            feed_template['css'] = self.config.domain + '/css/stylesheet.css'
 
             page_count = 1
             for page in pages:
@@ -223,12 +245,14 @@ class GenerateHTML(object):
 
                 filled_feed_template = self.parse_template(self.config.path_template_feed, feed_template)
 
-                self.check_dir(self.config.path_export_html + '/feeds/' + feed['hash'])
 
                 self.write_to_file('%s/feeds/%s/page_%s.html' %(self.config.path_export_html, feed['hash'], str(page_count)), filled_feed_template)
 
                 # First feed, first page will be index.html
                 if feed == feeds[0] and page_count == 1:
+                    feed_template['favicon'] = self.config.path_favicon
+                    feed_template['css'] = self.config.path_css
+                    filled_feed_template = self.parse_template(self.config.path_template_feed, feed_template)
                     self.write_to_file(self.config.path_export_html + '/index.html', filled_feed_template)
 
                 page_count = page_count + 1
@@ -459,6 +483,7 @@ class RSS(Database, GenerateHTML):
         for feed in self.config.feeds:
             if not self.check_in_table('feeds', 'hash', str(self.get_hash(feed[0]))):
                 self.add_feed(feed)
+
 
 
     def usage(self):

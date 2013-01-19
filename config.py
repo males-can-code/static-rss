@@ -3,16 +3,15 @@ import os
 
 class Config(object):
     def __init__(self):
-
         self.max_chars_per_page     = 10000
         self.max_entries_in_sidebar = 20
         self.update_interval        = 60
 
-        self.domain     = os.getenv('HOME') + '/bin/apps/static-rss'
-        self.config_dir = os.getenv('HOME') + '/bin/apps/static-rss'
+        # eg. 'http://example.com'
+        self.domain     = os.getenv('HOME') + '/html'
 
+        self.config_dir                        = os.getenv('HOME') + '/bin/apps/static-rss'
         self.path_db                           = self.config_dir + '/static-rss.sqlite'
-        self.path_export_html                  = self.config_dir + '/html'
         self.path_template_entry_read          = self.config_dir + '/templates/entry_read.html'
         self.path_template_entry_unread        = self.config_dir + '/templates/entry_unread.html'
         self.path_template_feed                = self.config_dir + '/templates/feed.html'
@@ -22,9 +21,12 @@ class Config(object):
         self.path_template_entry_list_unread   = self.config_dir + '/templates/entry_list_unread.html'
         self.path_template_page_link           = self.config_dir + '/templates/page_links.html'
         self.path_template_group               = self.config_dir + '/templates/group.html'
+        self.path_css                          = self.config_dir + '/css/stylesheet.css'
+        self.path_php                          = self.config_dir + '/php/mark_read.php'
+        self.path_favicon                      = self.config_dir + '/pics/favicon.ico'
 
-        self.path_css                          = 'css/stylesheet.css'
-        self.path_favicon                      = 'favicon.ico'
+        # Place where the html will be exported to. eg: '/var/www/StaticRSS'
+        self.path_export_html                  = os.getenv('HOME') + '/html'
 
 
 
