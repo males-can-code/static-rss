@@ -31,10 +31,11 @@ Install on server:
      If the database is accessable to the webserver you can use this to mark your feeds
      as read.
 
+
 Install locally:
+
     -Clone repository
     -Edit the config file to reflect your setup
     -run static-rss to create directories, database and html
     -point your browser to the index.html
-
     -Make a cronjob for automatic updating
