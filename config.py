@@ -23,8 +23,8 @@ class Config(object):
         self.path_template_page_link           = self.config_dir + '/templates/page_links.html'
         self.path_template_group               = self.config_dir + '/templates/group.html'
 
-        self.path_css                          = '/css/stylesheet.css'
-        self.path_favicon                      = '/favicon.ico'
+        self.path_css                          = 'css/stylesheet.css'
+        self.path_favicon                      = 'favicon.ico'
 
 
 
