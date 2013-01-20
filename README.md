@@ -14,36 +14,31 @@ Install on server:
     -Clone repository
         git clone https://github.com/elcoco/static-rss.git.
 
-    -Change group of static-rss to whatever user owns the webserver 
-        eg: chown -R insert_user_here:www-data ~/static-rss
-
     -Edit 'static-rss/config.py' to reflect your setup.
         Be sure to at least change:
-            self.config_dir =       -The location of the script
-            self.domain =           -Your domain eg. 'http://www.example.com'
-            self.path_export_html = -The path where the html files should be exported to
-                                      eg. '/var/www/static-rss'
+            self.config_dir =           -The location of the script
+            self.domain =               -Your domain eg. 'http://www.example.com'
+            self.path_export_html =     -The path where the html files should be exported to
+                                         eg. '/var/www/static-rss'
 
-    -Create export directory
-        $ mkdir ~/static-rss/html                       #or whatever you configured in config.py
-        $ chown -R www-data:www-data ~/static-rss/html
+        $ mkdir ~/static-rss/html       -Create export directory
+        $ mkdir ~/static-rss/database   -Create database directory
 
-    -Create database directory
-        $ mkdir ~/static-rss/database
-        $ chown -R www-data:www-data ~/static-rss/database
+    -Change owner:group of static-rss directory to whatever user owns the webserver 
+        eg: chown -R www-data:www-data ~/static-rss
 
     -Point your webserver to the export_html directory.
 
     -You can use cron to update your feeds, make sure it executes the script under the same user
      that owns the database and export directory
 
-        as root: 
+        As root: 
             $ crontab -e
 
-        add line:
+        Add line:
             */10  * * * * su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/eco/bin/apps/static-rss/static-rss"
 
-        restart cron
+        Restart cron
             $ service cron restart       (for ubuntu system)
             $ systemctl restart crond    (systemd/arch system)
 
