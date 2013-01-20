@@ -5,9 +5,9 @@ class Config(object):
     def __init__(self):
         self.max_chars_per_page     = 10000
         self.max_entries_in_sidebar = 20
-        self.update_interval        = 60
+        self.update_interval        = 120
 
-        self.path_export_html                  = os.getenv('HOME') + '/static-rss'  # Place where the html will be exported to. eg: '/var/www/StaticRSS'
+        self.path_export_html                  = '/home/eco/bin/apps/static-rss/html'  # Place where the html will be exported to. eg: '/var/www/StaticRSS'
         self.domain                            = 'http://rss.opentbc.nl'            # eg. 'http://example.com'
         self.config_dir                        = '/home/eco/bin/apps/static-rss'
 
