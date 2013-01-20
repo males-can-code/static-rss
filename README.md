@@ -35,8 +35,8 @@ Install on server:
         As root: 
             $ crontab -e
 
-        Add line:
-            */10  * * * * su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/eco/bin/apps/static-rss/static-rss"
+        Add line to check every 10 minutes for new entries:
+            */10  * * * * su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/eco/bin/apps/static-rss/static-rss -p -g"
 
         Restart cron
             $ service cron restart       (for ubuntu system)

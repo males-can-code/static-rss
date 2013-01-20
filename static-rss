@@ -104,7 +104,7 @@ class GenerateHTML(object):
         
             for feed in feeds:
                 # Count unread entries per feed
-                entries = self.get_rows_by_value('entries', 'feed_hash', feed['hash']) 
+                entries = self.get_rows_by_value('entries', 'feed_hash', feed['hash'], order_by='date_published')
                 unread_counter = 0
                 for entry in entries:
                     if entry['read'] == 'False':
@@ -127,7 +127,7 @@ class GenerateHTML(object):
 
     def generate_entries(self, feed, page):
         filled_entries_template = ''
-        entries = self.get_rows_by_value('entries', 'feed_hash', feed['hash']) 
+        entries = self.get_rows_by_value('entries', 'feed_hash', feed['hash'], order_by='date_published') 
         for entry in entries:
             for hash in page:
                 if hash == entry['hash']:
@@ -145,7 +145,7 @@ class GenerateHTML(object):
         titles = ''
         title = {}
         pages = self.calculate_pages(feed)
-        entries = self.get_rows_by_value('entries', 'feed_hash', feed['hash'], limit=self.config.max_entries_in_sidebar) 
+        entries = self.get_rows_by_value('entries', 'feed_hash', feed['hash'], order_by='date_published', limit=self.config.max_entries_in_sidebar) 
 
         for entry in entries:
             page_count = 1
@@ -193,7 +193,7 @@ class GenerateHTML(object):
         pages = []
         c = 1
 
-        entries = self.get_rows_by_value('entries', 'feed_hash', feed['hash']) 
+        entries = self.get_rows_by_value('entries', 'feed_hash', feed['hash'], order_by='date_published') 
         for entry in entries:
             sum_chars = sum_chars + len(entry['content'])
             entry_hash_list.append(entry['hash'])
@@ -459,6 +459,18 @@ class RSS(Database, GenerateHTML):
     def add_entry(self, entry, url):
         self.log.info('Inserting new entry: %s'%entry['title'])
         entry_insert = {}
+
+        # Try to get title otherwise insert link or unknown
+        try:
+            entry_insert['title']           = str(entry['title'])
+        except:
+            try:
+                entry_insert['title']           = str(entry['link'])
+                self.log.warning('Failed to find title, using \'url\'')
+            except:
+                entry_insert['title']           = 'unknown'
+                self.log.warning('Failed to find title, using \'unknown\'')
+
         entry_insert['hash']            = str(self.get_hash(entry['title'] + entry['summary']))
         entry_insert['content']         = str(entry['summary'])
         entry_insert['read']            = 'False'
@@ -472,16 +484,6 @@ class RSS(Database, GenerateHTML):
             entry_insert['entry_url']       = 'unknown'
             self.log.warning('Failed to find url for entry, using \'unknown\'')
 
-        # Try to get title otherwise insert link or unknown
-        try:
-            entry_insert['title']           = str(entry['title'])
-        except:
-            try:
-                entry_insert['title']           = str(entry['link'])
-                self.log.warning('Failed to find title, using \'url\'')
-            except:
-                entry_insert['title']           = 'unknown'
-                self.log.warning('Failed to find title, using \'unknown\'')
 
 
         # Try to get a date if available otherwise insert timestamp
@@ -500,7 +502,7 @@ class RSS(Database, GenerateHTML):
             # The date as returned from feedparser is in form: 2013-1-12, and must be 2013-01-12
             date = []
             for x in p:
-                date.append(str(x).ljust(2,'0'))
+                date.append(str(x).rjust(2,'0'))
             entry_insert['date_published'] = str('%s-%s-%s %s:%s:%s'%(date[0],date[1],date[2],date[3],date[4],date[5]))
         else:
             entry_insert['date_published'] = str(self.get_timestamp())
@@ -515,6 +517,7 @@ class RSS(Database, GenerateHTML):
 
 
     def init(self):
+        # TODO are there feeds? what will happen
         self.create_tables()
 
         for feed in self.config.feeds:
@@ -524,27 +527,43 @@ class RSS(Database, GenerateHTML):
 
 
     def usage(self):
-        self.log.info('Usage')
-
+        print('static-rss - An RSS reader that outputs static HTML')
+        print('Syntax: static-rss [OPTION]...')
+        print()
+        print('Options:')
+        print('    -p, --parse-feeds              -parse feeds')
+        print('    -g, --gen-html                 -generate HTML')
+        print('    -m, --mark-all-read            -mark all feeds as read')
+        print()
+        print('    -h, --help                     -this text')
+                                                                 
 
     def run(self):
+        if len(sys.argv) <= 1:
+            self.usage()
+            sys.exit()
+
+        if '-h' in sys.argv or '--help' in sys.argv:
+            self.usage()
+            sys.exit()
+
         self.init()
 
-        if len(sys.argv) > 1:
-            if sys.argv[1] == '--mark-all-read':
+        if len(sys.argv) >= 2:
+
+            if '--parse-feeds' in sys.argv or '-p' in sys.argv:
+                self.parse_feeds()
+
+            if '--mark-all-read' in sys.argv or '-m' in sys.argv:
                 feeds = self.get_table('feeds')
                 for feed in feeds:
                     self.mark_read(feed)
 
-            elif sys.argv[1] == '--gen-html':
+            if '--gen-html' in sys.argv or '-g' in sys.argv:
                 self.generate_HTML()
                 sys.exit()
-            else:
-                self.usage()
 
-        self.parse_feeds()
-        self.generate_HTML()
-
+            self.usage()
 
 app = RSS()
 app.run()
