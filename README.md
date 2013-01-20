@@ -25,8 +25,20 @@ Install on server:
                                       eg. '/var/www/static-rss'
 
     -Point your webserver to the export_html directory.
-    -You can use cron to update your feeds, make sure it runs under the same user
-     that owns the database
+
+    -You can use cron to update your feeds, make sure it executes the script under the same user
+     that owns the database and export directory
+
+        as root: 
+            $ crontab -e
+
+        add line:
+            */10  * * * * su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/eco/bin/apps/static-rss/static-rss"
+
+        restart cron
+            $ service cron restart       (for ubuntu system)
+            $ systemctl restart crond    (systemd/arch system)
+
     -A small php script is copied to export_dir/php/mark_read.php.
      If the database is accessable to the webserver you can use this to mark your feeds
      as read.

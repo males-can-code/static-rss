@@ -249,6 +249,7 @@ class GenerateHTML(object):
                 feed_template['page_next'] = self.generate_next_link(pages, feed, page_count)
                 feed_template['page_prev'] = self.generate_prev_link(pages, feed, page_count)
                 feed_template['content']   = self.generate_entries(feed, page)
+                feed_template['go_back']    = '%s/feeds/%s/page_%s.html' %(self.config.domain, feed['hash'], str(page_count))
 
                 # Parse the template and write to file
                 filled_feed_template = self.parse_template(self.config.path_template_feed, feed_template)
