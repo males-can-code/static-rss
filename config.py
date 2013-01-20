@@ -6,6 +6,7 @@ class Config(object):
         self.max_chars_per_page     = 10000
         self.max_entries_in_sidebar = 20
         self.update_interval        = 120
+        self.enable_php_scripts     = True
 
         self.path_export_html                  = '/home/eco/bin/apps/static-rss/html'  # Place where the html will be exported to. eg: '/var/www/StaticRSS'
         self.domain                            = 'http://rss.opentbc.nl'            # eg. 'http://example.com'
@@ -24,6 +25,8 @@ class Config(object):
         self.path_template_index               = self.config_dir + '/templates/index.html'
         self.path_css                          = self.config_dir + '/css/stylesheet.css'
         self.path_php                          = self.config_dir + '/php'
+        self.path_script_update                = self.config_dir + '/php/update.php'
+        self.path_script_mark_read             = self.config_dir + '/php/mark_read.php'
         self.path_favicon                      = self.config_dir + '/pics/favicon.ico'
 
 

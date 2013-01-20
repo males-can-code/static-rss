@@ -5,6 +5,7 @@ import feedparser
 import hashlib
 import sqlite3
 import shutil
+import subprocess
 from lib.log import Log
 from time import strftime
 from string import Template
@@ -217,8 +218,8 @@ class GenerateHTML(object):
             self.check_dir(self.config.path_export_html + '/feeds/' + feed['hash'])
 
         self.copy_file(self.config.path_css, self.config.path_export_html + '/css')
-        self.copy_file(self.config.path_php + '/update.php', self.config.path_export_html + '/php')
-        self.copy_file(self.config.path_php + '/mark_read.php', self.config.path_export_html + '/php')
+        self.copy_file(self.config.path_script_update, self.config.path_export_html + '/php')
+        self.copy_file(self.config.path_script_mark_read, self.config.path_export_html + '/php')
         self.copy_file(self.config.path_favicon, self.config.path_export_html)
 
 
@@ -374,9 +375,12 @@ class RSS(Database, GenerateHTML):
         self.log = Log()
         self.config = Config()
 
+    def check_running(self):
+        pass
+
 
     def get_timestamp(self):
-        timestamp = strftime("%Y%m%d%H%M%S")
+        timestamp = strftime("%Y-%m-%d %H:%M:%S")
         return timestamp
 
 
@@ -412,7 +416,6 @@ class RSS(Database, GenerateHTML):
             parsed_feed = self.parse_feed(feed['feed_url'])
             if parsed_feed:
                 for entry in parsed_feed.entries:
-                    sys.exit
                     if not self.check_in_table('entries', 'hash', str(self.get_hash(entry['title'] + entry['summary']))):
                         self.add_entry(entry, feed['feed_url'])
 
@@ -458,20 +461,50 @@ class RSS(Database, GenerateHTML):
         entry_insert = {}
         entry_insert['hash']            = str(self.get_hash(entry['title'] + entry['summary']))
         entry_insert['content']         = str(entry['summary'])
-        entry_insert['entry_url']       = str(entry['link'])
         entry_insert['read']            = 'False'
         entry_insert['date_entered']    = str(self.get_timestamp())
         entry_insert['feed_hash']       = str(self.get_hash(url))
 
-        if 'title' in entry.keys():
-            entry_insert['title']           = str(entry['title'])
-        else:
-            entry_insert['title']           = str(entry['link'])
+        # Try to get url otherwise insert unknown
+        try:
+            entry_insert['entry_url']       = str(entry['link'])
+        except:
+            entry_insert['entry_url']       = 'unknown'
+            self.log.warning('Failed to find url for entry, using \'unknown\'')
 
-        if 'published' in entry.keys():
-            entry_insert['date_published'] = str(entry.published)
+        # Try to get title otherwise insert link or unknown
+        try:
+            entry_insert['title']           = str(entry['title'])
+        except:
+            try:
+                entry_insert['title']           = str(entry['link'])
+                self.log.warning('Failed to find title, using \'url\'')
+            except:
+                entry_insert['title']           = 'unknown'
+                self.log.warning('Failed to find title, using \'unknown\'')
+
+
+        # Try to get a date if available otherwise insert timestamp
+        try:
+            p = entry.published_parsed
+        except:
+            try:
+                p = entry.updated_parsed
+            except:
+                try:
+                    p = entry.created_parsed
+                except:
+                    p = False
+
+        if p:
+            # The date as returned from feedparser is in form: 2013-1-12, and must be 2013-01-12
+            date = []
+            for x in p:
+                date.append(str(x).ljust(2,'0'))
+            entry_insert['date_published'] = str('%s-%s-%s %s:%s:%s'%(date[0],date[1],date[2],date[3],date[4],date[5]))
         else:
-            entry_insert['date_published'] = 'unknown'
+            entry_insert['date_published'] = str(self.get_timestamp())
+            self.log.warning('Failed to find a date, using timestamp')
 
         self.insert_row('entries', entry_insert)
 
