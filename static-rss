@@ -10,7 +10,6 @@ from time import strftime
 from string import Template
 from config import Config
 
-
 class GenerateHTML(object):
     def get_files(self, path):
         for path,dirs,files in os.walk(path):
@@ -218,7 +217,8 @@ class GenerateHTML(object):
             self.check_dir(self.config.path_export_html + '/feeds/' + feed['hash'])
 
         self.copy_file(self.config.path_css, self.config.path_export_html + '/css')
-        self.copy_file(self.config.path_php, self.config.path_export_html + '/php')
+        self.copy_file(self.config.path_php + '/update.php', self.config.path_export_html + '/php')
+        self.copy_file(self.config.path_php + '/mark_read.php', self.config.path_export_html + '/php')
         self.copy_file(self.config.path_favicon, self.config.path_export_html)
 
 

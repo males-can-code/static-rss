@@ -23,7 +23,7 @@ class Config(object):
         self.path_template_group               = self.config_dir + '/templates/group.html'
         self.path_template_index               = self.config_dir + '/templates/index.html'
         self.path_css                          = self.config_dir + '/css/stylesheet.css'
-        self.path_php                          = self.config_dir + '/php/mark_read.php'
+        self.path_php                          = self.config_dir + '/php'
         self.path_favicon                      = self.config_dir + '/pics/favicon.ico'
 
 
