@@ -14,8 +14,8 @@ Install on server:
     -Clone repository
         git clone https://github.com/elcoco/static-rss.git.
 
-    -Change owner of static-rss, static-rss/php to whatever user owns the webserver 
-        eg: chown www-data:www-data ~/static-rss
+    -Change group of static-rss to whatever user owns the webserver 
+        eg: chown -R insert_user_here:www-data ~/static-rss
 
     -Edit 'static-rss/config.py' to reflect your setup.
         Be sure to at least change:
@@ -23,6 +23,14 @@ Install on server:
             self.domain =           -Your domain eg. 'http://www.example.com'
             self.path_export_html = -The path where the html files should be exported to
                                       eg. '/var/www/static-rss'
+
+    -Create export directory
+        $ mkdir ~/static-rss/html                       #or whatever you configured in config.py
+        $ chown -R www-data:www-data ~/static-rss/html
+
+    -Create database directory
+        $ mkdir ~/static-rss/database
+        $ chown -R www-data:www-data ~/static-rss/database
 
     -Point your webserver to the export_html directory.
 
