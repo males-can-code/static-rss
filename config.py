@@ -13,16 +13,15 @@ class Config(object):
         self.config_dir                        = '/home/eco/bin/apps/static-rss'
 
         self.path_db                           = self.config_dir + '/database/static-rss.sqlite'
-        self.path_template_entry_read          = self.config_dir + '/templates/entry_read.html'
-        self.path_template_entry_unread        = self.config_dir + '/templates/entry_unread.html'
+
         self.path_template_feed                = self.config_dir + '/templates/feed.html'
-        self.path_template_feed_list_read      = self.config_dir + '/templates/feed_urls_read.html'
-        self.path_template_feed_list_unread    = self.config_dir + '/templates/feed_urls_unread.html'
-        self.path_template_entry_list_read     = self.config_dir + '/templates/entry_list_read.html'
-        self.path_template_entry_list_unread   = self.config_dir + '/templates/entry_list_unread.html'
+        self.path_template_feed_list_link      = self.config_dir + '/templates/feed_list_link.html'
+        self.path_template_feed_list_group     = self.config_dir + '/templates/feed_list_group.html'
+        self.path_template_entry               = self.config_dir + '/templates/entry.html'
+        self.path_template_entry_list_link     = self.config_dir + '/templates/entry_list_link.html'
         self.path_template_page_link           = self.config_dir + '/templates/page_links.html'
-        self.path_template_group               = self.config_dir + '/templates/group.html'
         self.path_template_index               = self.config_dir + '/templates/index.html'
+
         self.path_css                          = self.config_dir + '/css/stylesheet.css'
         self.path_php                          = self.config_dir + '/php'
         self.path_script_update                = self.config_dir + '/php/update.php'

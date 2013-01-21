@@ -104,7 +104,7 @@ class GenerateHTML(object):
 
         for group in self.get_groups():
             feeds = self.get_rows_by_value('feeds', 'groups',  group)
-            filled_group_template = self.parse_template(self.config.path_template_group, {'group_title' : group})
+            filled_group_template = self.parse_template(self.config.path_template_feed_list_group, {'group_title' : group})
             filled_template = filled_template + filled_group_template + '\n'
         
             for feed in feeds:
@@ -112,21 +112,22 @@ class GenerateHTML(object):
                 entries = self.get_rows_by_value('entries', 'feed_hash', feed['hash'], order_by='date_published')
                 unread_counter = 0
                 for entry in entries:
-                    if entry['read'] == 'False':
+                    if entry['read'] == 'unread':
                         unread_counter = unread_counter + 1
 
                 feed_url['title'] = feed['title'] 
                 feed_url['feed_url']= self.config.domain + '/feeds/' + feed['hash'] + '/page_1.html'
-                feed_url['counter'] = unread_counter
 
                 # Parse template
                 if unread_counter > 0:
-                    filled_url_template = self.parse_template(self.config.path_template_feed_list_unread, feed_url)
+                    feed_url['counter'] = '[' + str(unread_counter) + ']'
+                    feed_url['read'] = 'unread'
                 else:
-                    filled_url_template = self.parse_template(self.config.path_template_feed_list_read, feed_url)
+                    feed_url['counter'] = ''
+                    feed_url['read'] = 'read'
 
+                filled_url_template = self.parse_template(self.config.path_template_feed_list_link, feed_url)
                 filled_template = filled_template + filled_url_template + '\n'
-
         return filled_template
 
 
@@ -137,13 +138,8 @@ class GenerateHTML(object):
         for entry in entries:
             for hash in page:
                 if hash == entry['hash']:
-                    # Use different template for read/unread entries
-                    if entry['read'] == 'True':
-                        filled_entry_template = self.parse_template(self.config.path_template_entry_read, entry)
-                    elif entry['read'] == 'False':
-                        filled_entry_template = self.parse_template(self.config.path_template_entry_unread, entry)
+                    filled_entry_template = self.parse_template(self.config.path_template_entry, entry)
                     filled_entries_template = filled_entries_template + filled_entry_template + '\n'
-
         return filled_entries_template
 
 
@@ -161,10 +157,7 @@ class GenerateHTML(object):
                     entry['entry_url'] = self.config.domain + '/feeds/' + feed['hash'] + '/page_' + str(page_count) + '.html' 
                 page_count = page_count + 1
 
-            if entry['read'] == 'True':
-                filled_template = self.parse_template(self.config.path_template_entry_list_read, entry)
-            else:
-                filled_template = self.parse_template(self.config.path_template_entry_list_unread, entry)
+            filled_template = self.parse_template(self.config.path_template_entry_list_link, entry)
             titles = titles + filled_template + '\n'
         return titles
 
@@ -224,6 +217,7 @@ class GenerateHTML(object):
         self.check_dir(self.config.path_export_html + '/feeds')
         self.check_dir(self.config.path_export_html + '/css')
         self.check_dir(self.config.path_export_html + '/php')
+        self.check_dir(self.config.path_export_html + '/js')
 
         for feed in feeds:
             self.check_dir(self.config.path_export_html + '/feeds/' + feed['hash'])
@@ -231,6 +225,7 @@ class GenerateHTML(object):
         self.copy_file(self.config.path_css, self.config.path_export_html + '/css')
         self.copy_file(self.config.path_script_update, self.config.path_export_html + '/php')
         self.copy_file(self.config.path_script_mark_read, self.config.path_export_html + '/php')
+        self.copy_file(self.config.config_dir + '/js/jquery.slimscroll.min.js', self.config.path_export_html + '/js')
         self.copy_file(self.config.path_favicon, self.config.path_export_html)
 
 
@@ -423,7 +418,7 @@ class RSS(Database, GenerateHTML):
             return parsed_feed
         except:
             self.log.error('Failed to parse feed: %s'%url)
-            return false
+            return False
 
 
     def parse_feeds(self):
@@ -491,7 +486,7 @@ class RSS(Database, GenerateHTML):
 
         entry_insert['hash']            = str(self.get_hash(entry['title'] + entry['summary']))
         entry_insert['content']         = str(entry['summary'])
-        entry_insert['read']            = 'False'
+        entry_insert['read']            = 'unread'
         entry_insert['date_entered']    = str(self.get_timestamp())
         entry_insert['feed_hash']       = str(self.get_hash(url))
 
@@ -501,8 +496,6 @@ class RSS(Database, GenerateHTML):
         except:
             entry_insert['entry_url']       = 'unknown'
             self.log.warning('Failed to find url for entry, using \'unknown\'')
-
-
 
         # Try to get a date if available otherwise insert timestamp
         try:
@@ -532,7 +525,7 @@ class RSS(Database, GenerateHTML):
     def mark_read(self, feed):
     # Mark a feed as read
         self.log.info('Marking feed read: %s'%feed['title'])
-        self.update_row('entries', 'read', 'True', feed['hash'])
+        self.update_row('entries', 'read', 'read', feed['hash'])
 
 
     def mark_all_read(self):

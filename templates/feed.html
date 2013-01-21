@@ -3,17 +3,45 @@
         <TITLE>StaticRSS|$title</TITLE>
         <link rel="shortcut icon" href="$favicon">
         <link rel="stylesheet" type="text/css" href="$css" />
+
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.js"></script>
+        <script type="text/javascript" src="https://rss.opentbc.nl/js/jquery.slimscroll.min.js"></script>
+
         <script type="text/javascript"> document.write("<meta http-equiv='refresh' content='$update_interval' >"); </script>
+
     </HEAD>
     <BODY>
+        <script language="JavaScript">
+            window.onbeforeunload = markRead;
+                function markRead()
+                {
+                    window.location.replace('http://google.com')
+                    //window.location.replace('$domain/php/mark_read.php?hash=$hash&go_back=$go_back')
+                }
+        </script>
+
+        <script type="text/javascript">
+            $(function(){
+                $('.scrollbar').slimScroll({
+                    height: '99.5%',
+                    railVisible: true,
+                    size: '5px',
+                    disableFadeOut: true
+                });
+            });
+        </script>
+
+        
         <DIV id="main_wrapper">
-            <DIV id="feed_sidebar">
-                <UL>
+            <DIV class="feed_sidebar">
+                <UL class="scrollbar">
                     $feed_urls
                 </UL>
             </DIV>
-            <DIV id="entry_sidebar"> 
-                <UL>
+
+            <DIV class="entry_sidebar"> 
+                <UL class="scrollbar">
                     $entry_list 
                 </UL>
             </DIV>
@@ -41,6 +69,14 @@
                     $content
                 </DIV>
 
+                <DIV id="mark_read_button">
+                    <A HREF="$domain/php/mark_read.php?hash=$hash&go_back=$go_back">mark feed read</A>
+                    |
+                    <A HREF="$domain/php/mark_read.php?hash=all&go_back=$go_back">mark all read</A>
+                    |
+                    <A HREF="$domain/php/update.php?go_back=$go_back">update</A>
+                </DIV>
+
                 <DIV id="page_links">
                     <A HREF=$page_prev><</A>
                     $page_links
@@ -48,5 +84,8 @@
                 </DIV>
             </DIV>
         </DIV>
+
     </BODY>
+
+
 </HTML>
