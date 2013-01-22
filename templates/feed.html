@@ -1,26 +1,14 @@
 <HTML>
      <HEAD>
-        <TITLE>StaticRSS|$title</TITLE>
+        <TITLE>StaticRSS|$feed_title</TITLE>
         <link rel="shortcut icon" href="$favicon">
         <link rel="stylesheet" type="text/css" href="$css" />
-
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.js"></script>
         <script type="text/javascript" src="https://rss.opentbc.nl/js/jquery.slimscroll.min.js"></script>
-
-        <script type="text/javascript"> document.write("<meta http-equiv='refresh' content='$update_interval' >"); </script>
-
+        <script type="text/javascript">document.write("<meta http-equiv='refresh' content='$update_interval' >");</script>
     </HEAD>
     <BODY>
-        <script language="JavaScript">
-            window.onbeforeunload = markRead;
-                function markRead()
-                {
-                    window.location.replace('http://google.com')
-                    //window.location.replace('$domain/php/mark_read.php?hash=$hash&go_back=$go_back')
-                }
-        </script>
-
         <script type="text/javascript">
             $(function(){
                 $('.scrollbar').slimScroll({
@@ -31,25 +19,24 @@
                 });
             });
         </script>
-        
         <DIV id="main_wrapper">
             <DIV class="feed_sidebar">
                 <UL class="scrollbar">
-                    $feed_urls
+                    {{loop=feed_list}}
+                    <DIV id="group_title">$group_title</DIV>
+                    <LI><A HREF="$feed_url" class="$feed_read">$feed_link$counter</A></LI>
+                    {{endloop}}
                 </UL>
             </DIV>
-
             <DIV class="entry_sidebar"> 
                 <UL class="scrollbar">
-                    $entry_list 
+                    {{loop=entry_list}}
+                    <LI><A HREF="$entry_url#$entry_hash" class=$entry_read>$entry_title</A></LI>
+                    {{endloop}}
                 </UL>
             </DIV>
-
-            <DIV id="feed_wrapper">
-                <DIV id="feed_title">
-                    $title
-                </DIV>
-
+        <DIV id="feed_wrapper">
+            <DIV id="feed_title">$feed_title</DIV>
                 <DIV class="mark_read_button">
                     <A HREF="$domain/php/mark_read.php?hash=$hash&go_back=$go_back">mark feed read</A>
                     |
@@ -57,19 +44,23 @@
                     |
                     <A HREF="$domain/php/update.php?go_back=$go_back">update</A>
                 </DIV>
-
                 <DIV class="page_links">
                     <A HREF=$page_prev><</A>
-                    $page_links
+                    {{loop=page_links}}
+                    <A HREF="$page_url">$page</A>
+                    {{endloop}}
                     <A HREF=$page_next>></A>
                 </DIV>
-
-                <DIV id="feed_content_wrapper">
-                    {{loop=content}}
-                    $content
-                    {{endloop}}
+                {{loop=entries}}
+                <DIV id="entry_box">
+                    <A name="$entry_hash"></A>
+                    <DIV id="entry_header_wrapper">
+                        <DIV id="entry_title"><A HREF=$entry_url class="$entry_read">$entry_title</A></DIV>
+                    </DIV>
+                    <DIV id="entry_date_published">$entry_date_published</DIV>
+                    <DIV id="entry_content">$entry_content</DIV>
                 </DIV>
-
+                {{endloop}}
                 <DIV class="mark_read_button">
                     <A HREF="$domain/php/mark_read.php?hash=$hash&go_back=$go_back">mark feed read</A>
                     |
@@ -77,16 +68,14 @@
                     |
                     <A HREF="$domain/php/update.php?go_back=$go_back">update</A>
                 </DIV>
-
                 <DIV class="page_links">
                     <A HREF=$page_prev><</A>
-                    $page_links
+                    {{loop=page_links}}
+                        <A HREF="$page_url">$page</A>
+                    {{endloop}}
                     <A HREF=$page_next>></A>
                 </DIV>
             </DIV>
         </DIV>
-
     </BODY>
-
-
 </HTML>

@@ -14,11 +14,11 @@
 
         if ($hash == 'all') 
         {
-            $sth = $db->prepare("update entries set 'read' = 'True'");
+            $sth = $db->prepare("update entries set 'entry_read' = 'read'");
         }
         elseif (isValidMd5($hash) == 0) 
         {
-            $sth = $db->prepare("update entries set 'read' = 'True' where feed_hash = :parameter");
+            $sth = $db->prepare("update entries set 'entry_read' = 'read' where feed_hash = :parameter");
             $sth->bindParam(':parameter', $hash, PDO::PARAM_STR);
         }
 

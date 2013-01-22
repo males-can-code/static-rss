@@ -66,7 +66,8 @@ class GenerateHTML(object):
                 return False
 
             for line in f:
-                contents.append(self.sanitize(line))
+                #contents.append(self.sanitize(line))
+                contents.append(line.rstrip())
             f.close()
             return contents
         else:
@@ -87,107 +88,113 @@ class GenerateHTML(object):
     # Parse a template file, input is a dict and return is a string
         filled_template = ''
         template = self.get_file(template_path)
+        loop_func = False
 
         if template:
             for line in template:
-                for key in data.keys():
-                    if '$' + key in line:
-                        line = Template(line).safe_substitute({key:data[key]})
-                filled_template = filled_template + line + '\n'
+                # If '{{loop=' is encoutered in template keep on looping till {{endloop}} and 
+                # send the lines to the function with the name 'loop_' + the stuff after '=' in template
+                if '{{loop=' in line:
+                    loop_lines = []
+                    x,loop_func = line.split('=')
+                    loop_func = loop_func.strip('}}')
+
+                elif '{{endloop}}' in line:
+                    if loop_func and len(loop_lines) > 0:
+                        lines = getattr(self, 'loop_' + loop_func)(loop_lines, data)
+                        filled_template = filled_template + lines
+                        loop_func = False
+
+                elif loop_func:
+                    loop_lines.append(line)
+
+                else:
+                    for key in data.keys():
+                        if '$' + key in line:
+                            line = Template(line).safe_substitute({key:data[key]})
+                    filled_template = filled_template + line + '\n'
         return filled_template
 
 
-    def generate_feed_urls(self, feeds):
+    def loop_feed_list(self, lines, data):
     # Generate the left sidebar links
         filled_template = ''
         feed_url = {}
+        feeds = self.get_table('feeds')     # Get a list of dicts containing information about a feed
+        last_group = ''
 
         for group in self.get_groups():
-            feeds = self.get_rows_by_value('feeds', 'groups',  group)
-            filled_group_template = self.parse_template(self.config.path_template_feed_list_group, {'group_title' : group})
-            filled_template = filled_template + filled_group_template + '\n'
-        
+            feeds = self.get_rows_by_value('feeds', 'feed_group',  group, order_by='feed_date_entered')
             for feed in feeds:
+                data['group_title'] = group
+
                 # Count unread entries per feed
-                entries = self.get_rows_by_value('entries', 'feed_hash', feed['hash'], order_by='date_published')
+                entries = self.get_rows_by_value('entries', 'entry_feed_hash', feed['feed_hash'], order_by='entry_date_published')
                 unread_counter = 0
                 for entry in entries:
-                    if entry['read'] == 'unread':
+                    if entry['entry_read'] == 'unread':
                         unread_counter = unread_counter + 1
 
-                feed_url['title'] = feed['title'] 
-                feed_url['feed_url']= self.config.domain + '/feeds/' + feed['hash'] + '/page_1.html'
+                data['feed_link'] = feed['feed_title'] 
+                data['feed_url'] = self.config.domain + '/feeds/' + feed['feed_hash'] + '/page_1.html'
 
                 # Parse template
                 if unread_counter > 0:
-                    feed_url['counter'] = '[' + str(unread_counter) + ']'
-                    feed_url['read'] = 'unread'
+                    data['counter'] = '[' + str(unread_counter) + ']'
+                    data['feed_read'] = 'unread'
                 else:
-                    feed_url['counter'] = ''
-                    feed_url['read'] = 'read'
+                    data['counter'] = ''
+                    data['feed_read'] = 'read'
 
-                filled_url_template = self.parse_template(self.config.path_template_feed_list_link, feed_url)
-                filled_template = filled_template + filled_url_template + '\n'
+                # Very very very dirty hack to make the group not show up every feed link
+                lines_tmp = lines[:]
+                if last_group == data['group_title']:
+                    lines_tmp.pop(0)
+                else:
+                    last_group = data['group_title']
+
+                for line in lines_tmp:
+                    for key in data.keys():
+                        if '$' + key in line:
+                            line = Template(line).safe_substitute({key:data[key]})
+                    filled_template = filled_template + line + '\n'
+
         return filled_template
 
 
-    def generate_entries(self, feed, page):
+    def loop_entries(self, lines, feed):
     # Generate a page with entries (posts)
-        filled_entries_template = ''
-        entries = self.get_rows_by_value('entries', 'feed_hash', feed['hash'], order_by='date_published') 
+        filled_template = ''
+        entries = self.get_rows_by_value('entries', 'entry_feed_hash', feed['feed_hash'], order_by='entry_date_published') 
         for entry in entries:
-            for hash in page:
-                if hash == entry['hash']:
-                    filled_entry_template = self.parse_template(self.config.path_template_entry, entry)
-                    filled_entries_template = filled_entries_template + filled_entry_template + '\n'
-        return filled_entries_template
+            if entry['entry_hash'] in feed['page']:
+                for line in lines:
+                    for k in entry.keys():
+                        if '$' + k in line:
+                            line = Template(line).safe_substitute({k:entry[k]})
+                    filled_template = filled_template + line + '\n'
+        return filled_template
 
 
-    def generate_entry_list(self, feed):
+    def loop_entry_list(self, lines, feed):
     # Generate the right sidebar links
         titles = ''
-        title = {}
         pages = self.calculate_pages(feed)
-        entries = self.get_rows_by_value('entries', 'feed_hash', feed['hash'], order_by='date_published', limit=self.config.max_entries_in_sidebar) 
+        entries = self.get_rows_by_value('entries', 'entry_feed_hash', feed['feed_hash'], order_by='entry_date_published', limit=self.config.max_entries_in_sidebar) 
 
         for entry in entries:
             page_count = 1
             for page in pages:
-                if entry['hash'] in page:
-                    entry['entry_url'] = self.config.domain + '/feeds/' + feed['hash'] + '/page_' + str(page_count) + '.html' 
+                if entry['entry_hash'] in page:
+                    entry['entry_url'] = self.config.domain + '/feeds/' + feed['feed_hash'] + '/page_' + str(page_count) + '.html' 
                 page_count = page_count + 1
 
-            filled_template = self.parse_template(self.config.path_template_entry_list_link, entry)
-            titles = titles + filled_template + '\n'
+            for line in lines:
+                for key in entry.keys():
+                    if '$' + key in line:
+                        line = Template(line).safe_substitute({key:entry[key]})
+                titles = titles + line + '\n'
         return titles
-
-
-    def generate_page_links(self, feed_hash, n_pages):
-    # Generate the links to the different pages with entries for a feed
-        page_links = ''
-        for x in range(1,n_pages + 1):
-            link = {}
-            link['page_url'] = self.config.domain + '/feeds/' + feed_hash + '/page_' + str(x) + '.html'
-            link['page'] = x
-            filled_template = self.parse_template(self.config.path_template_page_link, link)
-            page_links = page_links + filled_template + '\n'
-        return page_links
-
-
-    def generate_prev_link(self, pages, feed, cur_page):
-    # Generate the link to the previous page (left from the page links)
-        if cur_page == len(pages):
-            return self.config.domain + '/feeds/' + feed['hash'] + '/page_' + str(cur_page - 1) + '.html'
-        elif cur_page > 0:
-            return self.config.domain + '/feeds/' + feed['hash'] + '/page_' + str(cur_page) + '.html'
-
-
-    def generate_next_link(self, pages, feed, cur_page):
-    # Generate the link to the next page (right from the page links)
-        if cur_page == len(pages):
-            return self.config.domain + '/feeds/' + feed['hash'] + '/page_' + str(cur_page) + '.html'
-        elif cur_page > 0:
-            return self.config.domain + '/feeds/' + feed['hash'] + '/page_' + str(cur_page + 1) + '.html'
 
 
     def calculate_pages(self, feed):
@@ -197,10 +204,10 @@ class GenerateHTML(object):
         pages = []
         c = 1
 
-        entries = self.get_rows_by_value('entries', 'feed_hash', feed['hash'], order_by='date_published') 
+        entries = self.get_rows_by_value('entries', 'entry_feed_hash', feed['feed_hash'], order_by='entry_date_published') 
         for entry in entries:
-            sum_chars = sum_chars + len(entry['content'])
-            entry_hash_list.append(entry['hash'])
+            sum_chars = sum_chars + len(entry['entry_content'])
+            entry_hash_list.append(entry['entry_hash'])
             if sum_chars >= self.config.max_chars_per_page or c == len(entries):
                 pages.append(entry_hash_list)
                 entry_hash_list = []
@@ -208,6 +215,40 @@ class GenerateHTML(object):
             c = c + 1
                 
         return pages
+
+
+    def loop_page_links(self, lines, feed):
+    # Generate the links to the different pages with entries for a feed
+        page_links = ''
+        for x in range(1, len(feed['pages']) + 1):
+            link = {}
+            link['page_url'] = self.config.domain + '/feeds/' + feed['feed_hash'] + '/page_' + str(x) + '.html'
+            link['page'] = x
+
+            for line in lines:
+                for key in link.keys():
+                    if '$' + key in line:
+                        line = Template(line).safe_substitute({key:link[key]})
+
+                page_links = page_links + line + '\n'
+
+        return page_links
+
+
+    def generate_prev_link(self, pages, feed, cur_page):
+    # Generate the link to the previous page (left from the page links)
+        if cur_page == len(pages):
+            return self.config.domain + '/feeds/' + feed['feed_hash'] + '/page_' + str(cur_page - 1) + '.html'
+        elif cur_page > 0:
+            return self.config.domain + '/feeds/' + feed['feed_hash'] + '/page_' + str(cur_page) + '.html'
+
+
+    def generate_next_link(self, pages, feed, cur_page):
+    # Generate the link to the next page (right from the page links)
+        if cur_page == len(pages):
+            return self.config.domain + '/feeds/' + feed['feed_hash'] + '/page_' + str(cur_page) + '.html'
+        elif cur_page > 0:
+            return self.config.domain + '/feeds/' + feed['feed_hash'] + '/page_' + str(cur_page + 1) + '.html'
 
 
     def gen_init(self, feeds):
@@ -220,7 +261,7 @@ class GenerateHTML(object):
         self.check_dir(self.config.path_export_html + '/js')
 
         for feed in feeds:
-            self.check_dir(self.config.path_export_html + '/feeds/' + feed['hash'])
+            self.check_dir(self.config.path_export_html + '/feeds/' + feed['feed_hash'])
 
         self.copy_file(self.config.path_css, self.config.path_export_html + '/css')
         self.copy_file(self.config.path_script_update, self.config.path_export_html + '/php')
@@ -240,39 +281,35 @@ class GenerateHTML(object):
         feeds = self.get_table('feeds')     # Get a list of dicts containing information about a feed
         self.gen_init(feeds)                # Remove/create and copy dirs and files
 
-        feed_template = {}                  # feed_template dict contains main content for the 'feed.html' template 
-        feed_template['update_interval'] = self.config.update_interval
-        feed_template['feed_urls']       = self.generate_feed_urls(feeds)
-        feed_template['domain']          = self.config.domain
-        feed_template['favicon']         = self.config.domain + '/favicon.ico'
-        feed_template['css']             = self.config.domain + '/css/stylesheet.css'
+        template = {}                  # feed_template dict contains main content for the 'feed.html' template 
+        template['update_interval'] = self.config.update_interval
+        template['domain']          = self.config.domain
+        template['favicon']         = self.config.domain + '/favicon.ico'
+        template['css']             = self.config.domain + '/css/stylesheet.css'
 
         # Create html pages for every page of every feed
         for feed in feeds:
             # Calculate in how many pages the entries fit
-            pages = self.calculate_pages(feed)
+            template['pages']      = self.calculate_pages(feed)
+            template['feed_title'] = feed['feed_title']
+            template['feed_hash']  = feed['feed_hash']
 
-            feed_template['page_links'] = self.generate_page_links(feed['hash'], len(pages))
-            feed_template['entry_list'] = self.generate_entry_list(feed)
-            feed_template['title']      = feed['title']
-            feed_template['hash']       = feed['hash']
-
-            page_count = 1
-            for page in pages:
-                feed_template['page_next'] = self.generate_next_link(pages, feed, page_count)
-                feed_template['page_prev'] = self.generate_prev_link(pages, feed, page_count)
-                feed_template['content']   = self.generate_entries(feed, page)
-                feed_template['go_back']    = '%s/feeds/%s/page_%s.html' %(self.config.domain, feed['hash'], str(page_count))
+            cur_page = 1
+            for page in template['pages']:
+                template['page']      = page
+                template['page_next'] = self.generate_next_link(template['pages'], feed, cur_page)
+                template['page_prev'] = self.generate_prev_link(template['pages'], feed, cur_page)
+                template['go_back']   = '%s/feeds/%s/page_%s.html' %(self.config.domain, feed['feed_hash'], str(cur_page))
 
                 # Parse the template and write to file
-                filled_feed_template = self.parse_template(self.config.path_template_feed, feed_template)
-                self.write_to_file('%s/feeds/%s/page_%s.html' %(self.config.path_export_html, feed['hash'], str(page_count)), filled_feed_template)
+                filled_template = self.parse_template(self.config.path_template_feed, template)
+                self.write_to_file('%s/feeds/%s/page_%s.html'%(self.config.path_export_html, feed['feed_hash'], str(cur_page)), filled_template)
 
                 # First feed, first page will be index.html
-                if feed == feeds[0] and page_count == 1:
-                    self.write_to_file(self.config.path_export_html + '/index.html', filled_feed_template)
+                if feed == feeds[0] and cur_page == 1:
+                    self.write_to_file(self.config.path_export_html + '/index.html', filled_template)
 
-                page_count = page_count + 1
+                cur_page = cur_page + 1
 
 
 
@@ -280,22 +317,22 @@ class Database(object):
     def create_tables(self): 
     # Create database and tables
         db = sqlite3.connect(self.config.path_db)
-        db.execute("create table if not exists feeds (hash          text    unique  ,"
-                                                     "title         text            ,"
-                                                     "date_entered  text            ,"
-                                                     "feed_url      text            ,"
-                                                     "icon_url      text            ,"
-                                                     "last_updated  text            ,"
-                                                     "groups        text            )")
+        db.execute("create table if not exists feeds (feed_hash         text unique  ,"
+                                                     "feed_title        text         ,"
+                                                     "feed_date_entered text         ,"
+                                                     "feed_url          text         ,"
+                                                     "feed_icon_url     text         ,"
+                                                     "feed_last_updated text         ,"
+                                                     "feed_group        text         )")
 
-        db.execute("create table if not exists entries (hash            text    unique  ,"
-                                                        "content        text            ,"
-                                                        "entry_url      text            ,"
-                                                        "title          text            ,"
-                                                        "read           text            ,"
-                                                        "date_entered   text            ,"
-                                                        "date_published text            ,"
-                                                        "feed_hash      text            )")
+        db.execute("create table if not exists entries (entry_hash           text unique  ,"
+                                                       "entry_content        text         ,"
+                                                       "entry_url            text         ,"
+                                                       "entry_title          text         ,"
+                                                       "entry_read           text         ,"
+                                                       "entry_date_entered   text         ,"
+                                                       "entry_date_published text         ,"
+                                                       "entry_feed_hash      text         )")
         db.commit()
         db.close()
 
@@ -323,7 +360,7 @@ class Database(object):
         return table_export
 
 
-    def get_rows_by_value(self, table, col, value, order_by='date_entered', limit='all'):
+    def get_rows_by_value(self, table, col, value, order_by, limit='all'):
     # Get a list of all rows containing a value
         db = sqlite3.connect(self.config.path_db)
         rows = []
@@ -357,6 +394,7 @@ class Database(object):
             values.append(row[key])
         keys = ','.join(row.keys())
         query = 'INSERT INTO %s(%s) VALUES(%s)'%(table, keys, ','.join(['?'] * len(row)))
+
         try:
             db.execute(query,values)
             db.commit()
@@ -410,8 +448,8 @@ class RSS(Database, GenerateHTML):
         group_list = []
         feeds = self.get_table('feeds')
         for feed in feeds:
-            if feed['groups'] not in group_list:
-                group_list.append(feed['groups'])
+            if feed['feed_group'] not in group_list:
+                group_list.append(feed['feed_group'])
         return group_list
 
 
@@ -433,7 +471,7 @@ class RSS(Database, GenerateHTML):
             parsed_feed = self.parse_feed(feed['feed_url'])
             if parsed_feed:
                 for entry in parsed_feed.entries:
-                    if not self.check_in_table('entries', 'hash', str(self.get_hash(entry['title'] + entry['summary']))):
+                    if not self.check_in_table('entries', 'entry_hash', str(self.get_hash(entry['title'] + entry['summary']))):
                         self.add_entry(entry, feed['feed_url'])
 
 
@@ -458,17 +496,17 @@ class RSS(Database, GenerateHTML):
         feed_insert = {}
         parsed_feed = self.parse_feed(feed[0])
         if parsed_feed:
-            feed_insert['hash'] = str(self.get_hash(feed[0]))
-            feed_insert['date_entered'] = str(self.get_timestamp())
+            feed_insert['feed_hash'] = str(self.get_hash(feed[0]))
+            feed_insert['feed_date_entered'] = str(self.get_timestamp())
             feed_insert['feed_url'] = str(feed[0])
-            feed_insert['icon_url'] = 'None'
-            feed_insert['last_updated'] = 'None'
-            feed_insert['groups'] = feed[1]
+            feed_insert['feed_icon_url'] = 'None'
+            feed_insert['feed_last_updated'] = 'None'
+            feed_insert['feed_group'] = feed[1]
 
             if 'title' in parsed_feed.feed.keys():
-                feed_insert['title'] = str(parsed_feed.feed['title'])
+                feed_insert['feed_title'] = str(parsed_feed.feed['title'])
             else:
-                feed_insert['title'] = str(feed[0])
+                feed_insert['feed_title'] = str(feed[0])
 
             self.insert_row('feeds', feed_insert)
 
@@ -480,20 +518,20 @@ class RSS(Database, GenerateHTML):
 
         # Try to get title otherwise insert link or unknown
         try:
-            entry_insert['title']           = str(entry['title'])
+            entry_insert['entry_title']           = str(entry['title'])
         except:
             try:
-                entry_insert['title']           = str(entry['link'])
+                entry_insert['entry_title']           = str(entry['link'])
                 self.log.warning('Failed to find title, using \'url\'')
             except:
-                entry_insert['title']           = 'unknown'
+                entry_insert['entry_title']           = 'unknown'
                 self.log.warning('Failed to find title, using \'unknown\'')
 
-        entry_insert['hash']            = str(self.get_hash(entry['title'] + entry['summary']))
-        entry_insert['content']         = str(entry['summary'])
-        entry_insert['read']            = 'unread'
-        entry_insert['date_entered']    = str(self.get_timestamp())
-        entry_insert['feed_hash']       = str(self.get_hash(url))
+        entry_insert['entry_hash']            = str(self.get_hash(entry['title'] + entry['summary']))
+        entry_insert['entry_content']         = str(entry['summary'])
+        entry_insert['entry_read']            = 'unread'
+        entry_insert['entry_date_entered']    = str(self.get_timestamp())
+        entry_insert['entry_feed_hash']       = str(self.get_hash(url))
 
         # Try to get url otherwise insert unknown
         try:
@@ -519,9 +557,9 @@ class RSS(Database, GenerateHTML):
             date = []
             for x in p:
                 date.append(str(x).rjust(2,'0'))
-            entry_insert['date_published'] = str('%s-%s-%s %s:%s:%s'%(date[0],date[1],date[2],date[3],date[4],date[5]))
+            entry_insert['entry_date_published'] = str('%s-%s-%s %s:%s:%s'%(date[0],date[1],date[2],date[3],date[4],date[5]))
         else:
-            entry_insert['date_published'] = str(self.get_timestamp())
+            entry_insert['entry_date_published'] = str(self.get_timestamp())
             self.log.warning('Failed to find a date, using timestamp')
 
         self.insert_row('entries', entry_insert)
@@ -529,8 +567,8 @@ class RSS(Database, GenerateHTML):
 
     def mark_read(self, feed):
     # Mark a feed as read
-        self.log.info('Marking feed read: %s'%feed['title'])
-        self.update_row('entries', 'read', 'read', feed['hash'])
+        self.log.info('Marking feed read: %s'%feed['feed_title'])
+        self.update_row('entries', 'entry_read', 'read', feed['entry_feed_hash'])
 
 
     def mark_all_read(self):
@@ -547,7 +585,7 @@ class RSS(Database, GenerateHTML):
 
         if len(self.config.feeds) >= 1:
             for feed in self.config.feeds:
-                if not self.check_in_table('feeds', 'hash', str(self.get_hash(feed[0]))):
+                if not self.check_in_table('feeds', 'feed_hash', str(self.get_hash(feed[0]))):
                     self.add_feed(feed)
         else:
             self.log.error('No feeds configured, Quitting...')
@@ -588,7 +626,6 @@ class RSS(Database, GenerateHTML):
                         self.log.error('Enter url... Quitting...')
                         sys.exit()
                     
-
             if '--parse-feeds' in sys.argv or '-p' in sys.argv:
                 self.parse_feeds()
 
