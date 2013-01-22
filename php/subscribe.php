@@ -1,6 +1,8 @@
 <?php
-    $go_back = $_GET["go_back"]; 
-    $handle = popen('LANG=en_US.UTF-8 /home/eco/bin/apps/static-rss/static-rss -p -g >> /tmp/StaticRSS.log 2>&1 &', 'r');
+    $url = $_GET["url"];
+    $go_back = "http://rss.opentbc.nl";
+
+    $handle = popen("LANG=en_US.UTF-8 /home/eco/bin/apps/static-rss/static-rss subscribe=$url >> /tmp/StaticRSS.log 2>&1 &", 'r');
     $line = "";
 
     while (false !== ($char = fgetc($handle))) 
@@ -22,19 +24,6 @@
     }
 
     pclose ($handle);
-    
-    while (true) 
-    {
-        if (! file_exists('/var/www/opentbc.nl/static-rss/index.html')) 
-        { 
-            sleep(.2); 
-        }
-        else 
-        {
-            break;
-        }
-    }
-
     header ("location: $go_back");
 ?>
 

@@ -20,12 +20,13 @@ class Config(object):
         self.path_template_entry               = self.config_dir + '/templates/entry.html'
         self.path_template_entry_list_link     = self.config_dir + '/templates/entry_list_link.html'
         self.path_template_page_link           = self.config_dir + '/templates/page_links.html'
-        self.path_template_index               = self.config_dir + '/templates/index.html'
 
         self.path_css                          = self.config_dir + '/css/stylesheet.css'
         self.path_php                          = self.config_dir + '/php'
         self.path_script_update                = self.config_dir + '/php/update.php'
         self.path_script_mark_read             = self.config_dir + '/php/mark_read.php'
+        self.path_script_subscribe             = self.config_dir + '/php/subscribe.php'
+        self.path_db_manager                   = self.config_dir + '/php/phpliteadmin.php'
         self.path_favicon                      = self.config_dir + '/pics/favicon.ico'
 
 

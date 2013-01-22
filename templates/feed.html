@@ -31,7 +31,6 @@
                 });
             });
         </script>
-
         
         <DIV id="main_wrapper">
             <DIV class="feed_sidebar">
@@ -51,7 +50,7 @@
                     $title
                 </DIV>
 
-                <DIV id="mark_read_button">
+                <DIV class="mark_read_button">
                     <A HREF="$domain/php/mark_read.php?hash=$hash&go_back=$go_back">mark feed read</A>
                     |
                     <A HREF="$domain/php/mark_read.php?hash=all&go_back=$go_back">mark all read</A>
@@ -59,17 +58,19 @@
                     <A HREF="$domain/php/update.php?go_back=$go_back">update</A>
                 </DIV>
 
-                <DIV id="page_links">
+                <DIV class="page_links">
                     <A HREF=$page_prev><</A>
                     $page_links
                     <A HREF=$page_next>></A>
                 </DIV>
 
                 <DIV id="feed_content_wrapper">
+                    {{loop=content}}
                     $content
+                    {{endloop}}
                 </DIV>
 
-                <DIV id="mark_read_button">
+                <DIV class="mark_read_button">
                     <A HREF="$domain/php/mark_read.php?hash=$hash&go_back=$go_back">mark feed read</A>
                     |
                     <A HREF="$domain/php/mark_read.php?hash=all&go_back=$go_back">mark all read</A>
@@ -77,7 +78,7 @@
                     <A HREF="$domain/php/update.php?go_back=$go_back">update</A>
                 </DIV>
 
-                <DIV id="page_links">
+                <DIV class="page_links">
                     <A HREF=$page_prev><</A>
                     $page_links
                     <A HREF=$page_next>></A>

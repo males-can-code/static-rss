@@ -225,6 +225,11 @@ class GenerateHTML(object):
         self.copy_file(self.config.path_css, self.config.path_export_html + '/css')
         self.copy_file(self.config.path_script_update, self.config.path_export_html + '/php')
         self.copy_file(self.config.path_script_mark_read, self.config.path_export_html + '/php')
+        self.copy_file(self.config.path_script_subscribe, self.config.path_export_html + '/php')
+        self.copy_file(self.config.path_db_manager, self.config.path_export_html + '/php')
+        self.copy_file(self.config.config_dir + '/php/logo.png', self.config.path_export_html + '/php')
+        self.copy_file(self.config.config_dir + '/php/bg.gif', self.config.path_export_html + '/php')
+        self.copy_file(self.config.config_dir + '/php/phpliteadmin.css', self.config.path_export_html + '/php')
         self.copy_file(self.config.config_dir + '/js/jquery.slimscroll.min.js', self.config.path_export_html + '/js')
         self.copy_file(self.config.path_favicon, self.config.path_export_html)
 
@@ -413,12 +418,12 @@ class RSS(Database, GenerateHTML):
     def parse_feed(self, url):
     # Parse feed with feedparser module or return False
         self.log.info('Parsing: %s'%url)
-        try:
-            parsed_feed = feedparser.parse(url)
-            return parsed_feed
-        except:
-            self.log.error('Failed to parse feed: %s'%url)
+        parsed_feed = feedparser.parse(url)
+        if len(parsed_feed.feed) < 1:
+            self.log.error('Failed to import feed: %s'%url)
             return False
+        else:
+            return parsed_feed
 
 
     def parse_feeds(self):
@@ -448,7 +453,7 @@ class RSS(Database, GenerateHTML):
 
 
     def add_feed(self, feed):
-    # Gather information to add feed to database
+    # Gather information to add feed to database, feed is a list [url,group]
         self.log.info('Adding feed: %s'%feed[0])
         feed_insert = {}
         parsed_feed = self.parse_feed(feed[0])
@@ -557,6 +562,7 @@ class RSS(Database, GenerateHTML):
         print('    -p, --parse-feeds              -parse feeds')
         print('    -g, --gen-html                 -generate HTML')
         print('    -m, --mark-all-read            -mark all feeds as read')
+        print('        --subscribe=<url>          -subscribe to feed')
         print()
         print('    -h, --help                     -this text')
                                                                  
@@ -573,6 +579,16 @@ class RSS(Database, GenerateHTML):
         if len(sys.argv) >= 2:
             self.init()
 
+            for arg in sys.argv:
+                if '--subscribe=' in arg:
+                    x,url = arg.split('=') 
+                    if len(url) != 0:
+                        self.add_feed([url, 'default'])
+                    else:
+                        self.log.error('Enter url... Quitting...')
+                        sys.exit()
+                    
+
             if '--parse-feeds' in sys.argv or '-p' in sys.argv:
                 self.parse_feeds()
 
@@ -582,8 +598,6 @@ class RSS(Database, GenerateHTML):
             if '--gen-html' in sys.argv or '-g' in sys.argv:
                 self.generate_HTML()
                 sys.exit()
-
-            self.usage()
 
 app = RSS()
 app.run()
