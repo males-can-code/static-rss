@@ -237,9 +237,9 @@ class GenerateHTML(object):
 
     def generate_prev_link(self, pages, feed, cur_page):
     # Generate the link to the previous page (left from the page links)
-        if cur_page == len(pages):
+        if cur_page > 1: 
             return self.config.domain + '/feeds/' + feed['feed_hash'] + '/page_' + str(cur_page - 1) + '.html'
-        elif cur_page > 0:
+        elif cur_page == 1:
             return self.config.domain + '/feeds/' + feed['feed_hash'] + '/page_' + str(cur_page) + '.html'
 
 
