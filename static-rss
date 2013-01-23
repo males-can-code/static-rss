@@ -618,13 +618,19 @@ class RSS(Database, GenerateHTML):
             self.init()
 
             for arg in sys.argv:
+                print(arg)
+                if 's' in arg:
+                    print('disko')
                 if '--subscribe=' in arg:
                     x,url = arg.split('=') 
-                    if len(url) != 0:
-                        self.add_feed([url, 'default'])
-                    else:
-                        self.log.error('Enter url... Quitting...')
-                        sys.exit()
+                    for arg in sys.argv:
+                        if '--group=' in arg:
+                            x,group = arg.split('=') 
+                            if len(url) > 0 and len(group) > 0:
+                                self.add_feed([url, group])
+                            else:
+                                self.log.error('Failed to enter url... Quitting...')
+                                sys.exit()
                     
             if '--parse-feeds' in sys.argv or '-p' in sys.argv:
                 self.parse_feeds()

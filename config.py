@@ -22,6 +22,7 @@ class Config(object):
         self.path_db_manager                   = self.config_dir + '/php/phpliteadmin.php'
         self.path_favicon                      = self.config_dir + '/pics/favicon.ico'
 
+# javascript:{var group=prompt("Enter group","default");window.location.href="http://rss.opentbc.nl/php/subscribe.php?url="+document.URL+'&group='+group;}
 
 
 
