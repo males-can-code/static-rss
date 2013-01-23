@@ -1,7 +1,6 @@
 <?php
     $url = $_GET["url"];
     $group = $_GET["group"];
-    $go_back = "http://rss.opentbc.nl";
 
     $handle = popen("LANG=en_US.UTF-8 /home/eco/bin/apps/static-rss/static-rss --subscribe=$url --group=$group >> /tmp/StaticRSS.log 2>&1 &", 'r');
     $line = "";
@@ -25,6 +24,6 @@
     }
 
     pclose ($handle);
-    //header ("location: $go_back");
+    header ("location: $url");
 ?>
 
