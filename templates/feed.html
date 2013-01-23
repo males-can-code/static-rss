@@ -3,12 +3,17 @@
         <TITLE>StaticRSS|$feed_title</TITLE>
         <link rel="shortcut icon" href="$favicon">
         <link rel="stylesheet" type="text/css" href="$css" />
+        {{switch=scrollbar}}
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.js"></script>
         <script type="text/javascript" src="https://rss.opentbc.nl/js/jquery.slimscroll.min.js"></script>
+        {{endswitch}}
+        {{switch=update_interval}}
         <script type="text/javascript">document.write("<meta http-equiv='refresh' content='$update_interval' >");</script>
+        {{endswitch}}
     </HEAD>
     <BODY>
+        {{switch=scrollbar}}
         <script type="text/javascript">
             $(function(){
                 $('.scrollbar').slimScroll({
@@ -19,6 +24,7 @@
                 });
             });
         </script>
+        {{endswitch}}
         <DIV id="main_wrapper">
             <DIV class="feed_sidebar">
                 <UL class="scrollbar">
@@ -37,6 +43,7 @@
             </DIV>
         <DIV id="feed_wrapper">
             <DIV id="feed_title">$feed_title</DIV>
+                {{switch=mark_read}}
                 <DIV class="mark_read_button">
                     <A HREF="$domain/php/mark_read.php?hash=$feed_hash&go_back=$go_back">mark feed read</A>
                     |
@@ -44,6 +51,7 @@
                     |
                     <A HREF="$domain/php/update.php?go_back=$go_back">update</A>
                 </DIV>
+                {{endswitch}}
                 <DIV class="page_links">
                     <A HREF=$page_prev><</A>
                     {{loop=page_links}}
@@ -61,6 +69,7 @@
                     <DIV id="entry_content">$entry_content</DIV>
                 </DIV>
                 {{endloop}}
+                {{switch=mark_read}}
                 <DIV class="mark_read_button">
                     <A HREF="$domain/php/mark_read.php?hash=$hash&go_back=$go_back">mark feed read</A>
                     |
@@ -68,6 +77,7 @@
                     |
                     <A HREF="$domain/php/update.php?go_back=$go_back">update</A>
                 </DIV>
+                {{endswitch}}
                 <DIV class="page_links">
                     <A HREF=$page_prev><</A>
                     {{loop=page_links}}

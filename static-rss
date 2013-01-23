@@ -90,6 +90,7 @@ class GenerateHTML(object):
         filled_template = ''
         template = self.get_file(template_path)
         loop_func = False
+        switch = False
 
         if template:
             for line in template:
@@ -105,10 +106,32 @@ class GenerateHTML(object):
                     if loop_func and len(loop_lines) > 0:
                         lines = getattr(self, 'loop_' + loop_func)(loop_lines, data)
                         filled_template = filled_template + lines
-                        loop_func = False
+                    loop_func = False
 
                 elif loop_func:
                     loop_lines.append(line)
+
+                # If {{switch= is found the leading lines till {{endswitch}} are written to switch_lines list
+                # At {{endswitch}} it will look for a key in self.switch that corresponds with the value after {{switch=
+                # Value can be True or False
+                # For now it is not possible to combine or nest switch and loop, maybe i'll change this but atm i don't need it
+                elif '{{switch=' in line:
+                    switch_lines = []
+                    x,switch = line.split('=')
+                    switch = switch.strip('}}')
+
+                elif '{{endswitch}}' in line:
+                    if switch and len(switch_lines) > 0:
+                        if self.switch[switch]:
+                            for switch_line in switch_lines:
+                                for key in data.keys():
+                                    if '$' + key in switch_line:
+                                        switch_line = Template(switch_line).safe_substitute({key:data[key]})
+                                filled_template = filled_template + switch_line + '\n'
+                    switch = False
+
+                elif switch:
+                    switch_lines.append(line)
 
                 else:
                     for key in data.keys():
@@ -260,25 +283,42 @@ class GenerateHTML(object):
     # Create/remove/copy dirs and files
         if del_dir:
             self.remove_dir(self.config.path_export_html)
+
         self.check_dir(self.config.path_export_html)
         self.check_dir(self.config.path_export_html + '/feeds')
         self.check_dir(self.config.path_export_html + '/css')
-        self.check_dir(self.config.path_export_html + '/php')
-        self.check_dir(self.config.path_export_html + '/js')
+        self.copy_file(self.config.path_css, self.config.path_export_html + '/css')
+        self.copy_file(self.config.path_favicon, self.config.path_export_html)
 
-        for feed in feeds:
+        for feed in feeds:      # Create all feed dirs which will store the entries
             self.check_dir(self.config.path_export_html + '/feeds/' + feed['feed_hash'])
 
-        self.copy_file(self.config.path_css, self.config.path_export_html + '/css')
-        self.copy_file(self.config.path_script_update, self.config.path_export_html + '/php')
-        self.copy_file(self.config.path_script_mark_read, self.config.path_export_html + '/php')
-        self.copy_file(self.config.path_script_subscribe, self.config.path_export_html + '/php')
-        self.copy_file(self.config.path_db_manager, self.config.path_export_html + '/php')
-        self.copy_file(self.config.config_dir + '/php/logo.png', self.config.path_export_html + '/php')
-        self.copy_file(self.config.config_dir + '/php/bg.gif', self.config.path_export_html + '/php')
-        self.copy_file(self.config.config_dir + '/php/phpliteadmin.css', self.config.path_export_html + '/php')
-        self.copy_file(self.config.config_dir + '/js/jquery.slimscroll.min.js', self.config.path_export_html + '/js')
-        self.copy_file(self.config.path_favicon, self.config.path_export_html)
+        self.switch = {}        # Evaluate some settings from config file for enabling/disabling switches in parse_template()
+        if self.config.enable_php_scripts:
+            self.switch['mark_read'] = True
+            self.check_dir(self.config.path_export_html + '/php')
+            self.copy_file(self.config.path_script_update, self.config.path_export_html + '/php')
+            self.copy_file(self.config.path_script_mark_read, self.config.path_export_html + '/php')
+            self.copy_file(self.config.path_script_subscribe, self.config.path_export_html + '/php')
+            self.copy_file(self.config.path_db_manager, self.config.path_export_html + '/php')
+            self.copy_file(self.config.config_dir + '/php/logo.png', self.config.path_export_html + '/php')
+            self.copy_file(self.config.config_dir + '/php/bg.gif', self.config.path_export_html + '/php')
+            self.copy_file(self.config.config_dir + '/php/phpliteadmin.css', self.config.path_export_html + '/php')
+        else:
+            self.switch['mark_read'] = False
+
+        if self.config.enable_scrollbar:
+            self.switch['scrollbar'] = True
+            self.check_dir(self.config.path_export_html + '/js')
+            self.copy_file(self.config.config_dir + '/js/jquery.slimscroll.min.js', self.config.path_export_html + '/js')
+        else:
+            self.switch['scrollbar'] = False
+
+        if self.config.update_interval:
+            self.switch['update_interval'] = True
+        else:
+            self.switch['update_interval'] = False
+
 
 
     def generate_HTML(self, feeds_unread='all'):
