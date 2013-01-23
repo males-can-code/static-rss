@@ -8,7 +8,7 @@
     $hash = $_GET["hash"];
     $go_back = $_GET["go_back"];
 
-    if (isValidMd5($hash) == 0) 
+    if (isValidMd5($hash) == 1) 
     {
         $handle = popen("LANG=en_US.UTF-8 /home/eco/bin/apps/static-rss/static-rss --mark-read=$hash >> /tmp/StaticRSS.log 2>&1", 'r');
         echo $hash;

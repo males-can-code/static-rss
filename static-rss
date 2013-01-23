@@ -420,13 +420,17 @@ class Database(object):
             db.close()
 
 
-    def update_row(self, table, field, string, hash, field2=False):
+    def update_row(self, table, col1, value1, col2, value2):
     # Update one or more rows
         db = sqlite3.connect(self.config.path_db)
-        if field2:
-            db.execute('update %s set "%s" = "%s" where "%s" = "%s"'%(str(table), str(field), str(string), str(field2), str(hash)))
+        if type(value2) == list:
+            tmp_value2 = ''
+            for v in value2:
+                tmp_value2 = tmp_value2 + ',\'' + v + '\''
+            value2 = tmp_value2.lstrip(',')
         else:
-            db.execute('update %s set "%s" = "%s" where "%s"'%(str(table), str(field), str(string), str(hash)))
+            value2 = '\'' + value2 + '\''
+        db.execute('update %s set "%s" = "%s" where "%s" in (%s)'%(str(table), str(col1), str(value1), str(col2), str(value2)))
         db.commit()
         db.close()
 
@@ -595,14 +599,21 @@ class RSS(Database, GenerateHTML):
 
     def mark_read(self, feed_hash):
     # Mark a feed as read
-        self.update_row('entries', 'entry_read', 'read', feed_hash, field2='entry_feed_hash')
+        self.log.info('Marking feed read: %s'%feed_hash)
+        self.update_row('entries', 'entry_read', 'read', 'entry_feed_hash', feed_hash)
 
 
     def mark_all_read(self):
-    # Mark all feeds as read, calls mark_read()
-        feeds = self.get_table('feeds')
-        for feed in feeds:
-            self.mark_read(feed['feed_hash'])
+    # Mark all feeds as read, and return a list of changed feeds so they can be regenerated
+        feeds_mark_read = []
+        entries = self.get_rows_by_value('entries', 'entry_read', 'unread', order_by='entry_date_published')
+        for entry in entries:
+            feeds_mark_read.append(entry['entry_feed_hash'])
+        feeds_mark_read = list(set(feeds_mark_read))
+        for h in feeds_mark_read:
+            self.log.info('Marking feed read: %s'%h)
+        self.update_row('entries', 'entry_read', 'read', 'entry_feed_hash', feeds_mark_read)
+        return feeds_mark_read
 
 
     def init(self):
@@ -663,12 +674,12 @@ class RSS(Database, GenerateHTML):
                 self.generate_HTML(feeds_unread=feeds_unread)
 
             if '--mark-all-read' in sys.argv or '-M' in sys.argv:
-                self.mark_all_read()
+                marked_read = self.mark_all_read()
+                self.generate_HTML(feeds_unread=marked_read)
 
             for arg in sys.argv:
                 if '--mark-read=' in arg:
                     x,hash = arg.split('=') 
-                    self.log.info('Marking feed read: %s'%hash)
                     self.mark_read(hash)
                     self.generate_HTML(feeds_unread=[hash])
 
