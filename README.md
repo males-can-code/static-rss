@@ -19,21 +19,21 @@ Install on server:
 
 <dl>
 <dt>Clone repository</dt>
-$ cd</dd>
-$ git clone https://github.com/elcoco/static-rss.git.
+$ cd  
+$ git clone https://github.com/elcoco/static-rss.git.  
 
 <dt>Edit 'static-rss/config.py' to reflect your setup.</dt>
-Be sure to at least change:
-self.config_dir = The location of the script
-self.domain = Your domain eg. 'http://www.example.com'
+Be sure to at least change:   
+self.config_dir = The location of the script    
+self.domain = Your domain eg. 'http://www.example.com'   
 self.path_export_html = The path where the html files should be exported to     
-                        eg. '/home/example/static-rss/html'
+                        eg. '/home/example/static-rss/html'  
 
 <dt>Change permissions</dt>
 <dd>Change owner:group of static-rss directory to whatever user owns the webserver</dd>
-<dd>eg: chown -R www-data:www-data /home/example/static-rss</dd>
-<dd>If the HTML export dir is outside the static-rss directory you have to create it   
-and change permissions manualy</dd>
+eg: chown -R www-data:www-data /home/example/static-rss
+If the HTML export dir is outside the static-rss directory you have to create it   
+and change permissions manualy
 
 <dt>-Start static-rss as owner of webserver to create directories and database:</dt>
 $ su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/example/static-rss/static-rss -p -g
