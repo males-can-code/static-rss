@@ -20,30 +20,31 @@ Install on server:
             self.config_dir =           -The location of the script
             self.domain =               -Your domain eg. 'http://www.example.com'
             self.path_export_html =     -The path where the html files should be exported to
-                                         eg. '/home/example/html'
+                                         eg. '/home/example/static-rss/html'
 
     -Change owner:group of static-rss directory to whatever user owns the webserver 
-        eg: chown -R www-data:www-data ~/static-rss
+        eg: chown -R www-data:www-data /home/example/static-rss
+        -If the HTML export dir is outside the static-rss directory you have to create it
+         and change permissions manualy
 
     -Start static-rss as owner of webserver to create directories and database:
-    $ su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/eco/bin/apps/static-rss/static-rss -p -g
+    $ su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/example/static-rss/static-rss -p -g
 
     -Point your webserver to the export_html directory.
 
     -You can use cron to update your feeds, make sure it executes the script under the same user
      that owns the database and export directory
-
         As root: 
             $ crontab -e
 
         Add line to check every 10 minutes for new entries:
-            */10  * * * * su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/eco/bin/apps/static-rss/static-rss -p -g"
+            */10  * * * * su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/example/static-rss/static-rss -p -g"
 
         Restart cron
             $ service cron restart       (for ubuntu system)
             $ systemctl restart crond    (systemd/arch system)
 
-    -A small php script is copied to export_dir/php/mark_read.php.
+    -A small php script is copied to 'export_dir/php/mark_read.php'.
      If the database is accessable to the webserver you can use this to mark your feeds
      as read.
 
