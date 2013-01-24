@@ -10,6 +10,7 @@ from lib.log import Log
 from time import strftime
 from string import Template
 from config import Config
+from bs4 import BeautifulSoup
 
 class GenerateHTML(object):
     def copy_file(self, src, dest):
@@ -320,13 +321,14 @@ class GenerateHTML(object):
             self.switch['update_interval'] = False
 
 
-
-    def generate_HTML(self, feeds_unread='all'):
+    def generate_HTML(self, del_dir=True, feeds_unread='all'):
     # The main method that calls the other method in class and eventually generates the HTML
         self.log.info('Generating HTML')
         feeds = self.get_table('feeds')     # Get a list of dicts containing information about a feed
 
-        if feeds_unread == 'all':
+        # Sometimes we don't wanna delete the export dir but just overwrite because there will be a (short) moment 
+        # where you will get a 404 when a file is missing
+        if del_dir == True:
             self.gen_init(feeds, del_dir=True)                # Remove/create and copy dirs and files
         else:
             self.gen_init(feeds, del_dir=False)                # Remove/create and copy dirs and files
@@ -450,13 +452,12 @@ class Database(object):
             values.append(row[key])
         keys = ','.join(row.keys())
         query = 'INSERT INTO %s(%s) VALUES(%s)'%(table, keys, ','.join(['?'] * len(row)))
-
         try:
             db.execute(query,values)
             db.commit()
             db.close()
-        except:
-            self.log.error('Failed to insert row')
+        except sqlite3.Error as e:
+            self.log.error('Failed to insert row: %s'%e.args[0])
             db.close()
 
 
@@ -535,7 +536,7 @@ class RSS(Database, GenerateHTML):
             parsed_feed = self.parse_feed(feed['feed_url'])
             if parsed_feed:
                 for entry in parsed_feed.entries:
-                    if not self.check_in_table('entries', 'entry_hash', str(self.get_hash(entry['title'] + entry['summary']))):
+                    if not self.check_in_table('entries', 'entry_hash', str(self.get_hash(entry['title'] + str(self.remove_css(entry['summary']))))):
                         self.add_entry(entry, feed['feed_url'])
                         # Add feed_hash from feeds with unread messages to feeds_unread so we know which html should be regenerated
                         if feed['feed_hash'] not in feeds_unread:
@@ -583,6 +584,14 @@ class RSS(Database, GenerateHTML):
             self.log.error('Url is not a feed')
 
 
+    def remove_css(self,content):
+        soup = BeautifulSoup(content)
+        for tag in soup():
+            for attribute in ["class", "id", "name", "style", "border", "width", "height"]:
+                del tag[attribute]
+        return soup
+
+
     def add_entry(self, entry, url):
     # Gather information to add entry (post) to database
         self.log.info('Inserting new entry: %s'%entry['title'])
@@ -599,8 +608,8 @@ class RSS(Database, GenerateHTML):
                 entry_insert['entry_title']           = 'unknown'
                 self.log.warning('Failed to find title, using \'unknown\'')
 
-        entry_insert['entry_hash']            = str(self.get_hash(entry['title'] + entry['summary']))
-        entry_insert['entry_content']         = str(entry['summary'])
+        entry_insert['entry_content']         = str(self.remove_css(entry['summary']))
+        entry_insert['entry_hash']            = str(self.get_hash(entry_insert['entry_title'] + entry_insert['entry_content']))
         entry_insert['entry_read']            = 'unread'
         entry_insert['entry_date_entered']    = str(self.get_timestamp())
         entry_insert['entry_feed_hash']       = str(self.get_hash(url))
@@ -718,14 +727,14 @@ class RSS(Database, GenerateHTML):
             if '--mark-all-read' in sys.argv or '-M' in sys.argv:
                 marked_read = self.mark_all_read()
                 #self.generate_HTML(feeds_unread=marked_read)
-                self.generate_HTML(feeds_unread='all')
+                self.generate_HTML(del_dir=False, feeds_unread='all')
 
             for arg in sys.argv:
                 if '--mark-read=' in arg:
                     x,hash = arg.split('=') 
                     self.mark_read(hash)
                     #self.generate_HTML(feeds_unread=[hash])
-                    self.generate_HTML(feeds_unread='all')
+                    self.generate_HTML(del_dir=False, feeds_unread='all')
 
             if '--gen-html' in sys.argv or '-g' in sys.argv:
                 self.generate_HTML()

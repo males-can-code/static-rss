@@ -5,25 +5,24 @@ class Config(object):
     def __init__(self):
         self.max_chars_per_page     = 10000
         self.max_entries_in_sidebar = 20
-        self.update_interval        = 120       # False to disable
+        self.update_interval        = 120      # False to disable
         self.enable_php_scripts     = True     # Mark feed read/mark all read/update feeds etc, False to make it truly static ;)
         self.enable_scrollbar       = True     # Nice jquery scrollbars, False to disable
-        
 
-        self.path_export_html                  = '/home/eco/bin/apps/static-rss/html'  # Place where the html will be exported to. eg: '/var/www/StaticRSS'
-        self.domain                            = 'http://rss.opentbc.nl'            # eg. 'http://example.com'
-        self.config_dir                        = '/home/eco/bin/apps/static-rss'
+        self.path_export_html      = '/home/eco/bin/apps/static-rss/html'  # Dir where the html will be exported to. eg: '/var/www/StaticRSS'
+        self.domain                = 'http://rss.opentbc.nl'               # eg. 'http://example.com'
+        self.config_dir            = '/home/eco/bin/apps/static-rss'
 
-        self.path_dir_db                       = self.config_dir + '/database' 
-        self.path_db                           = self.config_dir + '/database/static-rss.sqlite' 
-        self.path_template_feed                = self.config_dir + '/templates/feed.html'
-        self.path_css                          = self.config_dir + '/css/stylesheet.css'
-        self.path_php                          = self.config_dir + '/php'
-        self.path_script_update                = self.config_dir + '/php/update.php'
-        self.path_script_mark_read             = self.config_dir + '/php/mark_read.php'
-        self.path_script_subscribe             = self.config_dir + '/php/subscribe.php'
-        self.path_db_manager                   = self.config_dir + '/php/phpliteadmin.php'
-        self.path_favicon                      = self.config_dir + '/pics/favicon.ico'
+        self.path_dir_db           = self.config_dir + '/database' 
+        self.path_db               = self.config_dir + '/database/static-rss.sqlite' 
+        self.path_template_feed    = self.config_dir + '/templates/feed.html'
+        self.path_css              = self.config_dir + '/css/stylesheet.css'
+        self.path_php              = self.config_dir + '/php'
+        self.path_script_update    = self.config_dir + '/php/update.php'
+        self.path_script_mark_read = self.config_dir + '/php/mark_read.php'
+        self.path_script_subscribe = self.config_dir + '/php/subscribe.php'
+        self.path_db_manager       = self.config_dir + '/php/phpliteadmin.php'
+        self.path_favicon          = self.config_dir + '/pics/favicon.ico'
 
 # javascript:{var group=prompt("Enter group","default");window.location.href="http://rss.opentbc.nl/php/subscribe.php?url="+document.URL+'&group='+group;}
 
