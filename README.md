@@ -10,12 +10,14 @@ This means it will probably make your computer explode ;)
 Use at your own risk!  
 
 Dependencies:   
-    -beautifulsoup: https://github.com/bdoms/beautifulsoup    
-    -feedparser: https://code.google.com/p/feedparser/downloads/list    
+-------------
+* beautifulsoup: https://github.com/bdoms/beautifulsoup    
+* feedparser: https://code.google.com/p/feedparser/downloads/list    
 
 Install on server:
-
-    -Clone repository
+------------------
+<pre>
+    -Clone re pository
         $ cd 
         $ git clone https://github.com/elcoco/static-rss.git.
 
@@ -51,12 +53,15 @@ Install on server:
     -A small php script is copied to 'export_dir/php/mark_read.php'.
      If the database is accessable to the webserver you can use this to mark your feeds
      as read.
-
+</pre>
 
 Install locally:
+----------------
 
+<pre>
     -Clone repository
     -Edit the config file to reflect your setup
     -run static-rss to create directories, database and html
     -point your browser to the index.html
     -Make a cronjob for automatic updating
+</pre>
