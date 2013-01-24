@@ -1,23 +1,24 @@
 StaticRSS
 =========
-
-StaticRSS is an rss reader that outputs static html files.  
-This makes it extremely fast.   
-It can be used on a server or you can just use it locally.  
+StaticRSS is an rss reader written in python3 that outputs static html files.  
+This makes it ideal for webservers on slow connections.   
   
-Disclaimer: This script is a work in progress!!!  
+**Disclaimer:** This script is a work in progress!!!  
 This means it will probably make your computer explode ;)  
 Use at your own risk!  
 
+**Note:** This readme may be out of date.
+
 ## Dependencies:   
-* beautifulsoup: https://github.com/bdoms/beautifulsoup    
-* feedparser: https://code.google.com/p/feedparser/downloads/list    
+* **beautifulsoup:** https://github.com/bdoms/beautifulsoup    
+* **feedparser:** https://code.google.com/p/feedparser/downloads/list    
 
 ## Install on server:
 #### Clone repository  
-* $ cd  
-* $ git clone https://github.com/elcoco/static-rss.git.  
-
+<pre>
+$ cd  
+$ git clone https://github.com/elcoco/static-rss.git.  
+</pre>
 #### Edit 'static-rss/config.py' to reflect your setup.
 Be sure to at least change:   
 
@@ -62,6 +63,6 @@ $ systemctl restart crond    (systemd/arch system)
 </pre>
 
 #### Not so static stuff
-A couple of small php scripts can optionaly be copied to 'export_dir/php'.  
+A couple of small php scripts can optionaly be copied to *'export_dir/php'*.  
 If the database is accessable to the webserver you can use these to mark your feeds  
 as read or update feeds from the web.
