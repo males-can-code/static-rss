@@ -16,34 +16,37 @@ Dependencies:
 
 Install on server:
 ------------------
-<pre>
-    -Clone re pository
-        $ cd 
-        $ git clone https://github.com/elcoco/static-rss.git.
 
-    -Edit 'static-rss/config.py' to reflect your setup.
-        Be sure to at least change:
-            self.config_dir =           -The location of the script
-            self.domain =               -Your domain eg. 'http://www.example.com'
-            self.path_export_html =     -The path where the html files should be exported to
-                                         eg. '/home/example/static-rss/html'
+<dl>
+    <dt>Clone repository</dt>
+        <dd>$ cd</dd>
+        <dd>$ git clone https://github.com/elcoco/static-rss.git.</dd>
 
-    -Change owner:group of static-rss directory to whatever user owns the webserver 
-        eg: chown -R www-data:www-data /home/example/static-rss
-        -If the HTML export dir is outside the static-rss directory you have to create it
-         and change permissions manualy
+    <dt>Edit 'static-rss/config.py' to reflect your setup.</dt>
+        <dd>Be sure to at least change:</dd>
+        <dd>self.config_dir =           -The location of the script</dd>
+        <dd>self.domain =               -Your domain eg. 'http://www.example.com'</dd>
+        <dd>self.path_export_html =     -The path where the html files should be exported to     
+        <dd>                             eg. '/home/example/static-rss/html'</dd>
 
-    -Start static-rss as owner of webserver to create directories and database:
+    <dt>Change permissions</dt>
+        <dd>Change owner:group of static-rss directory to whatever user owns the webserver</dd>
+        <dd>eg: chown -R www-data:www-data /home/example/static-rss</dd>
+        <dd>If the HTML export dir is outside the static-rss directory you have to create it   
+         and change permissions manualy</dd>
+
+    <dt>-Start static-rss as owner of webserver to create directories and database:</dt>
     $ su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/example/static-rss/static-rss -p -g
 
-    -Point your webserver to the export_html directory.
+    <dt>-Point your webserver to the export_html directory.</dt>
 
-    -You can use cron to update your feeds, make sure it executes the script under the same user
+    <dt>Update feeds</dt>
+    You can use cron to update your feeds, make sure it executes the script under the same user
      that owns the database and export directory
         As root: 
             $ crontab -e
 
-        Add line to check every 10 minutes for new entries:
+    <dt>    Add line to check every 10 minutes for new entries:
             */10  * * * * su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/example/static-rss/static-rss -p -g"
 
         Restart cron
@@ -53,7 +56,8 @@ Install on server:
     -A small php script is copied to 'export_dir/php/mark_read.php'.
      If the database is accessable to the webserver you can use this to mark your feeds
      as read.
-</pre>
+
+<dl>
 
 Install locally:
 ----------------
