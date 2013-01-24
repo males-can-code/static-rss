@@ -14,7 +14,8 @@ class Config(object):
         self.domain                            = 'http://rss.opentbc.nl'            # eg. 'http://example.com'
         self.config_dir                        = '/home/eco/bin/apps/static-rss'
 
-        self.path_db                           = self.config_dir + '/database/static-rss.sqlite'
+        self.path_dir_db                       = self.config_dir + '/database' 
+        self.path_db                           = self.config_dir + '/database/static-rss.sqlite' 
         self.path_template_feed                = self.config_dir + '/templates/feed.html'
         self.path_css                          = self.config_dir + '/css/stylesheet.css'
         self.path_php                          = self.config_dir + '/php'
