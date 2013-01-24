@@ -9,63 +9,59 @@ Disclaimer: This script is a work in progress!!!
 This means it will probably make your computer explode ;)  
 Use at your own risk!  
 
-Dependencies:   
--------------
+## Dependencies:   
 * beautifulsoup: https://github.com/bdoms/beautifulsoup    
 * feedparser: https://code.google.com/p/feedparser/downloads/list    
 
-Install on server:
-------------------
+## Install on server:
+#### Clone repository  
+* $ cd  
+* $ git clone https://github.com/elcoco/static-rss.git.  
 
-<dl>
-<dt>Clone repository</dt>
-$ cd  
-$ git clone https://github.com/elcoco/static-rss.git.  
-
-<dt>Edit 'static-rss/config.py' to reflect your setup.</dt>
+#### Edit 'static-rss/config.py' to reflect your setup.
 Be sure to at least change:   
-self.config_dir = The location of the script    
-self.domain = Your domain eg. 'http://www.example.com'   
-self.path_export_html = The path where the html files should be exported to     
-                        eg. '/home/example/static-rss/html'  
-
-<dt>Change permissions</dt>
-<dd>Change owner:group of static-rss directory to whatever user owns the webserver</dd>
-eg: chown -R www-data:www-data /home/example/static-rss
-If the HTML export dir is outside the static-rss directory you have to create it   
-and change permissions manualy
-
-<dt>-Start static-rss as owner of webserver to create directories and database:</dt>
-$ su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/example/static-rss/static-rss -p -g
-
-<dt>-Point your webserver to the export_html directory.</dt>
-
-<dt>Update feeds</dt>
-You can use cron to update your feeds, make sure it executes the script under the same user
-that owns the database and export directory
-As root: 
-$ crontab -e
-
-Add line to check every 10 minutes for new entries:
-*/10  * * * * su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/example/static-rss/static-rss -p -g"
-
-Restart cron
-$ service cron restart       (for ubuntu system)
-$ systemctl restart crond    (systemd/arch system)
-
--A small php script is copied to 'export_dir/php/mark_read.php'.
-If the database is accessable to the webserver you can use this to mark your feeds
-as read.
-
-</dl>
-
-Install locally:
-----------------
 
 <pre>
-    -Clone repository
-    -Edit the config file to reflect your setup
-    -run static-rss to create directories, database and html
-    -point your browser to the index.html
-    -Make a cronjob for automatic updating
+self.config_dir =            -The location of the script    
+self.domain =                -Your domain eg. 'http://www.example.com'   
+self.path_export_html =      -The path where the html files should be exported to     
+                             eg. '/home/example/static-rss/html'  
 </pre>
+
+#### Change permissions
+Change **owner:group** of static-rss directory to whatever user owns the webserver  
+
+<pre>
+$ chown -R www-data:www-data /home/example/static-rss 
+</pre>   
+
+If the HTML export dir is outside the static-rss directory you have to create it     
+and change permissions manualy   
+
+Execute static-rss as owner of webserver to create directories and database:
+
+<pre>
+$ su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/example/static-rss/static-rss -p -g
+</pre>
+
+ Point your webserver to the export_html directory.
+
+#### Update feeds
+You can use cron to update your feeds, make sure it executes the script under the same user  
+that owns the database and export directory.  
+Add line to crontab to update every 10 minutes:
+
+<pre>
+$ su
+$ crontab -e
+
+*/10  * * * * su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/example/static-rss/static-rss -p -g"
+
+$ service cron restart       (for ubuntu system)
+$ systemctl restart crond    (systemd/arch system)
+</pre>
+
+#### Not so static stuff
+A couple of small php scripts can optionaly be copied to 'export_dir/php'.  
+If the database is accessable to the webserver you can use these to mark your feeds  
+as read or update feeds from the web.
