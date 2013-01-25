@@ -23,7 +23,7 @@ $ git clone https://github.com/elcoco/static-rss.git
 Be sure to at least change:   
 
 <pre>
-self.config_dir =            -The location of the script eg. '/home/example/static-rss'
+self.config_dir =            -The location of the script eg. '/home/example/static-rss'  
 self.domain =                -Your domain eg. 'http://www.example.com'   
 self.path_export_html =      -The path where the html files should be exported to     
                               eg. '/home/example/static-rss/html'  
@@ -39,13 +39,13 @@ $ chown -R www-data:www-data /home/example/static-rss
 If the HTML export dir is outside the static-rss directory you have to create it     
 and change permissions manualy   
 
-Execute static-rss as owner of webserver to create directories and database:
+Execute static-rss as owner of webserver to create directories and database:  
 
 <pre>
 $ su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/example/static-rss/static-rss -p -g
 </pre>
 
- Point your webserver to the export_html directory.
+ Point your webserver to the export_html directory.  
 
 #### Update feeds
 You can use cron to update your feeds, make sure it executes the script under the same user  
@@ -63,6 +63,6 @@ $ systemctl restart crond    (systemd/arch system)
 </pre>
 
 #### Not so static stuff
-A couple of small php scripts can optionaly be copied to *'export_dir/php'*.  
-If the database is accessable to the webserver you can use these to mark your feeds  
-as read or update feeds from the web.
+A couple of small php scripts can optionaly be used.  
+If the database is accessable to the webserver you can use these to mark your feeds   
+as read or update feeds from the web.  
