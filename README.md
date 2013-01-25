@@ -17,16 +17,16 @@ Use at your own risk!
 #### Clone repository  
 <pre>
 $ cd  
-$ git clone https://github.com/elcoco/static-rss.git.  
+$ git clone https://github.com/elcoco/static-rss.git    
 </pre>
 #### Edit 'static-rss/config.py' to reflect your setup.
 Be sure to at least change:   
 
 <pre>
-self.config_dir =            -The location of the script    
+self.config_dir =            -The location of the script eg. '/home/example/static-rss'
 self.domain =                -Your domain eg. 'http://www.example.com'   
 self.path_export_html =      -The path where the html files should be exported to     
-                             eg. '/home/example/static-rss/html'  
+                              eg. '/home/example/static-rss/html'  
 </pre>
 
 #### Change permissions
