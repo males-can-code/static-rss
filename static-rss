@@ -305,20 +305,18 @@ class GenerateHTML(object):
             self.copy_file(self.config.config_dir + '/php/logo.png', self.config.path_export_html + '/php')
             self.copy_file(self.config.config_dir + '/php/bg.gif', self.config.path_export_html + '/php')
             self.copy_file(self.config.config_dir + '/php/phpliteadmin.css', self.config.path_export_html + '/php')
+            if self.config.enable_auto_mark_read:
+                self.switch['auto_mark_read'] = True
+            else:
+                self.switch['auto_mark_read'] = False
         else:
             self.switch['mark_read'] = False
-
-        if self.config.enable_scrollbar:
-            self.switch['scrollbar'] = True
-            self.check_dir(self.config.path_export_html + '/js')
-            self.copy_file(self.config.config_dir + '/js/jquery.slimscroll.min.js', self.config.path_export_html + '/js')
-        else:
-            self.switch['scrollbar'] = False
 
         if self.config.update_interval:
             self.switch['update_interval'] = True
         else:
             self.switch['update_interval'] = False
+
 
 
     def generate_HTML(self, del_dir=True, feeds_unread='all'):
@@ -734,6 +732,7 @@ class RSS(Database, GenerateHTML):
                     x,hash = arg.split('=') 
                     self.mark_read(hash)
                     #self.generate_HTML(feeds_unread=[hash])
+                    self.generate_HTML(del_dir=False, feeds_unread=[hash])
                     self.generate_HTML(del_dir=False, feeds_unread='all')
 
             if '--gen-html' in sys.argv or '-g' in sys.argv:

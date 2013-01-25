@@ -7,7 +7,7 @@ class Config(object):
         self.max_entries_in_sidebar = 20
         self.update_interval        = 120      # False to disable
         self.enable_php_scripts     = True     # Mark feed read/mark all read/update feeds etc, False to make it truly static ;)
-        self.enable_scrollbar       = True     # Nice jquery scrollbars, False to disable
+        self.enable_auto_mark_read  = False     # Automatically mark read when reading feed (requires enable_php_scripts=True)
 
         self.path_export_html      = '/home/eco/bin/apps/static-rss/html'  # Dir where the html will be exported to. eg: '/var/www/StaticRSS'
         self.domain                = 'http://rss.opentbc.nl'               # eg. 'http://example.com'

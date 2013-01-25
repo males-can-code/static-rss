@@ -4,31 +4,21 @@
         <TITLE>StaticRSS|$feed_title</TITLE>
         <link rel="shortcut icon" href="$favicon">
         <link rel="stylesheet" type="text/css" href="$css" />
-        {{switch=scrollbar}}
-        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.js"></script>
-        <script type="text/javascript" src="https://rss.opentbc.nl/js/jquery.slimscroll.min.js"></script>
-        {{endswitch}}
         {{switch=update_interval}}
         <script type="text/javascript">document.write("<meta http-equiv='refresh' content='$update_interval' >");</script>
         {{endswitch}}
     </HEAD>
     <BODY>
-        {{switch=scrollbar}}
-        <script type="text/javascript">
-            $(function(){
-                $('.scrollbar').slimScroll({
-                    height: '99.5%',
-                    railVisible: true,
-                    size: '5px',
-                    disableFadeOut: true
-                });
-            });
+        {{switch=auto_mark_read}}
+        <script>
+            // insert code for automatic calling for mark_read.php with mode=silent (prevents waiting to be finnished updating)
+            // But for now it only redirects till eternity... which is nice
+            window.location.href = '$domain/php/mark_read.php?hash=$feed_hash&go_back=$go_back&mode=silent';
         </script>
         {{endswitch}}
         <DIV id="main_wrapper">
             <DIV class="feed_sidebar">
-                <UL class="scrollbar">
+                <UL>
                     {{loop=feed_list}}
                     <DIV id="group_title">$group_title</DIV>
                     <LI><A HREF="$feed_url" class="$feed_read">$feed_link$counter</A></LI>
@@ -36,7 +26,7 @@
                 </UL>
             </DIV>
             <DIV class="entry_sidebar"> 
-                <UL class="scrollbar">
+                <UL>
                     {{loop=entry_list}}
                     <LI><A HREF="$entry_url#$entry_hash" class=$entry_read>$entry_title</A></LI>
                     {{endloop}}
@@ -72,7 +62,7 @@
                 {{endloop}}
                 {{switch=mark_read}}
                 <DIV class="mark_read_button">
-                    <A HREF="$domain/php/mark_read.php?hash=$hash&go_back=$go_back">mark feed read</A>
+                    <A HREF="$domain/php/mark_read.php?hash=$feed_hash&go_back=$go_back">mark feed read</A>
                     |
                     <A HREF="$domain/php/mark_read.php?hash=all&go_back=$go_back">mark all read</A>
                     |
