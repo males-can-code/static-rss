@@ -320,8 +320,7 @@ class GenerateHTML(object):
         self.feed_list = ''
 
         template = {}                       # feed_template dict contains main content for the 'feed.html' template 
-        if self.config.switch['auto_refresh']:
-            template['update_interval'] = self.config.switch['auto_refresh']
+        template['auto_refresh']    = self.config.switch['auto_refresh']
         template['domain']          = self.config.domain
         template['favicon']         = self.config.domain + '/favicon.ico'
         template['css']             = self.config.domain + '/css/stylesheet.css'
@@ -534,13 +533,12 @@ class RSS(Database, GenerateHTML):
             parsed_feed = self.parse_feed(feed['feed_url'])
             if parsed_feed:
                 for entry in parsed_feed.entries:
-                    if not self.check_in_table('entries', 'entry_hash', str(self.get_hash(entry['title'] + str(self.remove_css(entry['summary']))))):
+                    if not self.check_in_table('entries', 'entry_hash', str(self.get_hash(entry['title'] + str(self.clean_HTML(entry['summary']))))):
                         self.add_entry(entry, feed['feed_url'])
                         # Add feed_hash from feeds with unread messages to feeds_unread so we know which html should be regenerated
                         if feed['feed_hash'] not in feeds_unread:
                             feeds_unread.append(feed['feed_hash'])
         return feeds_unread
-
 
 
     def sanitize(self, var):
@@ -582,11 +580,17 @@ class RSS(Database, GenerateHTML):
             self.log.error('Url is not a feed')
 
 
-    def remove_css(self,content):
+    def clean_HTML(self, content):
         soup = BeautifulSoup(content)
+
+        for tag in self.config.invalid_tags: 
+            for match in soup.findAll(tag):
+                        match.replaceWithChildren()
+
         for tag in soup():
-            for attribute in ["class", "id", "name", "style", "border", "width", "height"]:
+            for attribute in self.config.invalid_attr:
                 del tag[attribute]
+
         return soup
 
 
@@ -606,7 +610,7 @@ class RSS(Database, GenerateHTML):
                 entry_insert['entry_title']           = 'unknown'
                 self.log.warning('Failed to find title, using \'unknown\'')
 
-        entry_insert['entry_content']         = str(self.remove_css(entry['summary']))
+        entry_insert['entry_content']         = str(self.clean_HTML(entry['summary']))
         entry_insert['entry_hash']            = str(self.get_hash(entry_insert['entry_title'] + entry_insert['entry_content']))
         entry_insert['entry_read']            = 'unread'
         #entry_insert['entry_date_entered']    = str(self.get_timestamp(human_readable=False))
@@ -703,6 +707,7 @@ class RSS(Database, GenerateHTML):
         if len(sys.argv) <= 1:
             self.usage()
             sys.exit()
+
 
         if '-h' in sys.argv or '--help' in sys.argv:
             self.usage()

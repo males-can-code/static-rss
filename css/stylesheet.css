@@ -24,12 +24,19 @@ code {
     font-size: 1.5em;
 }
 
+
 ul li:before {
     margin-left: .5em;
 	content:     "\003A \003A \0020";
     font-weight: bold;
     color:       #DDDDDD;
 	}
+
+li.group_title {
+    margin-top:  .5em; 
+    margin-left: 0em;
+    font-weight: bold;
+}
 
 ul {
     margin-left:   .5em;
@@ -120,12 +127,6 @@ h1 h2 h3 h4 h5 {
 
 
 #sidebar_link {
-}
-
-#group_title {
-   margin-top:  .5em; 
-   margin-left: .5em;
-    font-weight: bold;
 }
 
 a.unread:link      {text-decoration:none;color:#FF7D35;}
