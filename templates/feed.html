@@ -4,7 +4,7 @@
         <TITLE>StaticRSS|$feed_title</TITLE>
         <link rel="shortcut icon" href="$favicon">
         <link rel="stylesheet" type="text/css" href="$css" />
-        {{switch=update_interval}}
+        {{switch=auto_refresh}}
         <script type="text/javascript">document.write("<meta http-equiv='refresh' content='$update_interval' >");</script>
         <script type="text/javascript">document.write("<meta http-equiv='refresh' content='$update_interval' >");</script>
         {{endswitch}}
@@ -31,15 +31,19 @@
             </DIV>
         <DIV id="feed_wrapper">
             <DIV id="feed_title">$feed_title</DIV>
-                {{switch=mark_read}}
-                <DIV class="mark_read_button">
+                <DIV class="php_buttons">
+                    {{switch=mark_read}}
                     <A HREF="$domain/php/mark_read.php?hash=$feed_hash&go_back=$go_back">mark feed read</A>
+                    {{endswitch}}
+                    {{switch=mark_all_read}}
                     |
                     <A HREF="$domain/php/mark_read.php?hash=all&go_back=$go_back">mark all read</A>
+                    {{endswitch}}
+                    {{switch=update_feeds}}
                     |
                     <A HREF="$domain/php/update.php?go_back=$go_back">update</A>
+                    {{endswitch}}
                 </DIV>
-                {{endswitch}}
                 <DIV class="page_links">
                     <A HREF=$page_prev><</A>
                     {{loop=page_links}}
@@ -57,15 +61,19 @@
                     <DIV id="entry_content">$entry_content</DIV>
                 </DIV>
                 {{endloop}}
-                {{switch=mark_read}}
-                <DIV class="mark_read_button">
+                <DIV class="php_buttons">
+                    {{switch=mark_read}}
                     <A HREF="$domain/php/mark_read.php?hash=$feed_hash&go_back=$go_back">mark feed read</A>
+                    {{endswitch}}
+                    {{switch=mark_all_read}}
                     |
                     <A HREF="$domain/php/mark_read.php?hash=all&go_back=$go_back">mark all read</A>
+                    {{endswitch}}
+                    {{switch=update_feeds}}
                     |
                     <A HREF="$domain/php/update.php?go_back=$go_back">update</A>
+                    {{endswitch}}
                 </DIV>
-                {{endswitch}}
                 <DIV class="page_links">
                     <A HREF=$page_prev><</A>
                     {{loop=page_links}}

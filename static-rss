@@ -123,7 +123,7 @@ class GenerateHTML(object):
 
                 elif '{{endswitch}}' in line:
                     if switch and len(switch_lines) > 0:
-                        if self.switch[switch]:
+                        if self.config.switch[switch]:
                             for switch_line in switch_lines:
                                 for key in data.keys():
                                     if '$' + key in switch_line:
@@ -294,29 +294,14 @@ class GenerateHTML(object):
         for feed in feeds:      # Create all feed dirs which will store the entries
             self.check_dir(self.config.path_export_html + '/feeds/' + feed['feed_hash'])
 
-        self.switch = {}        # Evaluate some settings from config file for enabling/disabling switches in parse_template()
-        if self.config.enable_php_scripts:
-            self.switch['mark_read'] = True
-            self.check_dir(self.config.path_export_html + '/php')
-            self.copy_file(self.config.path_script_update, self.config.path_export_html + '/php')
-            self.copy_file(self.config.path_script_mark_read, self.config.path_export_html + '/php')
-            self.copy_file(self.config.path_script_subscribe, self.config.path_export_html + '/php')
-            self.copy_file(self.config.path_db_manager, self.config.path_export_html + '/php')
-            self.copy_file(self.config.config_dir + '/php/logo.png', self.config.path_export_html + '/php')
-            self.copy_file(self.config.config_dir + '/php/bg.gif', self.config.path_export_html + '/php')
-            self.copy_file(self.config.config_dir + '/php/phpliteadmin.css', self.config.path_export_html + '/php')
-            if self.config.enable_auto_mark_read:
-                self.switch['auto_mark_read'] = True
-            else:
-                self.switch['auto_mark_read'] = False
-        else:
-            self.switch['mark_read'] = False
-
-        if self.config.update_interval:
-            self.switch['update_interval'] = True
-        else:
-            self.switch['update_interval'] = False
-
+        self.check_dir(self.config.path_export_html + '/php')
+        self.copy_file(self.config.path_script_update, self.config.path_export_html + '/php')
+        self.copy_file(self.config.path_script_mark_read, self.config.path_export_html + '/php')
+        self.copy_file(self.config.path_script_subscribe, self.config.path_export_html + '/php')
+        self.copy_file(self.config.path_db_manager, self.config.path_export_html + '/php')
+        self.copy_file(self.config.config_dir + '/php/logo.png', self.config.path_export_html + '/php')
+        self.copy_file(self.config.config_dir + '/php/bg.gif', self.config.path_export_html + '/php')
+        self.copy_file(self.config.config_dir + '/php/phpliteadmin.css', self.config.path_export_html + '/php')
 
 
     def generate_HTML(self, del_dir=True, feeds_unread='all'):
@@ -335,7 +320,8 @@ class GenerateHTML(object):
         self.feed_list = ''
 
         template = {}                       # feed_template dict contains main content for the 'feed.html' template 
-        template['update_interval'] = self.config.update_interval
+        if self.config.switch['auto_refresh']:
+            template['update_interval'] = self.config.switch['auto_refresh']
         template['domain']          = self.config.domain
         template['favicon']         = self.config.domain + '/favicon.ico'
         template['css']             = self.config.domain + '/css/stylesheet.css'

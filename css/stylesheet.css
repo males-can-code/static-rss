@@ -133,7 +133,8 @@ a.unread:visited   {text-decoration:none;color:#FF7D35;}
 a.unread:hover     {text-decoration:underline;color:#FF7D35;}
 a.unread:active    {text-decoration:none;color:#FF7D35;}
 
-.mark_read_button {
+.php_buttons {
+    /* the optional mark read, mark all read, update buttons*/
     float:      left;
     text-align: left;
     margin:     .5em;

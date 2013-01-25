@@ -3,16 +3,23 @@ import os
 
 class Config(object):
     def __init__(self):
-        self.max_chars_per_page     = 10000
-        self.max_entries_in_sidebar = 20
-        self.update_interval        = 120      # False to disable
-        self.enable_php_scripts     = True     # Mark feed read/mark all read/update feeds etc, False to make it truly static ;)
-        self.enable_auto_mark_read  = True    # Automatically mark read when reading feed (requires enable_php_scripts=True)
-        self.entry_ttl              = 1        # When to delete entrys in days, False to disable (This will make generating html more time consuming
+        self.max_chars_per_page     = 10000 # Max amount of characters a page contains
+        self.max_entries_in_sidebar = 20    # Max amount of entries in right sidebar
+        self.entry_ttl              = 1     # When to delete entrys in days, False to disable 
+                                            # (This will make generating html more time consuming
 
-        self.path_export_html      = '/home/eco/bin/apps/static-rss/html'  # Dir where the html will be exported to. eg: '/var/www/StaticRSS'
-        self.domain                = 'http://rss.opentbc.nl'               # eg. 'http://example.com'
-        self.config_dir            = '/home/eco/bin/apps/static-rss'
+        # This switches a couple of page elements on or off
+        self.switch = {}
+        self.switch['mark_read']        = True # Display mark read button on page
+        self.switch['mark_all_read']    = True # Display mark all read button on page
+        self.switch['update_feeds']     = True # Display update feeds button on page
+        self.switch['auto_mark_read']   = True # Automatically mark feed read on opening page
+        self.switch['auto_refresh']     = 120  # Automatic page refresh in seconds or False to disable
+
+        
+        self.path_export_html      = '/home/eco/bin/apps/static-rss/html'  # eg: '/var/www/StaticRSS'
+        self.domain                = 'http://rss.opentbc.nl'               # eg: 'http://example.com'
+        self.config_dir            = '/home/eco/bin/apps/static-rss'       # eg: '/home/user/static-rss'
 
         self.path_dir_db           = self.config_dir + '/database' 
         self.path_db               = self.config_dir + '/database/static-rss.sqlite' 
@@ -25,10 +32,7 @@ class Config(object):
         self.path_db_manager       = self.config_dir + '/php/phpliteadmin.php'
         self.path_favicon          = self.config_dir + '/pics/favicon.ico'
 
-# javascript:{var group=prompt("Enter group","default");window.location.href="http://rss.opentbc.nl/php/subscribe.php?url="+document.URL+'&group='+group;}
-
-
-
+        # Appart from just adding feeds to the database you can also enter them here as: ['url', 'group']
         self.feeds = [['http://www.webupd8.org/feeds/posts/default',                                    'linux'], 
                       ['http://www.osnews.com/files/recent.xml',                                        'linux'], 
                       ['http://inconsolation.wordpress.com/feed/',                                      'linux'], 
