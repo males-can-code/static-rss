@@ -6,15 +6,12 @@
         <link rel="stylesheet" type="text/css" href="$css" />
         {{switch=update_interval}}
         <script type="text/javascript">document.write("<meta http-equiv='refresh' content='$update_interval' >");</script>
+        <script type="text/javascript">document.write("<meta http-equiv='refresh' content='$update_interval' >");</script>
         {{endswitch}}
     </HEAD>
     <BODY>
         {{switch=auto_mark_read}}
-        <script>
-            // insert code for automatic calling for mark_read.php with mode=silent (prevents waiting to be finnished updating)
-            // But for now it only redirects till eternity... which is nice
-            window.location.href = '$domain/php/mark_read.php?hash=$feed_hash&go_back=$go_back&mode=silent';
-        </script>
+        <IFRAME style="display:none" src="$domain/php/mark_read.php?hash=$feed_hash&mode=silent"></IFRAME>
         {{endswitch}}
         <DIV id="main_wrapper">
             <DIV class="feed_sidebar">

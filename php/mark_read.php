@@ -15,7 +15,7 @@
     pclose ($handle);
     
 
-    if ($hash != 'all' && $mode != 'silent')
+    if ($hash != 'all')
     {
         while (true) 
         {
@@ -29,6 +29,8 @@
             }
         }
     }
-
-    header ("location: $go_back");
+    if ($mode != 'silent')
+    {
+        header ("location: $go_back");
+    }
 ?>
