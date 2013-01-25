@@ -1,10 +1,4 @@
 <?php
-    function isValidMd5($md5)
-    {
-        return !empty($md5) && preg_match('/^[a-f0-9]{32}$/', $md5);
-    }
-
-
     $hash = $_GET["hash"];
     $go_back = $_GET["go_back"];
     $mode = $_GET["mode"];
@@ -18,7 +12,6 @@
     {
         $handle = popen("LANG=en_US.UTF-8 /home/eco/bin/apps/static-rss/static-rss --mark-read=$hash >> /tmp/StaticRSS.log 2>&1", 'r');
     }
-
     pclose ($handle);
     
 
@@ -39,4 +32,3 @@
 
     header ("location: $go_back");
 ?>
-

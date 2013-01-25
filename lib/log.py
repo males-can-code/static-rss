@@ -66,6 +66,7 @@ class Log(object):
         message = re.sub( 'Inserting new entry:', self.color_green + 'Inserting new entry:' + self.color_reset, message )
         message = re.sub( 'Adding feed:', self.color_magenta + 'Adding feed:' + self.color_white, message )
         message = re.sub( 'Marking feed read:', self.color_red + 'Marking feed read:' + self.color_white, message )
+        message = re.sub( 'Deleting entry:', self.color_red + 'Deleting entry:' + self.color_white, message )
         message = re.sub( 'Generating:', self.color_blue + 'Generating:' + self.color_white, message )
 
         address = re.findall( r'[0-9]+(?:\.[0-9]+){3}', message )

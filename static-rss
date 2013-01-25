@@ -375,7 +375,7 @@ class Database(object):
         db = sqlite3.connect(self.config.path_db)
         db.execute("create table if not exists feeds (feed_hash         text unique  ,"
                                                      "feed_title        text         ,"
-                                                     "feed_date_entered text         ,"
+                                                     "feed_date_entered int          ,"
                                                      "feed_url          text         ,"
                                                      "feed_icon_url     text         ,"
                                                      "feed_last_updated text         ,"
@@ -386,7 +386,6 @@ class Database(object):
                                                        "entry_url            text         ,"
                                                        "entry_title          text         ,"
                                                        "entry_read           text         ,"
-                                                       "entry_date_entered   text         ,"
                                                        "entry_date_published text         ,"
                                                        "entry_feed_hash      text         )")
         db.commit()
@@ -460,7 +459,7 @@ class Database(object):
 
 
     def update_row(self, table, col1, value1, col2, value2):
-    # Update one or more rows
+    # Update one or more rows, you can also feed value2 as a list
         db = sqlite3.connect(self.config.path_db)
         if type(value2) == list:
             tmp_value2 = ''
@@ -472,6 +471,18 @@ class Database(object):
         db.execute('update %s set "%s" = "%s" where "%s" in (%s)'%(str(table), str(col1), str(value1), str(col2), str(value2)))
         db.commit()
         db.close()
+
+
+    def delete_older_than(self, table, days):
+        db = sqlite3.connect(self.config.path_db)
+        for row in db.execute('delete from %s where date("-%s day")'%(table,days)):
+            self.log.info('Deleting entry: %s'%row['entry_title'])
+        try:
+            db.commit()
+            db.close()
+        except sqlite3.Error as e:
+            self.log.error('Failed to delete row: %s'%e.args[0])
+            db.close()
 
 
     def check_in_table(self, table, col, value):
@@ -492,8 +503,11 @@ class RSS(Database, GenerateHTML):
         self.config = Config()
 
 
-    def get_timestamp(self):
-        timestamp = strftime("%Y-%m-%d %H:%M:%S")
+    def get_timestamp(self, human_readable=True):
+        if human_readable:
+            timestamp = strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            timestamp = strftime("%Y%m%d%H%M%S")
         return timestamp
 
 
@@ -609,7 +623,7 @@ class RSS(Database, GenerateHTML):
         entry_insert['entry_content']         = str(self.remove_css(entry['summary']))
         entry_insert['entry_hash']            = str(self.get_hash(entry_insert['entry_title'] + entry_insert['entry_content']))
         entry_insert['entry_read']            = 'unread'
-        entry_insert['entry_date_entered']    = str(self.get_timestamp())
+        #entry_insert['entry_date_entered']    = str(self.get_timestamp(human_readable=False))
         entry_insert['entry_feed_hash']       = str(self.get_hash(url))
 
         # Try to get url otherwise insert unknown
@@ -663,11 +677,18 @@ class RSS(Database, GenerateHTML):
         return feeds_mark_read
 
 
+    def check_ttl(self):
+        if self.config.entry_ttl:
+            self.log.info('Checking TTL')
+            self.delete_older_than('entries',self.config.entry_ttl)
+
+
     def init(self):
     # Create tables, input feeds from config file in table
     # TODO are there feeds? what will happen if not?
         self.check_dir(self.config.path_dir_db)
         self.create_tables()
+        self.check_ttl()
 
         if len(self.config.feeds) >= 1:
             for feed in self.config.feeds:
