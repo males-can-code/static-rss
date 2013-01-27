@@ -11,7 +11,7 @@
     </HEAD>
     <BODY>
         {{switch=auto_mark_read}}
-        <IFRAME style="display:none" src="$domain/php/mark_read.php?hash=$feed_hash&mode=silent"></IFRAME>
+        <IFRAME style="display:none" src="$domain/php/mark_read.php?hash=$feed_hash&amp;mode=silent"></IFRAME>
         {{endswitch}}
         <DIV id="main_wrapper">
             <DIV class="feed_sidebar">
@@ -25,7 +25,7 @@
             <DIV class="entry_sidebar"> 
                 <UL>
                     {{loop=entry_list}}
-                    <LI><A HREF="$entry_url#$entry_hash" class=$entry_read>$entry_title</A></LI>
+                    <LI><A HREF="$entry_url#$entry_hash" class="$entry_read">$entry_title</A></LI>
                     {{endloop}}
                 </UL>
             </DIV>
@@ -33,11 +33,11 @@
             <DIV id="feed_title">$feed_title</DIV>
                 <DIV class="php_buttons">
                     {{switch=mark_read}}
-                    <A HREF="$domain/php/mark_read.php?hash=$feed_hash&go_back=$go_back">mark feed read</A>
+                    <A HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">mark feed read</A>
                     {{endswitch}}
                     {{switch=mark_all_read}}
                     ::
-                    <A HREF="$domain/php/mark_read.php?hash=all&go_back=$go_back">mark all read</A>
+                    <A HREF="$domain/php/mark_read.php?hash=all&amp;go_back=$go_back">mark all read</A>
                     {{endswitch}}
                     {{switch=update_feeds}}
                     ::
@@ -45,29 +45,28 @@
                     {{endswitch}}
                 </DIV>
                 <DIV class="page_links">
-                    <A HREF=$page_prev><</A>
+                    <A HREF=$page_prev>&lt;</A>
                     {{loop=page_links}}
                     <A HREF="$page_url">$page</A>
                     {{endloop}}
                     <A HREF=$page_next>></A>
                 </DIV>
                 {{loop=entries}}
-                <DIV id="entry_box">
-                    <A name="$entry_hash"></A>
-                    <DIV id="entry_header_wrapper">
-                        <DIV id="entry_title"><A HREF=$entry_url class="$entry_read">$entry_title</A></DIV>
+                <DIV class="entry_box">
+                    <DIV class="entry_header_wrapper">
+                        <DIV class="entry_title"><A id="$entry_hash" HREF="$entry_url" class="$entry_read" target="$links_target">$entry_title</A></DIV>
                     </DIV>
-                    <DIV id="entry_date_published">$entry_date_published</DIV>
-                    <DIV id="entry_content">$entry_content</DIV>
+                    <DIV class="entry_date_published">$entry_date_published</DIV>
+                    <DIV class="entry_content">$entry_content</DIV>
                 </DIV>
                 {{endloop}}
                 <DIV class="php_buttons">
                     {{switch=mark_read}}
-                    <A HREF="$domain/php/mark_read.php?hash=$feed_hash&go_back=$go_back">mark feed read</A>
+                    <A HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">mark feed read</A>
                     {{endswitch}}
                     {{switch=mark_all_read}}
                     |
-                    <A HREF="$domain/php/mark_read.php?hash=all&go_back=$go_back">mark all read</A>
+                    <A HREF="$domain/php/mark_read.php?hash=all&amp;go_back=$go_back">mark all read</A>
                     {{endswitch}}
                     {{switch=update_feeds}}
                     |
@@ -75,7 +74,7 @@
                     {{endswitch}}
                 </DIV>
                 <DIV class="page_links">
-                    <A HREF=$page_prev><</A>
+                    <A HREF=$page_prev>&lt;</A>
                     {{loop=page_links}}
                         <A HREF="$page_url">$page</A>
                     {{endloop}}

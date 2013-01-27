@@ -196,6 +196,7 @@ class GenerateHTML(object):
         filled_template = ''
         entries = self.get_rows_by_value('entries', 'entry_feed_hash', feed['feed_hash'], order_by='entry_date_published') 
         for entry in entries:
+            entry['links_target'] = self.config.links_target          # Open links in self or blank
             if entry['entry_hash'] in feed['page']:
                 for line in lines:
                     for k in entry.keys():

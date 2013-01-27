@@ -5,10 +5,12 @@ class Config(object):
     def __init__(self):
         self.max_chars_per_page     = 10000 # Max amount of characters a page contains
         self.max_entries_in_sidebar = 30    # Max amount of entries in right sidebar
-        self.entry_ttl              = 1     # When to delete entrys in days, False to disable 
-                                            # (This will make generating html more time consuming
+        self.entry_ttl              = 1     # When to delete entries in days, False to disable 
+                                            # (This will make generating html a lot more time consuming)
+        self.links_target           = '_blank'  # Wether to open links in a new window or not '_blank' = new, '_self' = same
 
-        self.invalid_tags = ['html', 'body', 'strong', 'hr']
+        # List of blacklisted tags and attributes for content
+        self.invalid_tags = ['script', 'html', 'body', 'strong', 'hr']
         self.invalid_attr = ['class', 'id', 'name', 'style', 'border', 'width', 'height']
 
         # This switches a couple of page elements on or off
@@ -20,7 +22,7 @@ class Config(object):
         self.switch['auto_refresh']     = 120  # Automatic page refresh in seconds or False to disable
 
         self.domain                = 'http://rss.opentbc.nl'                    # eg: 'http://example.com'
-        self.config_dir            = '/home/eco/bin/apps/static-rss' # eg: '/home/user/static-rss'
+        self.config_dir            = '/home/eco/bin/apps/static-rss'            # eg: '/home/user/static-rss'
         self.path_export_html      = self.config_dir + '/html'                  # eg: '/var/www/StaticRSS'
 
         self.path_dir_db           = self.config_dir + '/database' 
