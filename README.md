@@ -44,6 +44,7 @@ Execute static-rss as owner of webserver to create directories and database:
 $ su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/example/static-rss/static-rss -p -g
 </pre>
 
+#### Done!
 Point your webserver to the path_export_html directory or your domain.    
 
 #### Update feeds
@@ -72,7 +73,7 @@ self.path_export_dir = '/tmp/static-rss/html'
 self.path_db = '/tmp/static-rss/database'   
 </pre>
 
-To create a tmpfs:
+To create a tmpfs on /tmp:
 
 <pre>
 $ vi /etc/fstab
