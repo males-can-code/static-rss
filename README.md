@@ -30,7 +30,7 @@ self.path_export_html =      -The path where the html files should be exported t
 </pre>
 
 **Note:** 
-If '/tmp' is tmpfs you can put 'path_export_dir' in '/tmp/static-rss/html' and 'path_db' in '/tmp/static-rss/database'   
+If '/tmp' is tmpfs you can change config to self.path_export_dir='/tmp/static-rss/html' and self.path_db='/tmp/static-rss/database'   
 This will greatly enhance speed. To create a tmpfs:
 <pre>
 $ vi /etc/fstab
