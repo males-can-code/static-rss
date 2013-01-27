@@ -7,8 +7,6 @@ This makes it ideal for webservers on slow connections.
 This means it will probably make your computer explode ;)  
 Use at your own risk!  
 
-**Note:** This readme may be out of date.
-
 ## Dependencies:   
 * **beautifulsoup:** https://github.com/bdoms/beautifulsoup    
 * **feedparser:** https://code.google.com/p/feedparser/downloads/list    
