@@ -29,6 +29,14 @@ self.path_export_html =      -The path where the html files should be exported t
                               eg. '/home/example_user/static-rss/html' or '/var/www/static-rss'  
 </pre>
 
+**Note:** 
+If '/tmp' is tmpfs you can put 'path_export_dir' in '/tmp/static-rss/html' and 'path_db' in '/tmp/static-rss/database'   
+This will greatly enhance speed. To create a tmpfs:
+<pre>
+$ vi /etc/fstab
+tmpfs   /tmp         tmpfs   nodev,nosuid,size=500M          0  0
+</pre>
+
 #### Change permissions
 Change **owner:group** of static-rss directory to whatever user owns the webserver    
 If the path_export_html is outside the static-rss directory you have to create it     
