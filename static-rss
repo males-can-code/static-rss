@@ -860,5 +860,3 @@ class RSS(Database, GenerateHTML):
 
 app = RSS()
 app.run()
-
-

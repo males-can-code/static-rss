@@ -45,9 +45,13 @@ ul li:before {
     color:       #DDDDDD;
 	}
 
-a.group_title {
+li.group_title:before {
+	content:     "";
+    margin-left: .5em;
+}
+
+li.group_title {
     margin-top:  .5em; 
-    margin-left: 0em;
     font-weight: bold;
 }
 
