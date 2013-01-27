@@ -83,7 +83,7 @@ tmpfs   /tmp         tmpfs   nodev,nosuid,size=500M          0  0
 For an easy way of adding feeds to static-rss, you can create a bookmark in firefox with the following content:   
 
 <pre>
-javascript:{var group=prompt("Enter group","default");window.location.href="<domain>/php/subscribe.php?url="+document.URL+'&group='+group;}
+javascript:{var group=prompt("Enter group","default");window.location.href="\<domain\>/php/subscribe.php?url="+document.URL+'&group='+group;}
 </pre>
 
-Repace \<domain\> with your own domain    
+Repace \<domain\> with your domain    
