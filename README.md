@@ -45,6 +45,7 @@ $ su - www-data -c "PYTHONPATH=/usr/lib/python3 /usr/bin/python3 /home/example/s
 #### Done!
 Point your webserver to the path_export_html directory or your domain.    
 
+## Extra
 #### Update feeds
 You can use cron to update your feeds, make sure it executes the script under the same user   
 that owns the database and export directory.   
