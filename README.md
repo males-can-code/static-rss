@@ -86,4 +86,4 @@ For an easy way of adding feeds to static-rss, you can create a bookmark in fire
 javascript:{var group=prompt("Enter group","default");window.location.href="<domain>/php/subscribe.php?url="+document.URL+'&group='+group;}
 </pre>
 
-Repace <domain> with your own domain    
+Repace \<domain\> with your own domain    
