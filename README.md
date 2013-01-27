@@ -66,7 +66,7 @@ If the database is accessable to the webserver you can use them to mark your fee
 read or to update your feeds from the web.  
 
 #### TMPFS:    
-To make static-rss faster you can use a tmpfs.
+To make static-rss faster you can use a tmpfs.    
 <pre>
 self.path_export_dir = '/tmp/static-rss/html'
 self.path_db = '/tmp/static-rss/database'   
@@ -80,10 +80,10 @@ tmpfs   /tmp         tmpfs   nodev,nosuid,size=500M          0  0
 </pre>
 
 #### Firefox
-You can create a bookmark in firefox with the following content:
+For an easy way of adding feeds to static-rss, you can create a bookmark in firefox with the following content:   
 
 <pre>
 javascript:{var group=prompt("Enter group","default");window.location.href="<domain>/php/subscribe.php?url="+document.URL+'&group='+group;}
 </pre>
 
-Repace <domain> with your own domain
+Repace <domain> with your own domain    
