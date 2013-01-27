@@ -78,3 +78,12 @@ To create a tmpfs on /tmp:
 $ vi /etc/fstab
 tmpfs   /tmp         tmpfs   nodev,nosuid,size=500M          0  0
 </pre>
+
+#### Firefox
+You can create a bookmark in firefox with the following content:
+
+<pre>
+javascript:{var group=prompt("Enter group","default");window.location.href="<domain>/php/subscribe.php?url="+document.URL+'&group='+group;}
+</pre>
+
+Repace <domain> with your own domain
