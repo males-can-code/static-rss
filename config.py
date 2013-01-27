@@ -3,11 +3,11 @@ import os
 
 class Config(object):
     def __init__(self):
-        self.max_chars_per_page     = 10000 # Max amount of characters a page contains
-        self.max_entries_in_sidebar = 30    # Max amount of entries in right sidebar
-        self.entry_ttl              = 1     # When to delete entries in days, False to disable 
-                                            # (This will make generating html a lot more time consuming)
-        self.links_target           = '_blank'  # Wether to open links in a new window or not '_blank' = new, '_self' = same
+        self.max_chars_per_page     = 10000    # Max amount of characters a page contains
+        self.max_entries_in_sidebar = 30       # Max amount of entries in right sidebar
+        self.entry_ttl              = 1        # When to delete entries in days, False to disable 
+                                               # (This will make generating html a lot more time consuming)
+        self.links_target           = '_blank' # Wether to open links in a new window or not '_blank' = new, '_self' = same
 
         # List of blacklisted tags and attributes for content
         self.invalid_tags = ['script', 'html', 'body', 'strong', 'hr']
@@ -21,20 +21,23 @@ class Config(object):
         self.switch['auto_mark_read']   = True # Automatically mark feed read on opening page
         self.switch['auto_refresh']     = 120  # Automatic page refresh in seconds or False to disable
 
-        self.domain                = 'http://rss.opentbc.nl'                    # eg: 'http://example.com'
-        self.config_dir            = '/home/eco/bin/apps/static-rss'            # eg: '/home/user/static-rss'
-        self.path_export_html      = self.config_dir + '/html'                  # eg: '/var/www/StaticRSS'
+        self.domain                = 'http://rss.opentbc.nl'         # eg: 'http://example.com'
+        self.app_dir               = '/home/eco/bin/apps/static-rss' # eg: '/home/user/static-rss'
 
-        self.path_dir_db           = self.config_dir + '/database' 
-        self.path_db               = self.config_dir + '/database/static-rss.sqlite' 
-        self.path_template_feed    = self.config_dir + '/templates/feed.html'
-        self.path_css              = self.config_dir + '/css/stylesheet.css'
-        self.path_php              = self.config_dir + '/php'
-        self.path_script_update    = self.config_dir + '/php/update.php'
-        self.path_script_mark_read = self.config_dir + '/php/mark_read.php'
-        self.path_script_subscribe = self.config_dir + '/php/subscribe.php'
-        self.path_db_manager       = self.config_dir + '/php/phpliteadmin.php'
-        self.path_favicon          = self.config_dir + '/pics/favicon.ico'
+        # Should be something like '/var/www/static-rss' or '/home/user/static-rss/html'
+        # If /tmp is tmpfs, you can also do '/tmp/static-rss' for incredible speed improvements
+        # Check README.md for a brief explanation about tmpfs
+        self.path_export_html      = '/tmp/static-rss/html'          
+        self.path_db               = '/tmp/static-rss/static-rss.sqlite'    # Path to sqlite database
+
+        self.path_template_feed    = self.app_dir + '/templates/feed.html'  # Path to the main template
+        self.path_css              = self.app_dir + '/css/stylesheet.css'
+        self.path_php              = self.app_dir + '/php'
+        self.path_script_update    = self.app_dir + '/php/update.php'
+        self.path_script_mark_read = self.app_dir + '/php/mark_read.php'
+        self.path_script_subscribe = self.app_dir + '/php/subscribe.php'
+        self.path_db_manager       = self.app_dir + '/php/phpliteadmin.php'
+        self.path_favicon          = self.app_dir + '/pics/favicon.ico'
 
         # Appart from just adding feeds to the database you can also enter them here as: ['url', 'group']
         self.feeds = [['http://www.webupd8.org/feeds/posts/default',                                    'linux'], 
@@ -84,5 +87,3 @@ class Config(object):
 
                       ['http://quicksurf.com/?feed=ogg&amp;cat=141',                                    'podcasts'],
                       ['http://feeds.feedburner.com/linuxoutlaws',                                      'podcasts']]
-
-        self.groups = ['linux', 'projects', 'news', 'space', 'threads', 'reddit']

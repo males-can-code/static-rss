@@ -300,9 +300,9 @@ class GenerateHTML(object):
         self.copy_file(self.config.path_script_mark_read, self.config.path_export_html + '/php')
         self.copy_file(self.config.path_script_subscribe, self.config.path_export_html + '/php')
         self.copy_file(self.config.path_db_manager, self.config.path_export_html + '/php')
-        self.copy_file(self.config.config_dir + '/php/logo.png', self.config.path_export_html + '/php')
-        self.copy_file(self.config.config_dir + '/php/bg.gif', self.config.path_export_html + '/php')
-        self.copy_file(self.config.config_dir + '/php/phpliteadmin.css', self.config.path_export_html + '/php')
+        self.copy_file(self.config.app_dir + '/php/logo.png', self.config.path_export_html + '/php')
+        self.copy_file(self.config.app_dir + '/php/bg.gif', self.config.path_export_html + '/php')
+        self.copy_file(self.config.app_dir + '/php/phpliteadmin.css', self.config.path_export_html + '/php')
 
 
     def generate_HTML(self, del_dir=True, feeds_unread='all'):
@@ -677,7 +677,7 @@ class RSS(Database, GenerateHTML):
     def init(self):
     # Create tables, input feeds from config file in table
     # TODO are there feeds? what will happen if not?
-        self.check_dir(self.config.path_dir_db)
+        self.check_dir(os.path.dirname(self.config.path_db))
         self.create_tables()
         self.check_ttl()
 
