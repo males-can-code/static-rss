@@ -189,11 +189,13 @@ class GenerateHTML(object):
             sys.exit()
 
 
-    def parse_template(self, template_path, data):
+    def parse_template(self, template, data):
     # Parse a template file, input is a dict: {data to be replaced : data to replace with}
     # Return is filled_template containing all the replaced lines
+    # You can put switches in loops to turn certain elements on and off, really handy
         filled_template = ''
-        template = self.get_file(template_path)
+        if type(template) != list:
+            template = self.get_file(template)
         loop_func = False
         switch = False
 
@@ -207,7 +209,7 @@ class GenerateHTML(object):
                     x,loop_func = line.split('=')
                     loop_func = loop_func.strip('}}')
 
-                elif '{{endloop}}' in line:
+                elif '{{endloop=%s}}'%loop_func in line:
                     if loop_func and len(loop_lines) > 0:
                         lines = getattr(self, 'loop_' + loop_func)(loop_lines, data)
                         filled_template = filled_template + lines
@@ -216,16 +218,15 @@ class GenerateHTML(object):
                 elif loop_func:
                     loop_lines.append(line)
 
-                # If {{switch= is found the leading lines till {{endswitch}} are written to switch_lines list
-                # At {{endswitch}} it will look for a key in self.switch that corresponds with the value after {{switch=
+                # If {{switch= is found the leading lines till {{endswitch=switch}} are written to switch_lines list
+                # At {{endswitch=switch}} it will look for a key in self.switch that corresponds with the value after {{switch=
                 # Value can be True or False
-                # For now it is not possible to combine or nest switch and loop, maybe i'll change this but atm i don't need it
                 elif '{{switch=' in line:
                     switch_lines = []
                     x,switch = line.split('=')
                     switch = switch.strip('}}')
 
-                elif '{{endswitch}}' in line:
+                elif '{{endswitch=%s}}'%switch in line:
                     if switch and len(switch_lines) > 0:
                         if self.config.switch[switch]:
                             for switch_line in switch_lines:
@@ -251,12 +252,14 @@ class GenerateHTML(object):
         filled_template = ''
         feed_url = {}
         last_group = ''
-        # We really don't wanna generate this list for every page since this doesn't change
+        # We really don't wanna generate this list for every page since it doesn't change
         # if self.feed_list is already set just return the old value
         if self.feed_list:
             return self.feed_list
         else:
             for group in self.get_groups():
+
+                # Get all feeds in specific group
                 feeds = self.get_rows_by_value('feeds', 'feed_group',  group, order_by='feed_date_entered')
                 for feed in feeds:
                     data['group_title'] = group
@@ -279,18 +282,29 @@ class GenerateHTML(object):
                         data['counter'] = ''
                         data['feed_read'] = 'read'
 
-                    # Very very very dirty hack to make the group not show up every feed link
-                    lines_tmp = lines[:]
-                    if last_group == data['group_title']:
-                        lines_tmp.pop(0)
-                    else:
-                        last_group = data['group_title']
+                    # So i heard you like loops, Parse template with switches again
+                    if feed == feeds[0]:
+                        # The first entry of a new group, display title and link
+                        self.config.switch['feed_list_title'] = True
+                        self.config.switch['feed_list_link'] = True
+                        self.config.switch['feed_list_close'] = False
+                        title_filled = self.parse_template(lines, data)
+                        filled_template = filled_template + title_filled
 
-                    for line in lines_tmp:
-                        for key in data.keys():
-                            if '$' + key in line:
-                                line = Template(line).safe_substitute({key:data[key]})
-                        filled_template = filled_template + line + '\n'
+                    elif feed == feeds[-1]:
+                        # The first entry of a new group, display link and group close (eg: </div>)
+                        self.config.switch['feed_list_title'] = False
+                        self.config.switch['feed_list_link'] = True
+                        self.config.switch['feed_list_close'] = True
+                        group_filled = self.parse_template(lines, data)
+                        filled_template = filled_template + group_filled
+                    else:
+                        # Display only the link
+                        self.config.switch['feed_list_title'] = False
+                        self.config.switch['feed_list_link'] = True
+                        self.config.switch['feed_list_close'] = False
+                        group_filled = self.parse_template(lines, data)
+                        filled_template = filled_template + group_filled
             self.feed_list = filled_template
         return filled_template
 

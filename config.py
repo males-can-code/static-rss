@@ -7,7 +7,7 @@ class Config(object):
         self.max_entries_in_sidebar = 30       # Max amount of entries in right sidebar
         self.entry_ttl              = 1        # When to delete entries in days, False to disable 
                                                # (This will make generating html a lot more time consuming)
-        self.links_target           = '_blank' # Wether to open links in a new window or not '_blank' = new, '_self' = same
+        self.links_target           = '_blank' # Open links in a new window or not '_blank' = new, '_self' = same
 
         # List of blacklisted tags and attributes for content
         self.invalid_tags = ['script', 'html', 'body', 'strong', 'hr']
@@ -28,7 +28,7 @@ class Config(object):
         # If /tmp is tmpfs, you can also do '/tmp/static-rss' for incredible speed improvements
         # Check README.md for a brief explanation about tmpfs
         self.path_export_html      = '/tmp/static-rss/html'          
-        self.path_db               = '/tmp/static-rss/static-rss.sqlite'    # Path to sqlite database
+        self.path_db               = self.app_dir + '/database/static-rss.sqlite'    # Path to sqlite database
 
         self.path_template_feed    = self.app_dir + '/templates/feed.html'  # Path to the main template
         self.path_css              = self.app_dir + '/css/stylesheet.css'

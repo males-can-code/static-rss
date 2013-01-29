@@ -7,26 +7,32 @@
         <LINK rel="stylesheet" type="text/css" href="$css">
         {{switch=auto_refresh}}
         <SCRIPT type="text/javascript">document.write("<meta http-equiv='refresh' content='$auto_refresh' >");</SCRIPT>
-        {{endswitch}}
+        {{endswitch=auto_refresh}}
     </HEAD>
     <BODY>
         {{switch=auto_mark_read}}
         <IFRAME style="display:none" src="$domain/php/mark_read.php?hash=$feed_hash&amp;mode=silent"></IFRAME>
-        {{endswitch}}
+        {{endswitch=auto_mark_read}}
         <DIV id="main_wrapper">
             <DIV class="feed_sidebar">
                 <UL>
-                    {{loop=feed_list}}
+                {{loop=feed_list}}
+                    {{switch=feed_list_title}}
                     <LI class="group_title">$group_title</LI>
+                    {{endswitch=feed_list_title}}
+                    {{switch=feed_list_link}}
                     <LI><A HREF="$feed_url" class="$feed_read">$feed_link$counter</A></LI>
-                    {{endloop}}
+                    {{endswitch=feed_list_link}}
+                    {{switch=feed_list_close}}
+                    {{endswitch=feed_list_close}}
+                {{endloop=feed_list}}
                 </UL>
             </DIV>
             <DIV class="entry_sidebar"> 
                 <UL>
                     {{loop=entry_list}}
                     <LI><A HREF="$entry_url#$entry_hash" class="$entry_read">$entry_title</A></LI>
-                    {{endloop}}
+                    {{endloop=entry_list}}
                 </UL>
             </DIV>
         <DIV id="feed_wrapper">
@@ -34,21 +40,21 @@
                 <DIV class="php_buttons">
                     {{switch=mark_read}}
                     <A HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">mark feed read</A>
-                    {{endswitch}}
+                    {{endswitch=mark_read}}
                     {{switch=mark_all_read}}
                     ::
                     <A HREF="$domain/php/mark_read.php?hash=all&amp;go_back=$go_back">mark all read</A>
-                    {{endswitch}}
+                    {{endswitch=mark_all_read}}
                     {{switch=update_feeds}}
                     ::
                     <A HREF="$domain/php/update.php?go_back=$go_back">update</A>
-                    {{endswitch}}
+                    {{endswitch=update_feeds}}
                 </DIV>
                 <DIV class="page_links">
                     <A HREF=$page_prev>&lt;</A>
                     {{loop=page_links}}
                     <A HREF="$page_url">$page</A>
-                    {{endloop}}
+                    {{endloop=page_links}}
                     <A HREF=$page_next>></A>
                 </DIV>
                 {{loop=entries}}
@@ -59,25 +65,25 @@
                     <DIV class="entry_date_published">$entry_date_published</DIV>
                     <DIV class="entry_content">$entry_content</DIV>
                 </DIV>
-                {{endloop}}
+                {{endloop=entries}}
                 <DIV class="php_buttons">
                     {{switch=mark_read}}
                     <A HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">mark feed read</A>
-                    {{endswitch}}
+                    {{endswitch=mark_read}}
                     {{switch=mark_all_read}}
                     |
                     <A HREF="$domain/php/mark_read.php?hash=all&amp;go_back=$go_back">mark all read</A>
-                    {{endswitch}}
+                    {{endswitch=mark_all_read}}
                     {{switch=update_feeds}}
                     |
                     <A HREF="$domain/php/update.php?go_back=$go_back">update</A>
-                    {{endswitch}}
+                    {{endswitch=update_feeds}}
                 </DIV>
                 <DIV class="page_links">
                     <A HREF=$page_prev>&lt;</A>
                     {{loop=page_links}}
                         <A HREF="$page_url">$page</A>
-                    {{endloop}}
+                    {{endloop=page_links}}
                     <A HREF=$page_next>></A>
                 </DIV>
             </DIV>
