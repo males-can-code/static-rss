@@ -268,13 +268,11 @@ class GenerateHTML(object):
                     entries = self.get_rows_by_value('entries', 'entry_feed_hash', feed['feed_hash'], order_by='entry_date_published')
                     unread_counter = 0
                     for entry in entries:
-                        if entry['entry_read'] == 'unread':
-                            unread_counter = unread_counter + 1
+                        if entry['entry_read'] == 'unread': unread_counter = unread_counter + 1
 
                     data['feed_link'] = feed['feed_title'] 
                     data['feed_url'] = self.config.domain + '/feeds/' + feed['feed_hash'] + '/page_1.html'
 
-                    # Parse template
                     if unread_counter > 0:
                         data['counter'] = '[' + str(unread_counter) + ']'
                         data['feed_read'] = 'unread'
@@ -282,29 +280,32 @@ class GenerateHTML(object):
                         data['counter'] = ''
                         data['feed_read'] = 'read'
 
-                    # So i heard you like loops, Parse template with switches again
-                    if feed == feeds[0]:
-                        # The first entry of a new group, display title and link
+                    # So i heard you like loops ...
+                    # Parse template with switches again
+                    if feed == feeds[0] and feed == feeds[-1]:
+                        # The only feed in group, display all
+                        self.config.switch['feed_list_title'] = True
+                        self.config.switch['feed_list_link'] = True
+                        self.config.switch['feed_list_close'] = True
+                    elif feed == feeds[0]:
+                        # The first feed of a new group, display title and link
                         self.config.switch['feed_list_title'] = True
                         self.config.switch['feed_list_link'] = True
                         self.config.switch['feed_list_close'] = False
-                        title_filled = self.parse_template(lines, data)
-                        filled_template = filled_template + title_filled
-
                     elif feed == feeds[-1]:
-                        # The first entry of a new group, display link and group close (eg: </div>)
+                        # The first feed of a new group, display link and group close (eg: </div>)
                         self.config.switch['feed_list_title'] = False
                         self.config.switch['feed_list_link'] = True
                         self.config.switch['feed_list_close'] = True
-                        group_filled = self.parse_template(lines, data)
-                        filled_template = filled_template + group_filled
                     else:
                         # Display only the link
                         self.config.switch['feed_list_title'] = False
                         self.config.switch['feed_list_link'] = True
                         self.config.switch['feed_list_close'] = False
-                        group_filled = self.parse_template(lines, data)
-                        filled_template = filled_template + group_filled
+
+                    group_filled = self.parse_template(lines, data)
+                    filled_template = filled_template + group_filled
+
             self.feed_list = filled_template
         return filled_template
 
@@ -417,6 +418,7 @@ class GenerateHTML(object):
         self.copy_file(self.config.path_script_update, self.config.path_export_html + '/php')
         self.copy_file(self.config.path_script_mark_read, self.config.path_export_html + '/php')
         self.copy_file(self.config.path_script_subscribe, self.config.path_export_html + '/php')
+        self.copy_file(self.config.path_script_del_feed, self.config.path_export_html + '/php')
         self.copy_file(self.config.path_db_manager, self.config.path_export_html + '/php')
         self.copy_file(self.config.app_dir + '/php/logo.png', self.config.path_export_html + '/php')
         self.copy_file(self.config.app_dir + '/php/bg.gif', self.config.path_export_html + '/php')
@@ -588,6 +590,15 @@ class Database(object):
             self.log.error('Failed to delete row: %s'%e.args[0])
             db.close()
 
+    def delete_row_by_value(self, table, col, value):
+        db = sqlite3.connect(self.config.path_db)
+        db.execute('delete from %s where "%s" = "%s"'%(table,col,value))
+        try:
+            db.commit()
+            db.close()
+        except sqlite3.Error as e:
+            self.log.error('Failed to delete row: %s'%e.args[0])
+            db.close()
 
     def check_in_table(self, table, col, value):
     # Return True/False if a value exists in table
@@ -767,6 +778,20 @@ class RSS(Database, GenerateHTML):
         self.insert_row('entries', entry_insert)
 
 
+    def del_feed(self, feed_hash):
+        self.log.info('Deleting feed: %s'%feed_hash)
+        if self.check_in_table('entries', 'entry_feed_hash',feed_hash):
+            # First delete entries belonging to feed
+            self.delete_row_by_value('entries', 'entry_feed_hash', feed_hash)
+        else:
+            self.log.error('Failed to remove entries, no entries belong to feed with hash: %s'%feed_hash)
+        if self.check_in_table('feeds','feed_hash', feed_hash):
+            # Delete feed
+            self.delete_row_by_value('feeds', 'feed_hash', feed_hash)
+        else:
+            self.log.error('Failed to remove feed, feed doesn\'t exist')
+
+
     def mark_read(self, feed_hash):
     # Mark a feed as read
         self.log.info('Marking feed read: %s'%feed_hash)
@@ -818,6 +843,7 @@ class RSS(Database, GenerateHTML):
         print('        --mark-read=<hash>         -mark feed as read')
         print('    -M, --mark-all-read            -mark all feeds as read')
         print('        --subscribe=<url>          -subscribe to feed')
+        print('        --del_feed=<hash>          -delete feed and all its entries')
         print()
         print('    -h, --help                     -this text')
                                                                  
@@ -858,12 +884,18 @@ class RSS(Database, GenerateHTML):
                 #self.generate_HTML(feeds_unread=marked_read)
                 self.generate_HTML(del_dir=False, feeds_unread='all')
 
+
             for arg in sys.argv:
                 if '--mark-read=' in arg:
                     x,hash = arg.split('=') 
                     self.mark_read(hash)
                     #self.generate_HTML(feeds_unread=[hash])
                     self.generate_HTML(del_dir=False, feeds_unread=[hash])
+                    self.generate_HTML(del_dir=False, feeds_unread='all')
+
+                if '--del-feed=' in arg:
+                    x,hash = arg.split('=') 
+                    self.del_feed(hash)
                     self.generate_HTML(del_dir=False, feeds_unread='all')
 
             if '--gen-html' in sys.argv or '-g' in sys.argv:

@@ -15,11 +15,13 @@ class Config(object):
 
         # This switches a couple of page elements on or off
         self.switch = {}
+        self.switch['delete_feed']      = True # Display mark read button on page
         self.switch['mark_read']        = True # Display mark read button on page
         self.switch['mark_all_read']    = True # Display mark all read button on page
         self.switch['update_feeds']     = True # Display update feeds button on page
         self.switch['auto_mark_read']   = True # Automatically mark feed read on opening page
         self.switch['auto_refresh']     = 120  # Automatic page refresh in seconds or False to disable
+        self.switch['menu']             = True # An awesome jquery menu that remembers state using cookies
 
         self.domain                = 'http://rss.opentbc.nl'         # eg: 'http://example.com'
         self.app_dir               = '/home/eco/bin/apps/static-rss' # eg: '/home/user/static-rss'
@@ -36,10 +38,12 @@ class Config(object):
         self.path_script_update    = self.app_dir + '/php/update.php'
         self.path_script_mark_read = self.app_dir + '/php/mark_read.php'
         self.path_script_subscribe = self.app_dir + '/php/subscribe.php'
+        self.path_script_del_feed  = self.app_dir + '/php/del_feed.php'
         self.path_db_manager       = self.app_dir + '/php/phpliteadmin.php'
         self.path_favicon          = self.app_dir + '/pics/favicon.ico'
 
         # Appart from just adding feeds to the database you can also enter them here as: ['url', 'group']
+        # They will be automatically added to the database also if you remove them from the database
         self.feeds = [['http://www.webupd8.org/feeds/posts/default',                                    'linux'], 
                       ['http://www.osnews.com/files/recent.xml',                                        'linux'], 
                       ['http://inconsolation.wordpress.com/feed/',                                      'linux'], 

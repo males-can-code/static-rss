@@ -8,55 +8,25 @@
         {{switch=auto_refresh}}
         <SCRIPT type="text/javascript">document.write("<meta http-equiv='refresh' content='$auto_refresh' >");</SCRIPT>
         {{endswitch=auto_refresh}}
-        {{switch=menu}}
-        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-        <script type="text/javascript" src="https://raw.github.com/carhartl/jquery-cookie/master/jquery.cookie.js"></script>
-        <script>
-            $(document).ready(function() {
-                $("#menu div.group_title").click(function() {
-                    if ($(this).siblings().is(":hidden")) {
-                        $(this).siblings().css("display","block");
-                        $.cookie($(this).parent().get(0).className, 'true', {expires:7, path:'/'});
-                    }
-                    else {
-                        $(this).siblings().css("display","none");
-                        $.cookie($(this).parent().get(0).className, 'false', {expires:7, path:'/'});
-                    }
-                });
-
-            // Restore state from cookie
-            $("#menu div.group_title").each(function() {
-                var c = $.cookie($(this).parent().get(0).className);
-                    if (c == 'true') { $(this).siblings().css("display","block"); }
-                    if (c == 'false') { $(this).siblings().css("display","none"); }
-                });
-            });
-        </script>
-        {{endswitch=menu}}
     </HEAD>
     <BODY>
         {{switch=auto_mark_read}}
         <IFRAME style="display:none" src="$domain/php/mark_read.php?hash=$feed_hash&amp;mode=silent"></IFRAME>
         {{endswitch=auto_mark_read}}
         <DIV id="main_wrapper">
-
-            <DIV id="menu">
+            <DIV class="feed_sidebar">
             {{loop=feed_list}}
                 {{switch=feed_list_title}}
-                <DIV class=$group_title>
-                    <DIV class='group_title'>$group_title</DIV>
-                    <DIV class='group_content'>
+                <DIV class=group><A href="#">$group_title</A>
                 {{endswitch=feed_list_title}}
                     {{switch=feed_list_link}}
-                        <DIV><A HREF="$feed_url" class="$feed_read">$feed_link$counter</A></DIV>
+                    <DIV><A HREF="$feed_url" class="$feed_read">$feed_link$counter</A></DIV>
                     {{endswitch=feed_list_link}}
-                    {{switch=feed_list_close}}
-                    </DIV>
+                {{switch=feed_list_close}}
                 </DIV>
-                    {{endswitch=feed_list_close}}
+                {{endswitch=feed_list_close}}
             {{endloop=feed_list}}
             </DIV>
-
             <DIV class="entry_sidebar"> 
                 {{loop=entry_list}}
                 <DIV><A HREF="$entry_url#$entry_hash" class="$entry_read">$entry_title</A></DIV>
