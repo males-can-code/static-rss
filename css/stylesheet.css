@@ -60,22 +60,24 @@ h1 h2 h3 h4 h5 {
     float:       left;
     margin-left: 2.5em;
     margin-top:  2.5em;
-    width:       960px;
+    width:       1050px;
     border:      solid 0px white;
     margin-bottom: 2.5em;
 }
 
-#menu {
+#sidebar{ float: left}
+
+.menu {
     -webkit-border-radius: 5px;
     -moz-border-radius:    5px;
     border-radius:         5px;
-    float:            left;
     padding:          .5em;
     width:            12.0em;
 	background-color: #232323;
     text-align:       right;
+    margin-bottom: 1em;
 }
-.group_title {
+.menu .group_title {
     -webkit-border-radius: 5px;
     -moz-border-radius:    5px;
     border-radius:         5px;
@@ -83,9 +85,9 @@ h1 h2 h3 h4 h5 {
     background-color: #171717;
     margin-top:       .25em;
 }
-.group_content>div>a:before { content:':: '; font-weight:bold; color:#DDDDDD; } 
-.group_content>div { text-indent:-1em;} 
-.group_content {
+.menu .group_content>div>a:before { content:':: '; font-weight:bold; color:#DDDDDD; } 
+.menu .group_content>div { text-indent:-1em;} 
+.menu .group_content {
     -webkit-border-radius: 5px;
     -moz-border-radius:    5px;
     border-radius:         5px;
@@ -98,27 +100,7 @@ h1 h2 h3 h4 h5 {
     text-align:    left;
 }
 
-.entry_sidebar>div:before { content:':: '; font-weight:bold; color:#DDDDDD; }
-.entry_sidebar>div {
-    text-indent: -1em;
-}
-.entry_sidebar {
-    float:            right;
-    -webkit-border-radius: 5px;
-    -moz-border-radius:    5px;
-    border-radius:         5px;
-    padding-left:     2em;
-    padding-top:      1em;
-    padding-bottom:   1em;
-    padding-right:   .5em;
-    width:            10.5em;
-	background-color: #232323;
-}
-
-#feed_wrapper { 
-    margin-left:14em; 
-    margin-right:14em; 
-}
+#feed_wrapper { margin-left:14em; margin-right:14em; }
 #feed_title:before { content:"\003A \003A \0020"; font-weight:bold; }
 #feed_title { 
     -webkit-border-top-left-radius:  5px;
@@ -140,8 +122,8 @@ h1 h2 h3 h4 h5 {
 
 .php_buttons { float:left; text-align:left; margin:.5em; }  /* the optional mark read, mark all read, update buttons*/
 .page_links { float:right; text-align:right; margin:.5em; } /* page number, next, previous page */
-.entry_box { margin-top:3em; } /* container for every entry on page */
 
+.entry_box { margin-top:3em; } /* container for every entry on page */
 .entry_header_wrapper{ 
     -webkit-border-top-left-radius:  5px;
     -webkit-border-top-right-radius: 5px;
@@ -153,22 +135,21 @@ h1 h2 h3 h4 h5 {
     height:           1em;
     border:           solid 0px yellow;
 	background-color: #232323;
+    white-space:nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-
 .entry_date_published { 
     margin-top:   .5em;
     margin-right: .5em;
     text-align:   right;
     color:        #DDDDDD;
 }
-
-.entry_title { 
+a.entry_title { 
     float:       left;
     text-align:  left;
     font-weight: bold;
-    overflow:    hidden;
 }
-
 .entry_content { 
     margin-left:  auto;
     margin-right: auto;
