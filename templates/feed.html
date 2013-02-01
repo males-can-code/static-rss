@@ -14,7 +14,7 @@
         <script src="http://code.jquery.com/ui/1.10.0/jquery-ui.js"></script>
         <script>
             $(document).ready(function() {
-                $(".menu div.group_title").click(function() {
+                $(".menu div.menu_group_title").click(function() {
                     if ($(this).siblings().is(":hidden")) {
                         $(this).siblings().slideDown();
                         $.cookie($(this).parent().get(0).className, 'true', {expires: 7, path:'/'});
@@ -25,10 +25,11 @@
                     }
                     });
                 // Restore state from cookie
-                $(".menu div.group_title").each(function() {
+                $(".menu div.menu_group_title").each(function() {
                     var c = $.cookie($(this).parent().get(0).className);
                     if (c == 'true') { $(this).siblings().show(); }
-                    if (c == 'false') { $(this).siblings().hide(); }
+                    else if (c == 'false') { $(this).siblings().hide(); }
+                    else { $(this).siblings().hide(); }
                 });
                 $(function() {
                     $( ".menu" ).sortable()
@@ -43,26 +44,26 @@
         {{endswitch=auto_mark_read}}
         <DIV id="main_wrapper">
             <DIV id=sidebar>
-                <DIV id=feed_sidebar class="menu">
+                <DIV class="menu">
                 {{loop=feed_list}}
                     {{switch=feed_list_title}}
                     <DIV class=$group_title>
-                        <DIV class='group_title'>$group_title</DIV>
-                        <DIV class='group_content'>
-                    {{endswitch=feed_list_title}}
-                        {{switch=feed_list_link}}
+                        <DIV class='menu_group_title'>$group_title</DIV>
+                        <DIV class='menu_group_content'>
+                        {{endswitch=feed_list_title}}
+                            {{switch=feed_list_link}}
                             <DIV><A HREF="$feed_url" class="$feed_read">$feed_link$counter</A></DIV>
                         {{endswitch=feed_list_link}}
-                    {{switch=feed_list_close}}
+                        {{switch=feed_list_close}}
                         </DIV>
                     </DIV>
                     {{endswitch=feed_list_close}}
                 {{endloop=feed_list}}
                 </DIV>
-                <DIV id=entries_sidebar class=menu>
+                <DIV class=menu>
                     <DIV class='entries'>
-                        <DIV class='group_title'>entries</DIV>
-                        <DIV class='group_content'>
+                        <DIV class='menu_group_title'>entries</DIV>
+                        <DIV class='menu_group_content'>
                             {{loop=entry_list}}
                             <DIV><A HREF="$entry_url#$entry_hash" class="$entry_read">$entry_title</A></DIV>
                             {{endloop=entry_list}}
@@ -71,7 +72,8 @@
                 </DIV>
             </DIV>
             <DIV id="feed_wrapper">
-                <DIV id="feed_title">$feed_title</DIV>
+                <DIV id="feed_header">
+                    <DIV id="feed_title">$feed_title</DIV>
                     <DIV class="php_buttons">
                         {{switch=mark_read}}
                         <A HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">mark feed read</A>
@@ -96,12 +98,13 @@
                         {{endloop=page_links}}
                         <A HREF=$page_next>></A>
                     </DIV>
+                </DIV>
                     {{loop=entries}}
                     <DIV class="entry_box">
                         <DIV class="entry_header_wrapper">
                             <A id="$entry_hash" class="entry_title" HREF="$entry_url" class="$entry_read" target="$links_target">$entry_title</A>
+                            <DIV class="entry_date_published">$entry_date_published</DIV>
                         </DIV>
-                        <DIV class="entry_date_published">$entry_date_published</DIV>
                         <DIV class="entry_content">$entry_content</DIV>
                     </DIV>
                     {{endloop=entries}}

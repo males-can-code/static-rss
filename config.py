@@ -11,7 +11,7 @@ class Config(object):
 
         # List of blacklisted tags and attributes for content
         self.invalid_tags = ['script', 'html', 'body', 'strong', 'hr']
-        self.invalid_attr = ['class', 'id', 'name', 'style', 'border', 'width', 'height']
+        self.invalid_attr = ['class', 'align', 'id', 'name', 'style', 'border', 'width', 'height']
 
         # This switches a couple of page elements on or off
         self.switch = {}
