@@ -108,7 +108,7 @@
                         <DIV class="entry_content">$entry_content</DIV>
                     </DIV>
                     {{endloop=entries}}
-                    <DIV class="php_buttons">
+                    <DIV id='php_buttons_bottom' class="php_buttons">
                         {{switch=mark_read}}
                         <A HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">mark feed read</A>
                         {{endswitch=mark_read}}
@@ -121,7 +121,7 @@
                         <A HREF="$domain/php/update.php?go_back=$go_back">update</A>
                         {{endswitch=update_feeds}}
                     </DIV>
-                    <DIV class="page_links">
+                    <DIV id='page_links_bottom' class="page_links">
                         <A HREF=$page_prev>&lt;</A>
                         {{loop=page_links}}
                             <A HREF="$page_url">$page</A>
