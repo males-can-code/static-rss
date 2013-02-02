@@ -12,7 +12,7 @@ body {
     color:            #8a8a8a;
     background-color: #262626;
     font-family:      Droid-Sans, sans-serif;
-    font-size:        .75em;
+    font-size:        .8em;
 }
 
 img {
@@ -50,9 +50,9 @@ ul {
     text-indent:   -1.5em;
 } 
 
-h1 h2 h3 h4 h5 {
+h1, h2, h3, h4, h5 {
     color:#DDDDDD;
-    font-size: 1.5em;
+    font-size: 1em;
 }
 
 #main_wrapper {
@@ -71,19 +71,18 @@ h1 h2 h3 h4 h5 {
     -webkit-border-radius: 5px;
     -moz-border-radius:    5px;
     border-radius:         5px;
-    padding:          .25em;
-    padding-bottom: 0em;
-    width:            12.0em;
-    text-align:       right;
-    margin-bottom: 2em;
+    padding-bottom:       0em;
+    width:                12.0em;
+    text-align:           right;
+    margin-bottom:        2em;
 }
 .menu .menu_group_title {
     -webkit-border-radius: 5px;
     -moz-border-radius:    5px;
     border-radius:         5px;
-    padding:          .5em;
-	border: solid .1em #3e3e3e;
-    margin-bottom:       .25em;
+    padding:               .5em;
+	border:                solid .1em #3e3e3e;
+    margin-bottom:         .25em;
 }
 .menu .menu_group_content>div>a:before { content:':: '; font-weight:bold; color:#DDDDDD; } 
 .menu .menu_group_content>div { text-indent:-1em;} 
@@ -99,7 +98,7 @@ h1 h2 h3 h4 h5 {
     text-align:    left;
 }
 
-#feed_wrapper { margin-left:14em;}
+#feed_wrapper { margin-left:13.5em;}
 
 #feed_header {
     -webkit-border-radius: 5px;
@@ -164,7 +163,7 @@ h1 h2 h3 h4 h5 {
     text-align:   right;
     color:        #DDDDDD;
 }
-a.entry_title { 
+.entry_title { 
     float:       left;
     text-align:  left;
     font-weight: bold;
@@ -177,6 +176,5 @@ a.entry_title {
     margin-right: auto;
     text-align:   justify;
     padding: .5em;
-    margin-top:.5em;
 }
 

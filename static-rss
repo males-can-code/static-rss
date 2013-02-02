@@ -444,7 +444,7 @@ class GenerateHTML(object):
         template['auto_refresh']    = self.config.switch['auto_refresh']
         template['domain']          = self.config.domain
         template['favicon']         = self.config.domain + '/favicon.ico'
-        template['css']             = self.config.domain + '/css/stylesheet.css'
+        template['css']             = self.config.domain + '/css/' + os.path.basename(self.config.path_css)
 
         # Create html pages for every page of every feed
         for feed in feeds:
@@ -581,7 +581,7 @@ class Database(object):
 
     def delete_older_than(self, table, days):
         db = sqlite3.connect(self.config.path_db)
-        for row in db.execute('delete from %s where date("-%s day")'%(table,days)):
+        for row in db.execute('delete from %s where entry_date_published <= date("now()","-2 day")'%(table)):
             self.log.info('Deleting entry: %s'%row['entry_title'])
         try:
             db.commit()
@@ -589,6 +589,7 @@ class Database(object):
         except sqlite3.Error as e:
             self.log.error('Failed to delete row: %s'%e.args[0])
             db.close()
+
 
     def delete_row_by_value(self, table, col, value):
         db = sqlite3.connect(self.config.path_db)
@@ -599,6 +600,7 @@ class Database(object):
         except sqlite3.Error as e:
             self.log.error('Failed to delete row: %s'%e.args[0])
             db.close()
+
 
     def check_in_table(self, table, col, value):
     # Return True/False if a value exists in table
@@ -829,7 +831,7 @@ class RSS(Database, GenerateHTML):
                 if not self.check_in_table('feeds', 'feed_hash', str(self.get_hash(feed[0]))):
                     self.add_feed(feed)
         else:
-            self.log.error('No feeds configured, Quitting...')
+            self.log.error('No feeds in config file')
 
 
     def usage(self):

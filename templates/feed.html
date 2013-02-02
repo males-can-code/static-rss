@@ -31,9 +31,7 @@
                     else if (c == 'false') { $(this).siblings().hide(); }
                     else { $(this).siblings().hide(); }
                 });
-                $(function() {
-                    $( ".menu" ).sortable()
-                });
+                $(function() { $( ".menu" ).sortable() });
             });
         </script>
         {{endswitch=menu}}
@@ -102,7 +100,7 @@
                     {{loop=entries}}
                     <DIV class="entry_box">
                         <DIV class="entry_header_wrapper">
-                            <A id="$entry_hash" class="entry_title" HREF="$entry_url" class="$entry_read" target="$links_target">$entry_title</A>
+                            <A id="$entry_hash" class="entry_title $entry_read" HREF="$entry_url" target="$links_target">$entry_title</A>
                             <DIV class="entry_date_published">$entry_date_published</DIV>
                         </DIV>
                         <DIV class="entry_content">$entry_content</DIV>
