@@ -13,6 +13,21 @@ from string import Template
 from config import Config
 from bs4 import BeautifulSoup
 
+# TODO Limit downloaded entries per parse, if we don't limit it it will download the complete feed and entry history 
+
+# TODO remove old entries after certain period, note that this will conflict with the above
+
+# TODO maybe move menu to iframe and remove read/unread headline feature from entries
+#      This way we can dramatically reduce the cpu load when generating html since there is
+#      no need for regeneration if there is no possible change, only stuff is added
+#      This btw also means that i have to move the pagelinks (maybe also in an iframe?)
+#      Another solution may be that i can use reggex to change certain values (read/unread) in html files
+#      so we don't have to regenerate the whole bunch but we still can retain this nice feature
+
+# TODO After podcasts also videocasts should be supported
+
+# TODO Comments Comments Comments Comments
+
 
 class Log(object):
     def __init__(self, log_file=False, level='debug', display=True, show='all', maxlength=15):
