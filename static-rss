@@ -193,6 +193,7 @@ class GenerateHTML(object):
     # Parse a template file, input is a dict: {data to be replaced : data to replace with}
     # Return is filled_template containing all the replaced lines
     # You can put switches in loops to turn certain elements on and off, really handy
+    # Also it is possible to put other loops inside loops... dawg
         filled_template = ''
         if type(template) != list:
             template = self.get_file(template)
@@ -282,6 +283,7 @@ class GenerateHTML(object):
 
                     # So i heard you like loops ...
                     # Parse template with switches again
+                    # TODO I really don't like this evil construction but oh well...
                     if feed == feeds[0] and feed == feeds[-1]:
                         # The only feed in group, display all
                         self.config.switch['feed_list_title'] = True
@@ -336,41 +338,28 @@ class GenerateHTML(object):
 
     def loop_entry_list(self, lines, feed):
     # Generate the right sidebar links
-        titles = ''
+        filled_template = ''
         pages = self.calculate_pages(feed)
         entries = self.get_rows_by_value('entries', 'entry_feed_hash', feed['feed_hash'], order_by='entry_date_published', limit=self.config.max_entries_in_sidebar) 
-
         for entry in entries:
             page_count = 1
             for page in pages:
                 if entry['entry_hash'] in page:
                     entry['entry_url'] = self.config.domain + '/feeds/' + feed['feed_hash'] + '/page_' + str(page_count) + '.html' 
                 page_count = page_count + 1
-
-            for line in lines:
-                for key in entry.keys():
-                    if '$' + key in line:
-                        line = Template(line).safe_substitute({key:entry[key]})
-                titles = titles + line + '\n'
-        return titles
+            filled_template = filled_template + self.parse_template(lines, entry)
+        return filled_template
 
 
     def loop_page_links(self, lines, feed):
     # Generate the links to the different pages with entries for a feed
-        page_links = ''
+        filled_template = ''
         for x in range(1, len(feed['pages']) + 1):
             link = {}
             link['page_url'] = self.config.domain + '/feeds/' + feed['feed_hash'] + '/page_' + str(x) + '.html'
             link['page'] = x
-
-            for line in lines:
-                for key in link.keys():
-                    if '$' + key in line:
-                        line = Template(line).safe_substitute({key:link[key]})
-
-                page_links = page_links + line + '\n'
-
-        return page_links
+            filled_template = filled_template + self.parse_template(lines, link)
+        return filled_template
 
 
     def calculate_pages(self, feed):
@@ -382,23 +371,15 @@ class GenerateHTML(object):
         entry_hash_list = []
         pages = []
         c = 1
-
         entries = self.get_rows_by_value('entries', 'entry_feed_hash', feed['feed_hash'], order_by='entry_date_published') 
         for entry in entries:
-            #soup = BeautifulSoup(entry['entry_content'])
-            #text = soup.findAll(text=True)
-            #text = ''.join(text)
-
-            #sum_chars = sum_chars + len(text)
             sum_chars = sum_chars + len(entry['entry_content'])
-
             entry_hash_list.append(entry['entry_hash'])
             if sum_chars >= self.config.max_chars_per_page or c == len(entries):
                 pages.append(entry_hash_list)
                 entry_hash_list = []
                 sum_chars = 0
             c = c + 1
-                
         return pages
 
 
