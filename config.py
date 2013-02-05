@@ -8,6 +8,7 @@ class Config(object):
         self.entry_ttl              = 1        # When to delete entries in days, False to disable 
                                                # (This will make generating html a lot more time consuming)
         self.links_target           = '_blank' # Open links in a new window or not '_blank' = new, '_self' = same
+        self.max_posts_per_feed     = 30       # Keep a max amount of posts per feed in database
 
         # List of blacklisted tags and attributes for content
         self.invalid_tags = ['script', 'html', 'body', 'strong', 'hr']

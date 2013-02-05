@@ -11,8 +11,8 @@
         {{switch=menu}}
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
         <script type="text/javascript" src="https://raw.github.com/carhartl/jquery-cookie/master/jquery.cookie.js"></script>
-        <script src="http://code.jquery.com/ui/1.10.0/jquery-ui.js"></script>
         <script>
+            //<script src="http://code.jquery.com/ui/1.10.0/jquery-ui.js">
             $(document).ready(function() {
                 $(".menu div.menu_group_title").click(function() {
                     if ($(this).siblings().is(":hidden")) {
@@ -31,7 +31,7 @@
                     else if (c == 'false') { $(this).siblings().hide(); }
                     else { $(this).siblings().hide(); }
                 });
-                $(function() { $( ".menu" ).sortable() });
+                //$(function() { $( ".menu" ).sortable() });
             });
         </script>
         {{endswitch=menu}}
@@ -74,7 +74,7 @@
                     <DIV id="feed_title">$feed_title</DIV>
                     <DIV class="php_buttons">
                         {{switch=mark_read}}
-                        <A HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">mark feed read</A>
+                        <A HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">mark read</A>
                         {{endswitch=mark_read}}
                         {{switch=mark_all_read}}
                         ::
@@ -103,12 +103,18 @@
                             <A id="$entry_hash" class="entry_title $entry_read" HREF="$entry_url" target="$links_target">$entry_title</A>
                             <DIV class="entry_date_published">$entry_date_published</DIV>
                         </DIV>
-                        <DIV class="entry_content">$entry_content</DIV>
+                        <DIV class="entry_content">
+                            {{loop=media}}
+                            <DIV><AUDIO controls="controls" preload="metadata"> <SOURCE src="$entry_media" /> Your browser does not support HTML5 audio element </AUDIO></DIV>
+                            <A href="$entry_media">Click to download media</A>
+                            {{endloop=media}}
+                            $entry_content
+                        </DIV>
                     </DIV>
                     {{endloop=entries}}
                     <DIV id='php_buttons_bottom' class="php_buttons">
                         {{switch=mark_read}}
-                        <A HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">mark feed read</A>
+                        <A HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">mark read</A>
                         {{endswitch=mark_read}}
                         {{switch=mark_all_read}}
                         |

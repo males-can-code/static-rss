@@ -204,7 +204,7 @@ class GenerateHTML(object):
                 # If '{{loop=' is encoutered in template keep on looping till {{endloop}} and 
                 # send the lines to the function with the name 'loop_' + the stuff after '=' in template
                 # Whatever returns from the loop function is added to the filled_template variable
-                if '{{loop=' in line:
+                if '{{loop=' in line and not loop_func:
                     loop_lines = []
                     x,loop_func = line.split('=')
                     loop_func = loop_func.strip('}}')
@@ -221,7 +221,7 @@ class GenerateHTML(object):
                 # If {{switch= is found the leading lines till {{endswitch=switch}} are written to switch_lines list
                 # At {{endswitch=switch}} it will look for a key in self.switch that corresponds with the value after {{switch=
                 # Value can be True or False
-                elif '{{switch=' in line:
+                elif '{{switch=' in line and not switch:
                     switch_lines = []
                     x,switch = line.split('=')
                     switch = switch.strip('}}')
@@ -317,11 +317,20 @@ class GenerateHTML(object):
         for entry in entries:
             entry['links_target'] = self.config.links_target          # Open links in self or blank
             if entry['entry_hash'] in feed['page']:
-                for line in lines:
-                    for k in entry.keys():
-                        if '$' + k in line:
-                            line = Template(line).safe_substitute({k:entry[k]})
-                    filled_template = filled_template + line + '\n'
+                filled_template = filled_template + self.parse_template(lines, entry)
+        return filled_template
+
+
+    def loop_media(self, lines, entry):
+        # if there are multiple media files attached to entry loop the code for every file
+        # Return nothing if there are no media files (so no need for a switch)
+        filled_template = ''
+        if entry['entry_media']:
+            medias = entry['entry_media'].split(',')
+            for media in medias:
+                if media:
+                    entry['entry_media'] = media
+                    filled_template = filled_template + self.parse_template(lines, entry)
         return filled_template
 
 
@@ -366,6 +375,9 @@ class GenerateHTML(object):
 
     def calculate_pages(self, feed):
     # Calculate on how many pages the entries will be spread out
+    # TODO Before putting posts in db do not count characters but posts that makes so much more sense
+    # because some feeds get updated once in a month or so and you don't wanna end up with only one post
+    # in your feed.
         sum_chars = 0
         entry_hash_list = []
         pages = []
@@ -373,7 +385,13 @@ class GenerateHTML(object):
 
         entries = self.get_rows_by_value('entries', 'entry_feed_hash', feed['feed_hash'], order_by='entry_date_published') 
         for entry in entries:
+            #soup = BeautifulSoup(entry['entry_content'])
+            #text = soup.findAll(text=True)
+            #text = ''.join(text)
+
+            #sum_chars = sum_chars + len(text)
             sum_chars = sum_chars + len(entry['entry_content'])
+
             entry_hash_list.append(entry['entry_hash'])
             if sum_chars >= self.config.max_chars_per_page or c == len(entries):
                 pages.append(entry_hash_list)
@@ -490,6 +508,7 @@ class Database(object):
         db.execute("create table if not exists entries (entry_hash           text unique  ,"
                                                        "entry_content        text         ,"
                                                        "entry_url            text         ,"
+                                                       "entry_media          text         ,"
                                                        "entry_title          text         ,"
                                                        "entry_read           text         ,"
                                                        "entry_date_published text         ,"
@@ -777,6 +796,12 @@ class RSS(Database, GenerateHTML):
             entry_insert['entry_date_published'] = str(self.get_timestamp())
             self.log.warning('Failed to find a date, using timestamp')
 
+        # Find audio in entry eg. in case of podcast and add it to entry_insert as a comma separated list
+        entry_insert['entry_media'] = ''
+        if len(entry.enclosures) > 0:
+            for enclosure in entry.enclosures:
+                if 'audio' in enclosure['type']:
+                    entry_insert['entry_media'] = entry_insert['entry_media'] + enclosure['href'] + ','
         self.insert_row('entries', entry_insert)
 
 
@@ -879,7 +904,7 @@ class RSS(Database, GenerateHTML):
                 # We pass a list of hashes from feeds with unread messages to generate_HTML
                 feeds_unread = self.parse_feeds()
                 #self.generate_HTML(feeds_unread=feeds_unread)
-                self.generate_HTML(feeds_unread='all')
+                self.generate_HTML(del_dir=False, feeds_unread='all')
 
             if '--mark-all-read' in sys.argv or '-M' in sys.argv:
                 marked_read = self.mark_all_read()
