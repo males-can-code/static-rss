@@ -21,7 +21,7 @@ class Config(object):
         self.switch['mark_all_read']    = True # Display mark all read button on page
         self.switch['update_feeds']     = True # Display update feeds button on page
         self.switch['auto_mark_read']   = True # Automatically mark feed read on opening page
-        self.switch['auto_refresh']     = 440  # Automatic page refresh in seconds or False to disable
+        self.switch['auto_refresh']     = 600  # Automatic page refresh in seconds or False to disable
         self.switch['menu']             = True # An awesome jquery menu that remembers state using cookies
 
         self.domain                = 'http://rss.opentbc.nl'         # eg: 'http://example.com'

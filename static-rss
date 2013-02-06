@@ -28,6 +28,7 @@ from bs4 import BeautifulSoup
 
 # TODO Comments Comments Comments Comments
 
+# TODO When a feed updates its entry I get a new copy, for some feeds this is really ennoying, eg. reddit
 
 class Log(object):
     def __init__(self, log_file=False, level='debug', display=True, show='all', maxlength=15):
@@ -897,14 +898,11 @@ class RSS(Database, GenerateHTML):
                                 sys.exit()
                     
             if '--parse-feeds' in sys.argv or '-p' in sys.argv:
-                # We pass a list of hashes from feeds with unread messages to generate_HTML
                 feeds_unread = self.parse_feeds()
-                #self.generate_HTML(feeds_unread=feeds_unread)
                 self.generate_HTML(del_dir=False, feeds_unread='all')
 
             if '--mark-all-read' in sys.argv or '-M' in sys.argv:
                 marked_read = self.mark_all_read()
-                #self.generate_HTML(feeds_unread=marked_read)
                 self.generate_HTML(del_dir=False, feeds_unread='all')
 
 
@@ -912,9 +910,8 @@ class RSS(Database, GenerateHTML):
                 if '--mark-read=' in arg:
                     x,hash = arg.split('=') 
                     self.mark_read(hash)
-                    #self.generate_HTML(feeds_unread=[hash])
+                    # TODO this doesn't work because all entries should be regenerated to make the read unread feeds consistent
                     self.generate_HTML(del_dir=False, feeds_unread=[hash])
-                    self.generate_HTML(del_dir=False, feeds_unread='all')
 
                 if '--del-feed=' in arg:
                     x,hash = arg.split('=') 
