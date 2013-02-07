@@ -145,6 +145,17 @@ class GenerateHTML(object):
             sys.exit()
 
 
+    def copy_dir(self, src, dest):
+    # Copy a dir
+        try:
+            self.remove_dir(dest)
+            shutil.copytree(src,dest)
+            return True
+        except IOError as e:
+            self.log.error('Failed to copy dir: %s. Quitting...'%src)
+            sys.exit()
+
+
     def remove_dir(self, path):
     # TODO This needs work, the dir is not removed
     # Remove a tree
@@ -201,8 +212,8 @@ class GenerateHTML(object):
     # (over)write data to file
         try:
             with open(path, 'w') as f:
+                self.log.warning('writing file: %s'%path)
                 f.write(data)
-                print(path)
         except IOError:
             self.log.error('Failed to write to file: %s. Quitting...'%path)
             sys.exit()
@@ -272,62 +283,56 @@ class GenerateHTML(object):
         filled_template = ''
         feed_url = {}
         last_group = ''
-        # We really don't wanna generate this list for every page since it doesn't change
-        # if self.feed_list is already set just return the old value
-        if self.feed_list:
-            return self.feed_list
-        else:
-            for group in self.get_groups():
+        for group in self.get_groups():
 
-                # Get all feeds in specific group
-                feeds = self.get_rows_by_value('feeds', 'feed_group',  group, order_by='feed_date_entered')
-                for feed in feeds:
-                    data['group_title'] = group
+            # Get all feeds in specific group
+            feeds = self.get_rows_by_value('feeds', 'feed_group',  group, order_by='feed_date_entered')
+            for feed in feeds:
+                data['group_title'] = group
 
-                    # Count unread entries per feed
-                    entries = self.get_rows_by_value('entries', 'entry_feed_hash', feed['feed_hash'], order_by='entry_date_published')
-                    unread_counter = 0
-                    for entry in entries:
-                        if entry['entry_read'] == 'unread': unread_counter = unread_counter + 1
+                # Count unread entries per feed
+                entries = self.get_rows_by_value('entries', 'entry_feed_hash', feed['feed_hash'], order_by='entry_date_published')
+                unread_counter = 0
+                for entry in entries:
+                    if entry['entry_read'] == 'unread': unread_counter = unread_counter + 1
 
-                    data['feed_link'] = feed['feed_title'] 
-                    data['feed_url'] = self.config.domain + '/feeds/' + feed['feed_hash']
+                data['feed_link'] = feed['feed_title'] 
+                data['feed_url'] = self.config.domain + '/feeds/' + feed['feed_hash']
 
-                    if unread_counter > 0:
-                        data['counter'] = '[' + str(unread_counter) + ']'
-                        data['feed_read'] = 'unread'
-                    else:
-                        data['counter'] = ''
-                        data['feed_read'] = 'read'
+                if unread_counter > 0:
+                    data['counter'] = '[' + str(unread_counter) + ']'
+                    data['feed_read'] = 'unread'
+                else:
+                    data['counter'] = ''
+                    data['feed_read'] = 'read'
 
-                    # So i heard you like loops ...
-                    # Parse template with switches again
-                    # TODO I really don't like this evil construction but oh well...
-                    if feed == feeds[0] and feed == feeds[-1]:
-                        # The only feed in group, display all
-                        self.config.switch['feed_list_title'] = True
-                        self.config.switch['feed_list_link'] = True
-                        self.config.switch['feed_list_close'] = True
-                    elif feed == feeds[0]:
-                        # The first feed of a new group, display title and link
-                        self.config.switch['feed_list_title'] = True
-                        self.config.switch['feed_list_link'] = True
-                        self.config.switch['feed_list_close'] = False
-                    elif feed == feeds[-1]:
-                        # The first feed of a new group, display link and group close (eg: </div>)
-                        self.config.switch['feed_list_title'] = False
-                        self.config.switch['feed_list_link'] = True
-                        self.config.switch['feed_list_close'] = True
-                    else:
-                        # Display only the link
-                        self.config.switch['feed_list_title'] = False
-                        self.config.switch['feed_list_link'] = True
-                        self.config.switch['feed_list_close'] = False
+                # So i heard you like loops ...
+                # Parse template with switches again
+                # TODO I really don't like this evil construction but oh well...
+                if feed == feeds[0] and feed == feeds[-1]:
+                    # The only feed in group, display all
+                    self.config.switch['feed_list_title'] = True
+                    self.config.switch['feed_list_link'] = True
+                    self.config.switch['feed_list_close'] = True
+                elif feed == feeds[0]:
+                    # The first feed of a new group, display title and link
+                    self.config.switch['feed_list_title'] = True
+                    self.config.switch['feed_list_link'] = True
+                    self.config.switch['feed_list_close'] = False
+                elif feed == feeds[-1]:
+                    # The first feed of a new group, display link and group close (eg: </div>)
+                    self.config.switch['feed_list_title'] = False
+                    self.config.switch['feed_list_link'] = True
+                    self.config.switch['feed_list_close'] = True
+                else:
+                    # Display only the link
+                    self.config.switch['feed_list_title'] = False
+                    self.config.switch['feed_list_link'] = True
+                    self.config.switch['feed_list_close'] = False
 
-                    group_filled = self.parse_template(lines, data)
-                    filled_template = filled_template + group_filled
+                group_filled = self.parse_template(lines, data)
+                filled_template = filled_template + group_filled
 
-            self.feed_list = filled_template
         return filled_template
 
 
@@ -385,87 +390,69 @@ class GenerateHTML(object):
             return 'page_' + str(cur_page - 1) + '.html'
 
 
+    def generate_menu(self, template): 
+        # Generate menu
+        self.log.info('Generating: menu.html: %s'%self.config.path_export_html + '/menu.html')
+        filled_menu_template = self.parse_template(self.config.path_template_menu, template)
+        self.write_to_file(self.config.path_export_html + '/menu.html', filled_menu_template)
+
+
+    def generate_index(self, feed_hash, template): 
+        # Generate index.html
+        self.log.info('Generating: index.html: %s'%self.config.path_export_html + '/index.html')
+        filled_index_template = self.parse_template(self.config.path_template_index, template)
+        self.write_to_file(self.config.path_export_html + '/index.html', filled_index_template)
+
+
     def gen_init(self, feeds, del_dir=True):
     # Create/remove/copy dirs and files
-        if del_dir:
-            self.remove_dir(self.config.path_export_html)
-
+        if del_dir: self.remove_dir(self.config.path_export_html)
         self.check_dir(self.config.path_export_html)
-        self.check_dir(self.config.path_export_html + '/feeds')
-        self.check_dir(self.config.path_export_html + '/css')
-        self.check_dir(self.config.path_export_html + '/js')
-        self.copy_file(self.config.path_css, self.config.path_export_html + '/css')
-        self.copy_file(self.config.path_js_infinitescroll, self.config.path_export_html + '/js')
+        self.copy_dir(self.config.path_css, self.config.path_export_html + '/css')
+        self.copy_dir(self.config.path_php, self.config.path_export_html + '/php')
+        self.copy_dir(self.config.path_js, self.config.path_export_html + '/js')
         self.copy_file(self.config.path_favicon, self.config.path_export_html)
-
-        for feed in feeds:      # Create all feed dirs which will store the entries
+        for feed in feeds: # Create all feed dirs which will store the entries
             self.check_dir(self.config.path_export_html + '/feeds/' + feed['feed_hash'])
 
-        self.check_dir(self.config.path_export_html + '/php')
-        self.copy_file(self.config.path_script_update, self.config.path_export_html + '/php')
-        self.copy_file(self.config.path_script_mark_read, self.config.path_export_html + '/php')
-        self.copy_file(self.config.path_script_subscribe, self.config.path_export_html + '/php')
-        self.copy_file(self.config.path_script_del_feed, self.config.path_export_html + '/php')
-        self.copy_file(self.config.path_db_manager, self.config.path_export_html + '/php')
-        self.copy_file(self.config.app_dir + '/php/logo.png', self.config.path_export_html + '/php')
-        self.copy_file(self.config.app_dir + '/php/bg.gif', self.config.path_export_html + '/php')
-        self.copy_file(self.config.app_dir + '/php/phpliteadmin.css', self.config.path_export_html + '/php')
 
-
-    def generate_HTML(self, del_dir=False, partial=True, feeds_unread='all'):
+    def generate_HTML(self, del_dir=False, partial=True, feeds_gen='all'):
     # The main method that calls the other method in class and eventually generates the HTML
         self.log.info('Generating HTML')
-        feeds = self.get_table('feeds')     # Get a list of dicts containing information about a feed
+        feeds = self.get_table('feeds')                        # Get a list of dicts containing information about a feed
+        if del_dir == True: self.gen_init(feeds, del_dir=True) # Sometimes we don't wanna delete the export dir but just overwrite because  
+        else: self.gen_init(feeds, del_dir=False)              # there will be a (short) moment where you will get a 404 when a file is missing
 
-        # Sometimes we don't wanna delete the export dir but just overwrite because there will be a (short) moment 
-        # where you will get a 404 when a file is missing
-        if del_dir == True:
-            self.gen_init(feeds, del_dir=True)
-        else:
-            self.gen_init(feeds, del_dir=False)
-
-        self.feed_list = ''
         template = {}               # feed_template dict contains main content for the 'feed.html' template 
         template['auto_refresh']    = self.config.switch['auto_refresh']
         template['domain']          = self.config.domain
         template['favicon']         = self.config.domain + '/favicon.ico'
-        template['css']             = self.config.domain + '/css/' + os.path.basename(self.config.path_css)
+        template['css']             = self.config.domain + '/css/' + os.path.basename(self.config.path_stylesheet)
 
-        # Generate menu
-        filled_menu_template = self.parse_template(self.config.path_template_menu, template)
-        self.write_to_file(self.config.path_export_html + '/menu.html', filled_menu_template)
-
-        # Generate index.html
-        template['first_feed'] = feeds[0]['feed_hash']
-        filled_index_template = self.parse_template(self.config.path_template_index, template)
-        self.write_to_file(self.config.path_export_html + '/index.html', filled_index_template)
+        self.generate_menu(template)                           # Generate menu
+        self.generate_index(feeds[0]['feed_hash'], template)   # Generate index.html
 
         for feed in feeds:                                                  # Create html pages for every page of every feed
-            if feed['feed_hash'] in feeds_unread or feeds_unread == 'all':  # only generate feed if it has new messages
+            if feed['feed_hash'] in feeds_gen or feeds_gen == 'all':        # only generate feed if it has new messages
                 self.log.info('Generating: %s'%feed['feed_title'])
+
                 template['pages']      = self.calculate_pages(feed)         # Calculate in how many pages the entries fit
                 template['feed_title'] = feed['feed_title']                 # Title is same for every page in feed
                 template['feed_hash']  = feed['feed_hash']
 
-                # From here generate every page in feed seperately
                 cur_page = len(template['pages'])
-                for page in template['pages']:
+                for page in template['pages'][0:self.config.max_pages]:
 
-                    # If partial is set, only regenerate the pages with unread entries in it
-                    # TODO i don't think the logic behind this makes sense, I'll have to check
-                    contains_unread = True
+                    # If partial is set, only regenerate the pages with unread entries (after parsing the newest) in it
+                    contains_unread = False
                     if partial:
-                        for entry_hash in page:
-                            if self.check_in_row_by_value('entries', 'entry_read', 'unread', "entry_hash", entry_hash):
-                                contains_unread = True
-                                break
-                            else:
-                                contains_unread = False
+                        if self.check_in_row_by_value('entries', 'entry_read', 'unread', "entry_hash", page):
+                            contains_unread = True
                         
                     if contains_unread or not partial:
                         template['page']      = page
                         template['page_next'] = self.generate_next_link(template['pages'], feed, cur_page)
-                        template['go_back']   = '%s/feeds/%s/page_%s.html' %(self.config.domain, feed['feed_hash'], str(cur_page))
+                        template['go_back']   = '%s/feeds/%s' %(self.config.domain, feed['feed_hash'])
 
                         # Parse the template and write to file
                         if cur_page == len(template['pages']):
@@ -621,7 +608,14 @@ class Database(object):
     def check_in_row_by_value(self, table, col1, value1, col2, value2):
     # Return True/False if a value exists in table
         db = sqlite3.connect(self.config.path_db)
-        for data in db.execute('select * from "%s" where "%s" = "%s" and "%s" = "%s"'%(str(table),str(col1),str(value1),str(col2),str(value2))):
+        if type(value2) == list:
+            tmp_value2 = ''
+            for v in value2:
+                tmp_value2 = tmp_value2 + ',\'' + v + '\''
+            value2 = tmp_value2.lstrip(',')
+        else:
+            value2 = '\'' + value2 + '\''
+        for data in db.execute('select * from "%s" where "%s" = "%s" and "%s" in (%s)'%(str(table),str(col1),str(value1),str(col2),str(value2))):
             if data:
                 db.close()
                 return True
@@ -675,7 +669,7 @@ class RSS(Database, GenerateHTML):
 
     def parse_feeds(self):
     # Parse all feeds, calls parse_feed()
-        feeds_unread = []
+        feeds_gen = []
         feeds = self.get_table('feeds')
         for feed in feeds:
             parsed_feed = self.parse_feed(feed['feed_url'])
@@ -683,10 +677,10 @@ class RSS(Database, GenerateHTML):
                 for entry in parsed_feed.entries:
                     if not self.check_in_table('entries', 'entry_hash', str(self.get_hash(entry['title'] + str(self.clean_HTML(entry['summary']))))):
                         self.add_entry(entry, feed['feed_url'])
-                        # Add feed_hash from feeds with unread messages to feeds_unread so we know which html should be regenerated
-                        if feed['feed_hash'] not in feeds_unread:
-                            feeds_unread.append(feed['feed_hash'])
-        return feeds_unread
+                        # Add feed_hash from feeds with unread messages to feeds_gen so we know which html should be regenerated
+                        if feed['feed_hash'] not in feeds_gen:
+                            feeds_gen.append(feed['feed_hash'])
+        return feeds_gen
 
 
     def sanitize(self, var):
@@ -898,31 +892,30 @@ class RSS(Database, GenerateHTML):
                                 sys.exit()
                     
             if '--parse-feeds' in sys.argv or '-p' in sys.argv:
-                feeds_unread = self.parse_feeds()
-                self.generate_HTML(del_dir=False, partial=True, feeds_unread=feeds_unread)
+                feeds_gen = self.parse_feeds()
+                self.generate_HTML(del_dir=False, partial=True, feeds_gen=feeds_gen)
 
             if '--mark-all-read' in sys.argv or '-M' in sys.argv:
                 marked_read = self.mark_all_read()
-                self.generate_HTML(del_dir=False, feeds_unread=marked_read)
-
+                self.generate_HTML(del_dir=False, partial=False, feeds_gen=marked_read)
 
             for arg in sys.argv:
                 if '--mark-read=' in arg:
                     x,hash = arg.split('=') 
                     self.mark_read(hash)
-                    self.generate_HTML(del_dir=False, feeds_unread=[hash])
+                    self.generate_HTML(del_dir=False, partial=False, feeds_gen=[hash])
 
                 if '--del-feed=' in arg:
                     x,hash = arg.split('=') 
                     self.del_feed(hash)
-                    self.generate_HTML(del_dir=False, feeds_unread='all')
+                    self.generate_HTML(del_dir=False, feeds_gen=[])
 
             if '--gen-html' in sys.argv or '-g' in sys.argv:
                 self.generate_HTML()
                 sys.exit()
 
             if '-G' in sys.argv:
-                self.generate_HTML(del_dir=True, partial=False, feeds_unread='all')
+                self.generate_HTML(del_dir=True, partial=False, feeds_gen='all')
                 sys.exit()
 
 

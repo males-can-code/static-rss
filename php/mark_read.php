@@ -19,9 +19,9 @@
     {
         while (true) 
         {
-            if (! file_exists('/var/www/opentbc.nl/static-rss/feeds/'.$hash.'/page_1.html')) 
+            if (! file_exists('/var/www/opentbc.nl/static-rss/feeds/'.$hash.'/index.html')) 
             { 
-                sleep(.1); 
+                sleep(1); 
             }
             else 
             {

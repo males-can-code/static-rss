@@ -8,7 +8,7 @@
     {
         if (! file_exists('/var/www/opentbc.nl/static-rss/index.html')) 
         { 
-            sleep(.2); 
+            sleep(1); 
         }
         else 
         {

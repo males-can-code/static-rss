@@ -1,0 +1,18 @@
+                    {{loop=entries}}
+                    <DIV class="entry_box">
+                        <DIV class="entry_header_wrapper">
+                            <A id="$entry_hash" class="entry_title $entry_read" HREF="$entry_url" target="$links_target">$entry_title</A>
+                            <DIV class="entry_date_published">$entry_date_published</DIV>
+                        </DIV>
+                        <DIV class="entry_content">
+                            {{loop=media}}
+                            <DIV><AUDIO controls="controls" preload="metadata"> <SOURCE src="$entry_media" />Your browser does not support the HTML5 audio element</AUDIO></DIV>
+                            <A href="$entry_media">[Download media]</A>
+                            {{endloop=media}}
+                            $entry_content
+                        </DIV>
+                    </DIV>
+                    {{endloop=entries}}
+                    {{switch=next}}
+                    <div class="load_next"><a href="$page_next" class="next">more</a></div>
+                    {{endswitch=next}}

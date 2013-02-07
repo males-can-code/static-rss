@@ -8,6 +8,7 @@ class Config(object):
                                                # (This will make generating html a lot more time consuming)
         self.links_target           = '_blank' # Open links in a new window or not '_blank' = new, '_self' = same
         self.max_posts_per_feed     = 30       # Keep a max amount of posts per feed in database
+        self.max_pages              = 10       # Max amount of pages that will be generated (improves performance dramatically)
 
         # List of blacklisted tags and attributes for content
         self.invalid_tags = ['script', 'html', 'body', 'strong', 'hr']
@@ -15,83 +16,34 @@ class Config(object):
 
         # This switches a couple of page elements on or off
         self.switch = {}
-        self.switch['auto_mark_read']   = True # Automatically mark feed read on opening page
-        self.switch['auto_refresh']     = 600  # Automatic page refresh in seconds or False to disable
-        self.switch['menu']             = True # An awesome jquery menu that remembers state using cookies
-        self.switch['php_buttons_top']  = True # An awesome jquery menu that remembers state using cookies
+        self.switch['auto_mark_read']     = True # Automatically mark feed read on opening page
+        self.switch['auto_refresh']       = 600  # Automatic page refresh in seconds or False to disable
+        self.switch['menu']               = True # An awesome jquery menu that remembers state using cookies
+        self.switch['php_buttons_top']    = True # The php buttons on top of page (del feed, mark read, mark all read)
         self.switch['php_buttons_bottom'] = False # An awesome jquery menu that remembers state using cookies
 
-        self.domain                = 'http://rss.opentbc.nl'         # eg: 'http://example.com'
-        self.app_dir               = '/home/eco/bin/apps/static-rss' # eg: '/home/user/static-rss'
+        self.domain  = 'http://rss.opentbc.nl'         # eg: 'http://example.com'
+        self.app_dir = '/home/eco/bin/apps/static-rss' # Location of the program, eg: '/home/user/static-rss'
 
-        # Should be something like '/var/www/static-rss' or '/home/user/static-rss/html'
-        # If /tmp is tmpfs, you can also do '/tmp/static-rss' for incredible speed improvements
+        # Should be something like '/var/www/static-rss'
+        # If /tmp is tmpfs, you can also do '/tmp/static-rss' for speed improvements
         # Check README.md for a brief explanation about tmpfs
         self.path_export_html      = '/tmp/static-rss'          
-        self.path_db               = self.app_dir + '/database/static-rss.sqlite'    # Path to sqlite database
+        self.path_export_html_tmp  = '/tmp/static-rss-tmp' # generate html to tmp dir and copy it to path_export_html
 
-        self.path_template_feed    = self.app_dir + '/templates/feed.html'  # Path to the main template
-        self.path_template_menu    = self.app_dir + '/templates/menu.html'  # Path to the menu template
-        self.path_template_page    = self.app_dir + '/templates/page.html'  # Path to the menu template
-        self.path_template_index   = self.app_dir + '/templates/index.html' # Path to the menu template
-        self.path_css              = self.app_dir + '/css/dark.css'
+        # Where we can find certain files
+        self.path_db               = self.app_dir + '/database/static-rss.sqlite' # Path to sqlite database
+        self.path_template_feed    = self.app_dir + '/templates/feed.html'        # Path to the main template
+        self.path_template_menu    = self.app_dir + '/templates/menu.html'        # Path to the menu template
+        self.path_template_page    = self.app_dir + '/templates/page.html'        # generates all entries in page
+        self.path_template_index   = self.app_dir + '/templates/index.html'       # This template redirects to a feed
+        self.path_stylesheet       = self.app_dir + '/css/dark.css'
+        self.path_css              = self.app_dir + '/css'
         self.path_php              = self.app_dir + '/php'
-        self.path_script_update    = self.app_dir + '/php/update.php'
-        self.path_script_mark_read = self.app_dir + '/php/mark_read.php'
-        self.path_script_subscribe = self.app_dir + '/php/subscribe.php'
-        self.path_script_del_feed  = self.app_dir + '/php/del_feed.php'
-        self.path_db_manager       = self.app_dir + '/php/phpliteadmin.php'
-        self.path_js_infinitescroll= self.app_dir + '/js/jquery.jscroll.min.js'
+        self.path_js               = self.app_dir + '/js'
         self.path_favicon          = self.app_dir + '/pics/favicon.ico'
 
         # Appart from just adding feeds to the database you can also enter them here as: ['url', 'group']
         # They will be automatically added to the database also if you remove them from the database
-        self.feeds = []
-
-        #self.feeds = [['http://www.webupd8.org/feeds/posts/default',                                    'linux'], 
-        #              ['http://www.osnews.com/files/recent.xml',                                        'linux'], 
-        #              ['http://inconsolation.wordpress.com/feed/',                                      'linux'], 
-        #              ['http://librenix.com/rss/',                                                      'linux'], 
-        #              ['http://feeds.feedburner.com/d0od',                                              'linux'], 
-        #              ['http://feeds.feedburner.com/ostatic',                                           'linux'], 
-        #              ['http://www.tuxmachines.org/node/feed',                                          'linux'], 
-        #              ['http://tweakers.net/feeds/mixed.xml',                                           'linux'], 
-        #              ['http://feeds.webwereld.nl/webwereld',                                           'linux'], 
-        #              ['http://www.phoronix.com/rss.php',                                               'linux'], 
-        #              ['http://feeds.feedburner.com/Linuxers?format=xml',                               'linux'], 
-        #              ['http://lxer.com/module/newswire/headlines.rss',                                 'linux'], 
-        #              ['http://rss.feedsportal.com/c/32569/f/491734/index.rss',                         'linux'], 
-        #              ['http://feeds.feedburner.com/thepowerbase?format=xml',                           'linux'], 
-        #              ['http://feeds.feedburner.com/unixmenhowtos?format=xml',                          'linux'], 
-#
-#                      ['http://www.nasa.gov/rss/lg_image_of_the_day.rss',                               'space'], 
-#                      ['http://www.nasa.gov/rss/chandra_images.rss',                                    'space'], 
-#                      ['http://www.esa.int/rss/TopNews.xml',                                            'space'], 
-#                      ['http://www.nasa.gov/directorates/somd/reports/iss_reports/iss_reports.rss',     'space'], 
-#                      ['http://www.nasa.gov/rss/breaking_news.rss',                                     'space'], 
-#                      ['http://www.nasa.gov/mission_pages/SOFIA/sofia-newsandfeatures-RSS.rss',         'space'], 
-#                      ['http://www.nasa.gov/rss/solar_system.rss',                                      'space'], 
-#                      ['http://www.nasa.gov/rss/universe.rss',                                          'space'], 
-#                      ['http://www.nasa.gov/mission_pages/kepler/news/kepler-newsandfeatures-RSS.rss',  'space'], 
-#
-##                      ['https://bbs.archlinux.org/extern.php?action=feed&tid=92895&type=atom',          'threads'],
-#                      ['https://bbs.archlinux.org/extern.php?action=feed&tid=155476&type=atom',         'threads'],
-#
-#                      ['http://feeds.bbci.co.uk/news/rss.xml',                                          'news'],
-#                      ['http://www.haarlemsdagblad.nl/?service=rss',                                    'news'],
-#                      ['http://www.haarlemsdagblad.nl/nieuws/regionaal/?service=rss',                   'news'],
-#                      ['http://feeds.nos.nl/nosnieuwsalgemeen',                                         'news'],
-#                      ['http://nrc.nl/rss.php',                                                         'news'],
-#                      ['http://www.nu.nl/feeds/rss/algemeen.rss',                                       'news'],
-#                      ['http://lifehacker.com/index.xml',                                               'news'],
-#
-#                      ['http://elementaryos.org/journal/rss.xml',                                       'projects'],
-#                      ['http://www.raspberrypi.org/feed',                                               'projects'],
-#                      ['http://themagpi.wordpress.com/feed/',                                           'projects'],
-#                      ['https://www.haiku-os.org/rss.xml',                                              'projects'],
-#                      ['https://www.tizen.org/blogs/feed',                                              'projects'],
-#                      ['http://www.cyanogenmod.com/feed',                                               'projects'],
-#                      ['http://fritzing.org/news/feeds/rss/',                                           'projects'],
-#
-#                      ['http://quicksurf.com/?feed=ogg&amp;cat=141',                                    'podcasts'],
-#                      ['http://feeds.feedburner.com/linuxoutlaws',                                      'podcasts']]
+        self.feeds = [['http://www.webupd8.org/feeds/posts/default', 'linux'], 
+                      ['http://www.osnews.com/files/recent.xml',     'linux']]
