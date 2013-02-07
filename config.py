@@ -3,8 +3,7 @@ import os
 
 class Config(object):
     def __init__(self):
-        self.max_chars_per_page     = 10000    # Max amount of characters a page contains
-        self.max_entries_in_sidebar = 30       # Max amount of entries in right sidebar
+        self.entries_per_page       = 5
         self.entry_ttl              = 1        # When to delete entries in days, False to disable 
                                                # (This will make generating html a lot more time consuming)
         self.links_target           = '_blank' # Open links in a new window or not '_blank' = new, '_self' = same
@@ -16,13 +15,11 @@ class Config(object):
 
         # This switches a couple of page elements on or off
         self.switch = {}
-        self.switch['delete_feed']      = True # Display mark read button on page
-        self.switch['mark_read']        = True # Display mark read button on page
-        self.switch['mark_all_read']    = True # Display mark all read button on page
-        self.switch['update_feeds']     = True # Display update feeds button on page
         self.switch['auto_mark_read']   = True # Automatically mark feed read on opening page
         self.switch['auto_refresh']     = 600  # Automatic page refresh in seconds or False to disable
         self.switch['menu']             = True # An awesome jquery menu that remembers state using cookies
+        self.switch['php_buttons_top']  = True # An awesome jquery menu that remembers state using cookies
+        self.switch['php_buttons_bottom'] = False # An awesome jquery menu that remembers state using cookies
 
         self.domain                = 'http://rss.opentbc.nl'         # eg: 'http://example.com'
         self.app_dir               = '/home/eco/bin/apps/static-rss' # eg: '/home/user/static-rss'
@@ -30,10 +27,13 @@ class Config(object):
         # Should be something like '/var/www/static-rss' or '/home/user/static-rss/html'
         # If /tmp is tmpfs, you can also do '/tmp/static-rss' for incredible speed improvements
         # Check README.md for a brief explanation about tmpfs
-        self.path_export_html      = '/tmp/static-rss/html'          
+        self.path_export_html      = '/tmp/static-rss'          
         self.path_db               = self.app_dir + '/database/static-rss.sqlite'    # Path to sqlite database
 
         self.path_template_feed    = self.app_dir + '/templates/feed.html'  # Path to the main template
+        self.path_template_menu    = self.app_dir + '/templates/menu.html'  # Path to the menu template
+        self.path_template_page    = self.app_dir + '/templates/page.html'  # Path to the menu template
+        self.path_template_index   = self.app_dir + '/templates/index.html' # Path to the menu template
         self.path_css              = self.app_dir + '/css/dark.css'
         self.path_php              = self.app_dir + '/php'
         self.path_script_update    = self.app_dir + '/php/update.php'
@@ -41,6 +41,7 @@ class Config(object):
         self.path_script_subscribe = self.app_dir + '/php/subscribe.php'
         self.path_script_del_feed  = self.app_dir + '/php/del_feed.php'
         self.path_db_manager       = self.app_dir + '/php/phpliteadmin.php'
+        self.path_js_infinitescroll= self.app_dir + '/js/jquery.jscroll.min.js'
         self.path_favicon          = self.app_dir + '/pics/favicon.ico'
 
         # Appart from just adding feeds to the database you can also enter them here as: ['url', 'group']

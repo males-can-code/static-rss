@@ -8,131 +8,55 @@
         {{switch=auto_refresh}}
         <SCRIPT type="text/javascript">document.write("<meta http-equiv='refresh' content='$auto_refresh' >");</SCRIPT>
         {{endswitch=auto_refresh}}
-        {{switch=menu}}
-        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-        <script type="text/javascript" src="https://raw.github.com/carhartl/jquery-cookie/master/jquery.cookie.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script src="$domain/js/jquery.jscroll.min.js"></script>
         <script>
-            //<script src="http://code.jquery.com/ui/1.10.0/jquery-ui.js">
             $(document).ready(function() {
-                $(".menu div.menu_group_title").click(function() {
-                    if ($(this).siblings().is(":hidden")) {
-                        $(this).siblings().slideDown();
-                        $.cookie($(this).parent().get(0).className, 'true', {expires: 7, path:'/'});
-                    }
-                    else {
-                        $(this).siblings().slideUp();
-                        $.cookie($(this).parent().get(0).className, 'false', {expires: 7, path:'/'});
-                    }
-                    });
-                // Restore state from cookie
-                $(".menu div.menu_group_title").each(function() {
-                    var c = $.cookie($(this).parent().get(0).className);
-                    if (c == 'true') { $(this).siblings().show(); }
-                    else if (c == 'false') { $(this).siblings().hide(); }
-                    else { $(this).siblings().hide(); }
+                $('.scroll').jscroll({
+                    autoTrigger: true,
+                    nextSelector: 'a.next:last',
+                    debug: false
                 });
-                //$(function() { $( ".menu" ).sortable() });
             });
         </script>
-        {{endswitch=menu}}
     </HEAD>
     <BODY>
         {{switch=auto_mark_read}}
         <IFRAME style="display:none" src="$domain/php/mark_read.php?hash=$feed_hash&amp;mode=silent"></IFRAME>
         {{endswitch=auto_mark_read}}
         <DIV id="main_wrapper">
-            <DIV id=sidebar>
-                <DIV class="menu">
-                {{loop=feed_list}}
-                    {{switch=feed_list_title}}
-                    <DIV class=$group_title>
-                        <DIV class='menu_group_title'>$group_title</DIV>
-                        <DIV class='menu_group_content'>
-                        {{endswitch=feed_list_title}}
-                            {{switch=feed_list_link}}
-                            <DIV><A HREF="$feed_url" class="$feed_read">$feed_link$counter</A></DIV>
-                        {{endswitch=feed_list_link}}
-                        {{switch=feed_list_close}}
-                        </DIV>
-                    </DIV>
-                    {{endswitch=feed_list_close}}
-                {{endloop=feed_list}}
-                </DIV>
-                <DIV class=menu>
-                    <DIV class='entries'>
-                        <DIV class='menu_group_title'>entries</DIV>
-                        <DIV class='menu_group_content'>
-                            {{loop=entry_list}}
-                            <DIV><A HREF="$entry_url#$entry_hash" class="$entry_read">$entry_title</A></DIV>
-                            {{endloop=entry_list}}
-                        </DIV>
-                    </DIV>
-                </DIV>
-            </DIV>
+            <DIV id=sidebar><IFRAME src="$domain/menu.html"></IFRAME></DIV>
             <DIV id="feed_wrapper">
                 <DIV id="feed_header">
                     <DIV id="feed_title">$feed_title</DIV>
+                    {{switch=php_buttons_top}}
                     <DIV class="php_buttons">
-                        {{switch=mark_read}}
                         <A HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">mark read</A>
-                        {{endswitch=mark_read}}
-                        {{switch=mark_all_read}}
                         ::
                         <A HREF="$domain/php/mark_read.php?hash=all&amp;go_back=$go_back">mark all read</A>
-                        {{endswitch=mark_all_read}}
-                        {{switch=update_feeds}}
                         ::
                         <A HREF="$domain/php/update.php?go_back=$go_back">update</A>
-                        {{endswitch=update_feeds}}
                         ::
-                        {{switch=delete_feed}}
                         <A HREF="$domain/php/del_feed.php?hash=$feed_hash&amp;go_back=$domain">delete feed</A>
-                        {{endswitch=delete_feed}}
                     </DIV>
-                    <DIV class="page_links">
-                        <A HREF=$page_prev>&lt;</A>
-                        {{loop=page_links}}
-                        <A HREF="$page_url">$page</A>
-                        {{endloop=page_links}}
-                        <A HREF=$page_next>></A>
-                    </DIV>
+                    {{endswitch=php_buttons_top}}
                 </DIV>
-                    {{loop=entries}}
-                    <DIV class="entry_box">
-                        <DIV class="entry_header_wrapper">
-                            <A id="$entry_hash" class="entry_title $entry_read" HREF="$entry_url" target="$links_target">$entry_title</A>
-                            <DIV class="entry_date_published">$entry_date_published</DIV>
-                        </DIV>
-                        <DIV class="entry_content">
-                            {{loop=media}}
-                            <DIV><AUDIO controls="controls" preload="metadata"> <SOURCE src="$entry_media" />Your browser does not support the HTML5 audio element</AUDIO></DIV>
-                            <A href="$entry_media">[Download media]</A>
-                            {{endloop=media}}
-                            $entry_content
-                        </DIV>
-                    </DIV>
-                    {{endloop=entries}}
-                    <DIV id='php_buttons_bottom' class="php_buttons">
-                        {{switch=mark_read}}
-                        <A HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">mark read</A>
-                        {{endswitch=mark_read}}
-                        {{switch=mark_all_read}}
-                        |
-                        <A HREF="$domain/php/mark_read.php?hash=all&amp;go_back=$go_back">mark all read</A>
-                        {{endswitch=mark_all_read}}
-                        {{switch=update_feeds}}
-                        |
-                        <A HREF="$domain/php/update.php?go_back=$go_back">update</A>
-                        {{endswitch=update_feeds}}
-                    </DIV>
-                    <DIV id='page_links_bottom' class="page_links">
-                        <A HREF=$page_prev>&lt;</A>
-                        {{loop=page_links}}
-                            <A HREF="$page_url">$page</A>
-                        {{endloop=page_links}}
-                        <A HREF=$page_next>></A>
-                    </DIV>
+                <DIV class="scroll">
+                {{loop=page}}
+                <!-- Loop entries in the page template -->
+                {{endloop=page}}
                 </DIV>
+                {{switch=php_buttons_bottom}}
+                <DIV id='php_buttons_bottom' class="php_buttons">
+                    <A HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">mark read</A>
+                    ::
+                    <A HREF="$domain/php/mark_read.php?hash=all&amp;go_back=$go_back">mark all read</A>
+                    ::
+                    <A HREF="$domain/php/update.php?go_back=$go_back">update</A>
+                    ::
+                    <A HREF="$domain/php/del_feed.php?hash=$feed_hash&amp;go_back=$domain">delete feed</A>
+                </DIV>
+                {{endswitch=php_buttons_bottom}}
             </DIV>
         </DIV>
     </BODY>
