@@ -21,9 +21,6 @@
         </script>
     </HEAD>
     <BODY>
-        {{switch=auto_mark_read}}
-        <IFRAME style="display:none" src="$domain/php/mark_read.php?hash=$feed_hash&amp;mode=silent"></IFRAME>
-        {{endswitch=auto_mark_read}}
         <DIV id="main_wrapper">
             <DIV id=sidebar><IFRAME src="$domain/menu.html"></IFRAME></DIV>
             <DIV id="feed_wrapper">
@@ -59,5 +56,8 @@
                 {{endswitch=php_buttons_bottom}}
             </DIV>
         </DIV>
+        {{switch=auto_mark_read}}
+        <IFRAME style="display:none" src="$domain/php/mark_read.php?hash=$feed_hash&amp;mode=silent"></IFRAME>
+        {{endswitch=auto_mark_read}}
     </BODY>
 </HTML>

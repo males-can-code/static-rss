@@ -84,16 +84,17 @@ class Log(object):
                 return
 
         # custom syntax highlighting
-        message = re.sub( '<<<', self.color_inbound + '<<<' + self.color_reset, message )
-        message = re.sub( '>>>', self.color_outbound + '>>>' + self.color_reset, message )
-        message = re.sub( 'LISTEN', self.color_listen + 'LISTEN' + self.color_reset, message )
-        message = re.sub( 'CONNECT', self.color_connect + 'CONNECT' + self.color_reset, message )
         message = re.sub( 'Parsing:', self.color_blue + 'Parsing:' + self.color_white, message )
+        message = re.sub( 'Generating:', self.color_blue + 'Generating:' + self.color_white, message )
+
         message = re.sub( 'Inserting new entry:', self.color_green + 'Inserting new entry:' + self.color_reset, message )
-        message = re.sub( 'Adding feed:', self.color_magenta + 'Adding feed:' + self.color_white, message )
+        message = re.sub( 'Adding feed:', self.color_green + 'Adding feed:' + self.color_white, message )
+
+        message = re.sub( 'Writing file:', self.color_magenta + 'Writing file:' + self.color_white, message )
+
         message = re.sub( 'Marking feed read:', self.color_red + 'Marking feed read:' + self.color_white, message )
         message = re.sub( 'Deleting entry:', self.color_red + 'Deleting entry:' + self.color_white, message )
-        message = re.sub( 'Generating:', self.color_blue + 'Generating:' + self.color_white, message )
+        message = re.sub( 'Deleting feed:', self.color_red + 'Deleting feed:' + self.color_white, message )
 
         address = re.findall( r'[0-9]+(?:\.[0-9]+){3}', message )
         if address:
@@ -212,7 +213,7 @@ class GenerateHTML(object):
     # (over)write data to file
         try:
             with open(path, 'w') as f:
-                self.log.warning('writing file: %s'%path)
+                self.log.info('Writing file: %s'%path)
                 f.write(data)
         except IOError:
             self.log.error('Failed to write to file: %s. Quitting...'%path)
@@ -719,6 +720,7 @@ class RSS(Database, GenerateHTML):
 
                 self.log.info('Adding feed: %s'%feed[0])
                 self.insert_row('feeds', feed_insert)
+                return feed_insert['feed_hash']
         else:
             self.log.error('Url is not a feed')
 
@@ -882,14 +884,17 @@ class RSS(Database, GenerateHTML):
 
             for arg in sys.argv:
                 if '--subscribe=' in arg:
-                    x,url = arg.split('=') 
+                    print(arg)
+                    x,url = arg.split('--subscribe=') 
                     for arg in sys.argv:
                         if '--group=' in arg:
-                            x,group = arg.split('=') 
+                            x,group = arg.split('--group=') 
                             if len(url) > 0 and len(group) > 0:
-                                self.add_feed([url, group])
+                                hash = self.add_feed([url, group])
+                                feeds_gen = self.parse_feeds()
+                                self.generate_HTML(del_dir=False, partial=False, feeds_gen=feeds_gen)
                             else:
-                                self.log.error('Failed to enter url... Quitting...')
+                                self.log.error('Failed to add url... Quitting...')
                                 sys.exit()
                     
             if '--parse-feeds' in sys.argv or '-p' in sys.argv:
