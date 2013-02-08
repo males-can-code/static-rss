@@ -14,22 +14,9 @@ from config import Config
 from bs4 import BeautifulSoup
 
 # TODO Limit downloaded entries per parse, if we don't limit it it will download the complete feed and entry history 
-
 # TODO remove old entries after certain period, note that this will conflict with the above
-
-# TODO maybe move menu to iframe and remove read/unread headline feature from entries
-#      This way we can dramatically reduce the cpu load when generating html since there is
-#      no need for regeneration if there is no possible change, only stuff is added
-#      This btw also means that i have to move the pagelinks (maybe also in an iframe?)
-#      Another solution may be that i can use reggex to change certain values (read/unread) in html files
-#      so we don't have to regenerate the whole bunch but we still can retain this nice feature
-
-# start page count at one
-
 # TODO After podcasts also videocasts should be supported
-
 # TODO Comments Comments Comments Comments
-
 # TODO When a feed updates its entry I get a new copy, for some feeds this is really ennoying, eg. reddit
 
 class Log(object):
@@ -406,7 +393,32 @@ class GenerateHTML(object):
         self.write_to_file(self.config.path_export_html + '/index.html', filled_index_template)
 
 
-    def gen_init(self, feeds, del_dir=True):
+    def generate_feed(self, feed, template, partial):
+        self.log.info('Generating: %s'%feed['feed_title'])
+        template['pages']      = self.calculate_pages(feed)         # Calculate in how many pages the entries fit
+        template['feed_title'] = feed['feed_title']                 # Title is same for every page in feed
+        template['feed_hash']  = feed['feed_hash']
+
+        cur_page = len(template['pages'])
+
+        for page in template['pages'][0:self.config.max_pages]:
+            if (self.check_in_row_by_value('entries', 'entry_read', 'unread', "entry_hash", page) and partial) or not partial:
+                template['page']      = page
+                template['page_next'] = self.generate_next_link(template['pages'], feed, cur_page)
+                template['go_back']   = '%s/feeds/%s' %(self.config.domain, feed['feed_hash'])
+
+                # Parse the template and write to file
+                if cur_page == len(template['pages']):
+                    # Generate the highest (newest) page as index.html in feed dir (this file will be linked to from menu)
+                    filled_template = self.parse_template(self.config.path_template_feed, template)
+                    self.write_to_file('%s/feeds/%s/index.html'%(self.config.path_export_html, feed['feed_hash']), filled_template)
+                else:
+                    filled_template = self.parse_template(self.config.path_template_page, template)
+                    self.write_to_file('%s/feeds/%s/page_%s.html'%(self.config.path_export_html, feed['feed_hash'], str(cur_page)), filled_template)
+                cur_page = cur_page - 1
+
+
+    def gen_init(self, feeds, del_dir):
     # Create/remove/copy dirs and files
         if del_dir: self.remove_dir(self.config.path_export_html)
         self.check_dir(self.config.path_export_html)
@@ -414,57 +426,29 @@ class GenerateHTML(object):
         self.copy_dir(self.config.path_php, self.config.path_export_html + '/php')
         self.copy_dir(self.config.path_js, self.config.path_export_html + '/js')
         self.copy_file(self.config.path_favicon, self.config.path_export_html)
-        for feed in feeds: # Create all feed dirs which will store the entries
+        for feed in feeds:                      # Create all feed dirs which will store the entries
             self.check_dir(self.config.path_export_html + '/feeds/' + feed['feed_hash'])
 
 
     def generate_HTML(self, del_dir=False, partial=True, feeds_gen='all'):
     # The main method that calls the other method in class and eventually generates the HTML
         self.log.info('Generating HTML')
-        feeds = self.get_table('feeds')                        # Get a list of dicts containing information about a feed
-        if del_dir == True: self.gen_init(feeds, del_dir=True) # Sometimes we don't wanna delete the export dir but just overwrite because  
-        else: self.gen_init(feeds, del_dir=False)              # there will be a (short) moment where you will get a 404 when a file is missing
+        feeds = self.get_table('feeds')     
+        self.gen_init(feeds, del_dir=del_dir)
 
-        template = {}               # feed_template dict contains main content for the 'feed.html' template 
-        template['auto_refresh']    = self.config.switch['auto_refresh']
-        template['domain']          = self.config.domain
-        template['favicon']         = self.config.domain + '/favicon.ico'
-        template['css']             = self.config.domain + '/css/' + os.path.basename(self.config.path_stylesheet)
+        # Feed_template dict contains information to fill templates
+        template = {}            
+        template['auto_refresh'] = self.config.switch['auto_refresh']
+        template['domain']       = self.config.domain
+        template['favicon']      = self.config.domain + '/favicon.ico'
+        template['css']          = self.config.domain + '/css/' + os.path.basename(self.config.path_stylesheet)
 
         self.generate_menu(template)                           # Generate menu
         self.generate_index(feeds[0]['feed_hash'], template)   # Generate index.html
 
-        for feed in feeds:                                                  # Create html pages for every page of every feed
-            if feed['feed_hash'] in feeds_gen or feeds_gen == 'all':        # only generate feed if it has new messages
-                self.log.info('Generating: %s'%feed['feed_title'])
-
-                template['pages']      = self.calculate_pages(feed)         # Calculate in how many pages the entries fit
-                template['feed_title'] = feed['feed_title']                 # Title is same for every page in feed
-                template['feed_hash']  = feed['feed_hash']
-
-                cur_page = len(template['pages'])
-                for page in template['pages'][0:self.config.max_pages]:
-
-                    # If partial is set, only regenerate the pages with unread entries (after parsing the newest) in it
-                    contains_unread = False
-                    if partial:
-                        if self.check_in_row_by_value('entries', 'entry_read', 'unread', "entry_hash", page):
-                            contains_unread = True
-                        
-                    if contains_unread or not partial:
-                        template['page']      = page
-                        template['page_next'] = self.generate_next_link(template['pages'], feed, cur_page)
-                        template['go_back']   = '%s/feeds/%s' %(self.config.domain, feed['feed_hash'])
-
-                        # Parse the template and write to file
-                        if cur_page == len(template['pages']):
-                            # Generate the highest (newest) page as index.html in feed dir (this file will be linked to from menu)
-                            filled_template = self.parse_template(self.config.path_template_feed, template)
-                            self.write_to_file('%s/feeds/%s/index.html'%(self.config.path_export_html, feed['feed_hash']), filled_template)
-                        else:
-                            filled_template = self.parse_template(self.config.path_template_page, template)
-                            self.write_to_file('%s/feeds/%s/page_%s.html'%(self.config.path_export_html, feed['feed_hash'], str(cur_page)), filled_template)
-                        cur_page = cur_page - 1
+        for feed in feeds:              
+            if feed['feed_hash'] in feeds_gen or feeds_gen == 'all':        # Only generate feed if it has new messages
+                self.generate_feed(feed, template, partial)
 
  
 
