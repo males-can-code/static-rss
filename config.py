@@ -3,12 +3,10 @@ import os
 
 class Config(object):
     def __init__(self):
-        self.entries_per_page       = 5
-        self.entry_ttl              = 1        # When to delete entries in days, False to disable 
-                                               # (This will make generating html a lot more time consuming)
-        self.links_target           = '_blank' # Open links in a new window or not '_blank' = new, '_self' = same
-        self.max_posts_per_feed     = 30       # Keep a max amount of posts per feed in database
-        self.max_pages              = 10       # Max amount of pages that will be generated (improves performance dramatically)
+        self.links_target               = '_blank' # Open links in a new window or not '_blank' = new, '_self' = same
+        self.entries_per_page           = 5        # Max amount of entries a page will contain
+        self.max_pages                  = 10       # Max amount of pages that will be generated, keep this low as this will improve performance
+        self.max_entries_per_feed_in_db = 200      # Max amount of entries per feed before being deleted from database
 
         # List of blacklisted tags and attributes for content
         self.invalid_tags = ['script', 'html', 'body', 'strong', 'hr']
@@ -45,5 +43,6 @@ class Config(object):
 
         # Appart from just adding feeds to the database you can also enter them here as: ['url', 'group']
         # They will be automatically added to the database also if you remove them from the database
+        # You can leave this var empty, 'self.feeds = []'
         self.feeds = [['http://www.webupd8.org/feeds/posts/default', 'linux'], 
                       ['http://www.osnews.com/files/recent.xml',     'linux']]

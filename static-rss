@@ -575,7 +575,14 @@ class Database(object):
 
     def delete_row_by_value(self, table, col, value):
         db = sqlite3.connect(self.config.path_db)
-        db.execute('delete from %s where "%s" = "%s"'%(table,col,value))
+        if type(value) == list:
+            tmp_value = ''
+            for v in value:
+                tmp_value = tmp_value + ',\'' + v + '\''
+            value = tmp_value.lstrip(',')
+        else:
+            value = '\'' + value + '\''
+        db.execute('delete from %s where "%s" in (%s)'%(table,col,value))
         try:
             db.commit()
             db.close()
@@ -714,6 +721,7 @@ class RSS(Database, GenerateHTML):
 
 
     def clean_HTML(self, content):
+    # Get rid of nasty tags and attributes in feed content
         soup = BeautifulSoup(content)
 
         for tag in self.config.invalid_tags: 
@@ -746,7 +754,6 @@ class RSS(Database, GenerateHTML):
         entry_insert['entry_content']         = str(self.clean_HTML(entry['summary']))
         entry_insert['entry_hash']            = str(self.get_hash(entry_insert['entry_title'] + entry_insert['entry_content']))
         entry_insert['entry_read']            = 'unread'
-        #entry_insert['entry_date_entered']    = str(self.get_timestamp(human_readable=False))
         entry_insert['entry_feed_hash']       = str(self.get_hash(url))
 
         # Try to get url otherwise insert unknown
@@ -790,7 +797,7 @@ class RSS(Database, GenerateHTML):
     def del_feed(self, feed_hash):
         self.log.info('Deleting feed: %s'%feed_hash)
         if self.check_in_table('entries', 'entry_feed_hash',feed_hash):
-            # First delete entries belonging to feed
+            # Delete entries that belong to feed
             self.delete_row_by_value('entries', 'entry_feed_hash', feed_hash)
         else:
             self.log.error('Failed to remove entries, no entries belong to feed with hash: %s'%feed_hash)
@@ -799,6 +806,20 @@ class RSS(Database, GenerateHTML):
             self.delete_row_by_value('feeds', 'feed_hash', feed_hash)
         else:
             self.log.error('Failed to remove feed, feed doesn\'t exist')
+
+
+    def cleanup_feeds(self):
+    # Delete entries from database if they exceed self.config.max_entries_per_feed_in_db
+        self.log.info('Cleaning up feeds')
+        feeds = self.get_table('feeds')
+        for feed in feeds:
+            entries_hashes = []
+            entries = self.get_rows_by_value('entries', 'entry_feed_hash', feed['feed_hash'], order_by='entry_date_published') 
+            for entry in entries:
+                entries_hashes.append(entry['entry_hash'])
+            del_entries = entries_hashes[self.config.max_entries_per_feed_in_db-1:-1]
+            if del_entries:
+                self.delete_row_by_value('entries', 'entry_hash', del_entries)
 
 
     def mark_read(self, feed_hash):
@@ -820,18 +841,12 @@ class RSS(Database, GenerateHTML):
         return feeds_mark_read
 
 
-    def check_ttl(self):
-        if self.config.entry_ttl:
-            self.log.info('Checking TTL')
-            self.delete_older_than('entries',self.config.entry_ttl)
-
-
     def init(self):
     # Create tables, input feeds from config file in table
     # TODO are there feeds? what will happen if not?
         self.check_dir(os.path.dirname(self.config.path_db))
         self.create_tables()
-        self.check_ttl()
+        self.cleanup_feeds()
 
         if len(self.config.feeds) >= 1:
             for feed in self.config.feeds:
