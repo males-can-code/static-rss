@@ -19,6 +19,7 @@ from bs4 import BeautifulSoup
 # TODO Comments Comments Comments Comments
 # TODO When a feed updates its entry I get a new copy, for some feeds this is really ennoying, eg. reddit
 
+
 class Log(object):
     def __init__(self, log_file=False, level='debug', display=True, show='all', maxlength=15):
         self.log_file = log_file
@@ -267,7 +268,7 @@ class GenerateHTML(object):
 
 
     def loop_feed_list(self, lines, data):
-    # Generate the left sidebar links
+    # Is called by parse_template, Generates the left sidebar links
         filled_template = ''
         feed_url = {}
         last_group = ''
@@ -325,13 +326,14 @@ class GenerateHTML(object):
 
 
     def loop_page(self, lines, data):
+    # Is called by parse_template
         filled_template = ''
         filled_template = filled_template + self.parse_template(self.config.path_template_page, data)
         return filled_template
 
 
     def loop_entries(self, lines, feed):
-    # Generate a page with entries (posts)
+    # Is called by parse_template, Generate a page with entries (posts)
         filled_template = ''
         entries = self.get_rows_by_value('entries', 'entry_feed_hash', feed['feed_hash'], order_by='entry_date_published') 
         for entry in entries:
@@ -342,8 +344,9 @@ class GenerateHTML(object):
 
 
     def loop_media(self, lines, entry):
-        # if there are multiple media files attached to entry loop the code for every file
-        # Return nothing if there are no media files (so no need for a switch)
+    # Is called by parse_template
+    # if there are multiple media files attached to entry loop the code for every file
+    # Return nothing if there are no media files (so no need for a switch)
         filled_template = ''
         if entry['entry_media']:
             medias = entry['entry_media'].split(',')
@@ -379,14 +382,14 @@ class GenerateHTML(object):
 
 
     def generate_menu(self, template): 
-        # Generate menu
+    # Generate menu
         self.log.info('Generating: menu.html: %s'%self.config.path_export_html + '/menu.html')
         filled_menu_template = self.parse_template(self.config.path_template_menu, template)
         self.write_to_file(self.config.path_export_html + '/menu.html', filled_menu_template)
 
 
     def generate_index(self, feed_hash, template): 
-        # Generate index.html
+    # Generate index.html
         self.log.info('Generating: index.html: %s'%self.config.path_export_html + '/index.html')
         template['first_feed'] = feed_hash
         filled_index_template = self.parse_template(self.config.path_template_index, template)
@@ -394,6 +397,7 @@ class GenerateHTML(object):
 
 
     def generate_feed(self, feed, template, partial):
+    # Generate a feed and its pages
         self.log.info('Generating: %s'%feed['feed_title'])
         template['pages']      = self.calculate_pages(feed)         # Calculate in how many pages the entries fit
         template['feed_title'] = feed['feed_title']                 # Title is same for every page in feed
@@ -419,7 +423,7 @@ class GenerateHTML(object):
 
 
     def gen_init(self, feeds, del_dir):
-    # Create/remove/copy dirs and files
+    # Create/remove/copy dirs and files, is always called before doing anything
         if del_dir: self.remove_dir(self.config.path_export_html)
         self.check_dir(self.config.path_export_html)
         self.copy_dir(self.config.path_css, self.config.path_export_html + '/css')
@@ -431,7 +435,7 @@ class GenerateHTML(object):
 
 
     def generate_HTML(self, del_dir=False, partial=True, feeds_gen='all'):
-    # The main method that calls the other method in class and eventually generates the HTML
+    # The main method that calls the other method in class
         self.log.info('Generating HTML')
         feeds = self.get_table('feeds')     
         self.gen_init(feeds, del_dir=del_dir)
