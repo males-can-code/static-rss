@@ -22,7 +22,7 @@ class Config(object):
         self.switch['php_buttons_top']    = True # The php buttons on top of page (del feed, mark read, mark all read)
         self.switch['php_buttons_bottom'] = False # An awesome jquery menu that remembers state using cookies
 
-        self.domain  = 'http://rss.opentbc.nl'         # eg: 'http://example.com'
+        self.domain  = '//rss.opentbc.nl'         # eg: '//example.com' (leave the http: cause chromium will start complaining about insecure content
         self.app_dir = '/home/eco/bin/apps/static-rss' # Location of the program, eg: '/home/user/static-rss'
 
         # Should be something like '/var/www/static-rss'

@@ -400,6 +400,7 @@ class GenerateHTML(object):
     def generate_index(self, feed_hash, template): 
         # Generate index.html
         self.log.info('Generating: index.html: %s'%self.config.path_export_html + '/index.html')
+        template['first_feed'] = feed_hash
         filled_index_template = self.parse_template(self.config.path_template_index, template)
         self.write_to_file(self.config.path_export_html + '/index.html', filled_index_template)
 
