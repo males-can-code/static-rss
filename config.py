@@ -4,7 +4,7 @@ import os
 class Config(object):
     def __init__(self):
         self.links_target               = '_blank' # Open links in a new window or not '_blank' = new, '_self' = same
-        self.entries_per_page           = 5        # Max amount of entries a page will contain
+        self.entries_per_page           = 10        # Max amount of entries a page will contain
         self.max_pages                  = 10       # Max amount of pages that will be generated, keep this low as this will improve performance
         self.max_entries_per_feed_in_db = 200      # Max amount of entries per feed before being deleted from database
 

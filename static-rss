@@ -14,7 +14,6 @@ from config import Config
 from bs4 import BeautifulSoup
 
 # TODO Limit downloaded entries per parse, if we don't limit it it will download the complete feed and entry history 
-# TODO remove old entries after certain period, note that this will conflict with the above
 # TODO After podcasts also videocasts should be supported
 # TODO Comments Comments Comments Comments
 # TODO When a feed updates its entry I get a new copy, for some feeds this is really ennoying, eg. reddit
@@ -657,7 +656,7 @@ class RSS(Database, GenerateHTML):
     # Parse feed with feedparser module or return False
         self.log.info('Parsing: %s'%url)
         parsed_feed = feedparser.parse(url)
-        if len(parsed_feed.feed) < 1:
+        if len(parsed_feed.feed) == 0:
             self.log.error('Failed to import feed: %s'%url)
             return False
         else:
@@ -672,6 +671,8 @@ class RSS(Database, GenerateHTML):
             parsed_feed = self.parse_feed(feed['feed_url'])
             if parsed_feed:
                 for entry in parsed_feed.entries:
+                    if 'updated' in entry:
+                        print(entry['updated'], entry['title'])
                     if not self.check_in_table('entries', 'entry_hash', str(self.get_hash(entry['title'] + str(self.clean_HTML(entry['summary']))))):
                         self.add_entry(entry, feed['feed_url'])
                         # Add feed_hash from feeds with unread messages to feeds_gen so we know which html should be regenerated
