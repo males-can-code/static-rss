@@ -113,18 +113,29 @@ h1, h2, h3, h4, h5 {
     -webkit-border-radius: 5px;
     -moz-border-radius:    5px;
     border-radius:         5px;
-    position:relative;
-    height: 4.5em;
+    height: 2.3em;
 	border: solid .1em #3e3e3e;
+    background-color: #262626;
 }
+
+#feed_header.sticky {
+    position: fixed;
+    top: 0em;
+    width: 790px;
+}
+
+#ghost.show { 
+    height:2.3em; 
+    }
+
 #feed_header #feed_title:before { content:"\003A \003A \0020"; font-weight:bold; }
 #feed_header #feed_title { 
     -webkit-border-radius: 5px;
     -moz-border-radius:    5px;
-    position:absolute;
+    float: left;
+    margin: .5em;
+    margin-top: .35em;
     border-radius:         5px;
-    left:.5em;
-    top:.5em;
     font-size:             1.3em; 
     font-weight:           bold;
     text-transform:        uppercase;
@@ -134,24 +145,15 @@ h1, h2, h3, h4, h5 {
     color:                 #DDDDDD;
 }
 #feed_header .php_buttons { 
-    position:absolute;
-    left: .5em;
-    bottom: .5em;
-    text-align:left; 
+    float: right;
+    margin: .5em;
+    text-align:right; 
 }
 
-#feed_header .page_links { 
-    position:absolute;
-    right: .5em;
-    bottom: .5em;
-    text-align:right; 
-} 
-
-#page_links_bottom { float:right; margin-right:.5em; margin-top:1em; margin-bottom:2.5em;}
-#php_buttons_bottom { float:left; margin-left:.5em; margin-top:1em; margin-bottom:2.5em;}
 
 /* container for every entry on page */
-.entry_box:hover { background-color: #2E2E2E;}
+.entry_active { background-color: #2E2E2E;}
+.feed_active { background-color: #2E2E2E;}
 .entry_box { 
     -webkit-border-radius: 5px;
     -moz-border-radius:    5px;
