@@ -10,6 +10,7 @@ Use at your own risk!
 ## Dependencies:   
 * **beautifulsoup:** https://github.com/bdoms/beautifulsoup    
 * **feedparser:** https://code.google.com/p/feedparser/downloads/list    
+* **sqlite3:** https://sqlite.org/    
 
 ## Install:
 #### Clone repository  
@@ -81,6 +82,7 @@ tmpfs   /tmp         tmpfs   nodev,nosuid,size=500M          0  0
 
 #### Firefox
 For an easy way of adding feeds to static-rss, you can create a bookmark in firefox with the following content:   
+Now you can browse to the rss page and click the bookmark to add the feed to static-rss.   
 
 <pre>
 javascript:{var group=prompt("Enter group","default");window.location.href="[domain]/php/subscribe.php?url="+document.URL+'&group='+group;}
