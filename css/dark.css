@@ -60,9 +60,8 @@ h1, h2, h3, h4, h5 {
     position:    relative;
     margin-left: auto;
     margin-right: auto;
-    margin-top:  2.5em;
     width:       980px;
-    border:      solid 0px white;
+    border:      solid 1px white;
     margin-bottom: 2.5em;
 }
 
@@ -72,6 +71,7 @@ h1, h2, h3, h4, h5 {
     width: 13em;
     height: 150em;;
     padding: 0px;
+    margin-top: 1.5em;
 }
 
 .menu {
@@ -82,13 +82,13 @@ h1, h2, h3, h4, h5 {
     width:                12.0em;
     text-align:           right;
     margin-bottom:        2em;
-    margin-top: 0em;
+    float: left;
 }
 .menu .menu_group_title {
     -webkit-border-radius: 5px;
     -moz-border-radius:    5px;
     border-radius:         5px;
-    padding:               .5em;
+    padding:               .25em;
 	border:                solid .1em #3e3e3e;
     margin-bottom:         .25em;
 }
@@ -107,27 +107,15 @@ h1, h2, h3, h4, h5 {
     text-align:    left;
 }
 
-#feed_wrapper { margin-left:13.5em; padding:.6em;}
-
 #feed_header {
-    -webkit-border-radius: 5px;
-    -moz-border-radius:    5px;
-    border-radius:         5px;
     height: 2.3em;
-	border: solid .1em #3e3e3e;
-    background-color: #262626;
-}
-
-#feed_header.sticky {
+	border-bottom: solid .1em #3e3e3e;
     position: fixed;
     top: 0em;
-    width: 790px;
+    left:0em;
+    right:0em;
+    background-color: #262626;
 }
-
-#ghost.show { 
-    height:2.3em; 
-    }
-
 #feed_header #feed_title:before { content:"\003A \003A \0020"; font-weight:bold; }
 #feed_header #feed_title { 
     -webkit-border-radius: 5px;
@@ -144,12 +132,24 @@ h1, h2, h3, h4, h5 {
     text-overflow:         ellipsis;
     color:                 #DDDDDD;
 }
+
 #feed_header .php_buttons { 
+    display: none;
     float: right;
     margin: .5em;
     text-align:right; 
 }
 
+#feed_header:hover .php_buttons {
+    display: block;
+}
+
+#content { 
+    float: right;
+    padding:.6em;
+    width: 62em;
+    margin-top: .5em;
+}
 
 /* container for every entry on page */
 .entry_active { background-color: #2E2E2E;}
@@ -158,7 +158,7 @@ h1, h2, h3, h4, h5 {
     -webkit-border-radius: 5px;
     -moz-border-radius:    5px;
     border-radius:         5px;
-    margin-top:1.5em; 
+    margin-top:1em; 
 	border: solid .1em #3e3e3e;
 } 
 

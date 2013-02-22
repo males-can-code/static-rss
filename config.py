@@ -17,7 +17,7 @@ class Config(object):
         self.switch['auto_mark_read']     = True # Automatically mark feed read on opening page
         self.switch['auto_refresh']       = 600  # Automatic page refresh in seconds or False to disable
         self.switch['menu']               = True # An awesome jquery menu that remembers state using cookies
-        self.switch['php_buttons_top']    = True # The php buttons on top of page (del feed, mark read, mark all read)
+        self.switch['php_buttons']        = True # The php buttons on top of page (del feed, mark read, mark all read)
 
         self.domain  = '//rss.opentbc.nl'         # eg: '//example.com' (leave the http: cause chromium will start complaining about insecure content
         self.app_dir = '/home/eco/bin/apps/static-rss' # Location of the program, eg: '/home/user/static-rss'
