@@ -61,6 +61,7 @@ ul {
 h1, h2, h3, h4, h5 {
     color:#DDDDDD;
     font-size: 1em;
+    margin: 0em;
 }
 
 #main_wrapper {
@@ -112,6 +113,18 @@ h1, h2, h3, h4, h5 {
 }
 
 #feed_header {
+    -webkit-box-shadow: 0px 5px 5px #212121;
+    -moz-box-shadow:    0px 5px 5px #212121;
+    box-shadow:         0px 5px 5px #212121;
+    height: 2.3em;
+    position: fixed;
+    top: 0em;
+    left:0em;
+    right:0em;
+    background-color: #262626;
+}
+/*
+#feed_header {
     -webkit-box-shadow: 0px 5px 5px #1a1a1a;
     -moz-box-shadow:    0px 5px 5px #1a1a1a;
     box-shadow:         0px 5px 5px #1a1a1a;
@@ -122,6 +135,7 @@ h1, h2, h3, h4, h5 {
     right:0em;
     background-color: #222222;
 }
+*/
 #feed_header_wrapper { width:980px; margin-left:auto; margin-right:auto; }
 #feed_header #feed_title:before { content:"\003A \003A \0020 StaticRSS | "; font-weight:bold; }
 #feed_header #feed_title { 
@@ -142,35 +156,37 @@ h1, h2, h3, h4, h5 {
 
 #top_menu { display: none; }
 #feed_header:hover #top_menu {
-    -webkit-box-shadow: 0px 5px 5px #1a1a1a;
-    -moz-box-shadow:    0px 5px 5px #1a1a1a;
-    box-shadow:         0px 5px 5px #1a1a1a;
+    -webkit-box-shadow: 0px 5px 5px #212121;
+    -moz-box-shadow:    0px 5px 5px #212121;
+    box-shadow:         0px 5px 5px #212121;
     float:right;
     margin-right:     1em;
     margin-top:       2.3em;
     display: block;
-    height: 6em;
-    width:            50em;
     padding:          .5em;
-    background-color: #222222;
+    padding-top:          0em;
+    background-color: #262626;
 }
 
 #top_menu .col1 { 
     float:left;
-    background-color: #262626;
-    padding: .5em;
-    width: 30em;
-    height:5em;
+    margin-right: 2em;
 }
 
+/*
 #top_menu .php_buttons div:after { content:"\0020 \003A \003A"; font-weight:bold; } 
 #top_menu .php_buttons {
-    padding: .5em;
     float:            right;
     text-align: right;
-    background-color: #262626;
     width: 10em;
     height:5em;
+}
+*/
+
+#top_menu .php_buttons div:before { content:"\0020 \003A \003A \0020"; font-weight:bold; } 
+#top_menu .php_buttons {
+    float:            right;
+    text-align: left;
 }
 
 #content { 
