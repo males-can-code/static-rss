@@ -1,108 +1,44 @@
 <!DOCTYPE html>
 <HTML lang="en">
-     <HEAD>
+    <HEAD>
         <META charset="utf-8">
         <TITLE>StaticRSS|$feed_title</TITLE>
         <LINK rel="shortcut icon" href="$favicon">
         <LINK rel="stylesheet" type="text/css" href="$css">
         {{switch=auto_refresh}}
-        <SCRIPT type="text/javascript">document.write("<meta http-equiv='refresh' content='$auto_refresh' >");</SCRIPT>
+        <script> document.write("<meta http-equiv='refresh' content='$auto_refresh' >");</script>
         {{endswitch=auto_refresh}}
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-        <script src="$domain/js/jquery.jscroll.min.js"></script>
-        <script>
-            $(document).ready(function() {
-                $('.scroll').jscroll({
-                    autoTrigger: true,
-                    nextSelector: 'a.next:last',
-                    debug: false
-                });
-
-                /*
-
-                //console.log($('#menu').contents().find('.menu_link').html()); //.addClass('feed_active');
-
-                var doc = window.frames['iframe.menu'].document;
-                $(doc).ready(function(){
-                    $('body').prepend('This is outside the iframe<br>');
-                    $('body',doc).prepend('This is inside the iframe<br>');
-
-                    $('body', doc).delegate('*', 'hover', function() {
-                        $(this).addClass('blablabla');
-                        $(this).css('textDecoration', 'underline');
-                    });
-                });
-
-
-                document.addEventListener('keydown', function(event) {
-                    var feed_active = $('iframe#menu').contents().find('.feed_active');
-                    console.log('>>>>>> '+feed_active.html());
-                    var feed_active_next = $('iframe#menu').contents().find('.feed_active').next('div').addClass('feed_active');
-                    console.log('>>>>>> '+feed_active_next.html());
-
-
-                    // Binding for 'n', select next feed
-                    if ((event.keyCode == 78) && (feed_active.next().length != 0)) {
-                        console.log('up');
-                        var feed_active = $('iframe#menu').contents().find('.feed_active').removeClass('feed_active');
-                        feed_active = $('iframe#menu').contents().find('.feed_active').next('div').addClass('feed_active');
-                        console.log('up'+ feed_active.html());
-                    }
-                    else if ((event.keyCode == 80) && (feed_active.prev().length != 0)) {
-                        console.log('down');
-                        var feed_active = $('iframe#menu').contents().find('.feed_active').removeClass('feed_active');
-                        feed_active = $('iframe#menu').contents().find('.feed_active').prev('div').addClass('feed_active');
-                        console.log('down'+ feed_active.html());
-                    }
-                });
-
-
-
-                // Add '.active' to first div with class '.entry_box'
-                $('.entry_box:first').addClass('entry_active');
-
-                document.addEventListener('keydown', function(event) {
-                    var entry_active = $('div.entry_active');
-
-                    // Binding for 'j', previous entry
-                    if ((event.keyCode == 74) && (entry_active.next('div').length != 0)) {
-                        var entry_active = $('div.entry_active').removeClass('entry_active');
-                        var position = $(entry_active).next('div').position();
-                        scroll(0,position.top);
-                        $(entry_active).next('div').addClass('entry_active');
-                        console.log('selected next entry');
-                    }
-                    // Binding for 'k', next entry
-                    else if ((event.keyCode == 75) && (entry_active.prev('div').length != 0)) {
-                        var entry_active = $('div.entry_active').removeClass('entry_active');
-                        var position = $(entry_active).prev('div').position();
-                        scroll(0,position.top);
-                        $(entry_active).prev('div').addClass('entry_active');
-                        console.log('selected previous entry');
-                    }
-                });
-
-*/
-                });
-        </script>
+        <script src="../../js/jquery.jscroll.min.js"></script>
+        <script src="../../js/keys.js"></script>
+        <script> $(document).ready(function() { $('.scroll').jscroll(); });</script>
     </HEAD>
     <BODY>
         <DIV id="main_wrapper">
             <DIV id=sidebar><IFRAME id="menu" src="$domain/menu.html"></IFRAME></DIV>
             <DIV id="feed_header">
-                <DIV id="feed_title">StaticRSS | $feed_title</DIV>
-                {{switch=php_buttons}}
-                <DIV class="php_buttons">
-                    <A HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">read</A> ::
-                    <A HREF="$domain/php/mark_read.php?hash=all&amp;go_back=$go_back">all read</A> ::
-                    <A HREF="$domain/php/update.php?go_back=$go_back">update</A> ::
-                    <A HREF="$domain/php/del_feed.php?hash=$feed_hash&amp;go_back=$domain">delete</A>
+                <DIV id="feed_header_wrapper">
+                    <DIV id="feed_title">$feed_title</DIV>
                 </DIV>
-                {{endswitch=php_buttons}}
+                <DIV id="top_menu">
+                    <DIV class="col1">
+                        <P>StaticRSS is released under GPL v3</P>
+                        <P>Get source code at <A HREF="https://github.com/elcoco/static-rss">github</A></P>
+
+                    </DIV>
+                    {{switch=php_buttons}}
+                    <DIV class="php_buttons">
+                        <DIV><A HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">Mark read</A></DIV>
+                        <DIV><A HREF="$domain/php/mark_read.php?hash=all&amp;go_back=$go_back">Mark all read</A></DIV>
+                        <DIV><A HREF="$domain/php/update.php?go_back=$go_back">Update</A></DIV>
+                        <DIV><A HREF="$domain/php/del_feed.php?hash=$feed_hash&amp;go_back=$domain">Delete feed</A></DIV>
+                    </DIV>
+                    {{endswitch=php_buttons}}
+                </DIV>
             </DIV>
             <DIV id="content" class="scroll">
             {{loop=page}}
-            <!-- Loop entries in the page template -->
+            <!-- Loop entries in the page template and insert here -->
             {{endloop=page}}
             </DIV>
         </DIV>
