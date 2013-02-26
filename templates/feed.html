@@ -5,13 +5,20 @@
         <TITLE>StaticRSS|$feed_title</TITLE>
         <LINK rel="shortcut icon" href="$favicon">
         <LINK rel="stylesheet" type="text/css" href="$css">
+        <link href="../../css/lightbox.css" rel="stylesheet" />  
         {{switch=auto_refresh}}
         <script> document.write("<meta http-equiv='refresh' content='$auto_refresh' >");</script>
         {{endswitch=auto_refresh}}
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script src="../../js/lightbox.js"></script>
         <script src="../../js/jquery.jscroll.min.js"></script>
         <script src="../../js/keys.js"></script>
         <script> $(document).ready(function() { $('.scroll').jscroll(); });</script>
+        <script>
+        $(document).ready(function() {
+            $('a:has(img)').attr('rel','lightbox'); // Add rel='lightbox' to every image link
+        });
+        </script>
     </HEAD>
     <BODY>
         <DIV id="main_wrapper">
@@ -19,6 +26,7 @@
             <DIV id="feed_header">
                 <DIV id="feed_header_wrapper">
                     <DIV id="feed_title">$feed_title</DIV>
+                    <DIV id="triangle" class="triangle"></DIV>
                 </DIV>
                 <DIV id="top_menu">
                     <DIV class="col1">
