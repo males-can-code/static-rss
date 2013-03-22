@@ -15,9 +15,26 @@
         <!-- <script src="../../js/keys.js"></script> -->
         <script> $(document).ready(function() { $('.scroll').jscroll(); });</script>
         <script> $(document).ready(function() { $('a:has(img)').attr('rel','lightbox'); });</script>
+        <script>
+            $(document).ready(function() {
+                $(window).scroll(function(){
+                    if ($(this).scrollTop() > 100) {
+                        $('.scrollup').fadeIn();
+                    } else {
+                        $('.scrollup').fadeOut();
+                    }
+                });
+
+                $('.scrollup').click(function(){
+                    $("html, body").animate({ scrollTop: 0 }, 600);
+                    return false;
+                });
+            });
+        </script>
     </HEAD>
     <BODY>
         <DIV id="main_wrapper">
+            <A href="#" class="scrollup">Scroll</A>
             <DIV id=sidebar><IFRAME id="menu" src="$domain/menu.html"></IFRAME></DIV>
             <DIV id="feed_header">
                 <DIV id="feed_header_wrapper">
