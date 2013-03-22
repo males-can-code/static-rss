@@ -4,7 +4,7 @@ import os
 class Config(object):
     def __init__(self):
         self.links_target               = '_blank' # Open links in a new window or not '_blank' = new, '_self' = same
-        self.entries_per_page           = 10        # Max amount of entries a page will contain
+        self.entries_per_page           = 10       # Max amount of entries a page will contain
         self.max_pages                  = 10       # Max amount of pages that will be generated, keep this low as this will improve performance
         self.max_entries_per_feed_in_db = 200      # Max amount of entries per feed before being deleted from database
 
@@ -14,10 +14,14 @@ class Config(object):
 
         # This switches a couple of page elements on or off
         self.switch = {}
-        self.switch['auto_mark_read']     = True # Automatically mark feed read on opening page
-        self.switch['auto_refresh']       = 600  # Automatic page refresh in seconds or False to disable
-        self.switch['menu']               = True # An awesome jquery menu that remembers state using cookies
-        self.switch['php_buttons']        = True # The php buttons on top of page (del feed, mark read, mark all read)
+        self.switch['auto_mark_read']     = True  # Automatically mark feed read on opening page
+        self.switch['auto_refresh']       = 600   # Automatic page refresh in seconds or False to disable
+        self.switch['menu']               = True  # An awesome jquery menu that remembers state using cookies
+        self.switch['php_mark_read']      = False # Add a PHP button
+        self.switch['php_mark_all_read']  = True  # 
+        self.switch['php_update']         = False # 
+        self.switch['php_delete_feed']    = False # 
+        self.switch['php_subscribe']      = True  # Add PHP script to subscribe to a new feed
 
         self.domain  = '//rss.opentbc.nl'         # eg: '//example.com' (leave the http: cause chromium will start complaining about insecure content
         self.app_dir = '/home/eco/bin/apps/static-rss' # Location of the program, eg: '/home/user/static-rss'

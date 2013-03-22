@@ -426,13 +426,18 @@ class GenerateHTML(object):
         if del_dir: self.remove_dir(self.config.path_export_html)
         self.check_dir(self.config.path_export_html)
         self.copy_dir(self.config.path_css, self.config.path_export_html + '/css')
-        self.copy_dir(self.config.path_php, self.config.path_export_html + '/php')
         self.copy_dir(self.config.path_js, self.config.path_export_html + '/js')
         self.copy_dir(self.config.path_pics, self.config.path_export_html + '/pics')
         self.copy_file(self.config.path_favicon, self.config.path_export_html)
         for feed in feeds:                      # Create all feed dirs which will store the entries
             self.check_dir(self.config.path_export_html + '/feeds/' + feed['feed_hash'])
 
+        self.check_dir(self.config.path_export_html + '/php')
+        if self.config.switch['php_mark_read']: self.copy_file(self.config.path_php + '/mark_read.php', self.config.path_export_html + '/php')
+        if self.config.switch['php_mark_all_read']: self.copy_file(self.config.path_php + '/mark_read.php', self.config.path_export_html + '/php')
+        if self.config.switch['php_update']: self.copy_file(self.config.path_php + '/update.php', self.config.path_export_html + '/php')
+        if self.config.switch['php_delete_feed']: self.copy_file(self.config.path_php + '/delete_feed.php', self.config.path_export_html + '/php')
+        if self.config.switch['php_subscribe']: self.copy_file(self.config.path_php + '/subscribe.php', self.config.path_export_html + '/php')
 
     def generate_HTML(self, del_dir=False, partial=True, feeds_gen='all'):
     # The main method that calls the other method in class

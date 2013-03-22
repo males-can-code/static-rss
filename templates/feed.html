@@ -46,15 +46,21 @@
                         <P>StaticRSS is released under GPLv3.</P>
                         <P>Get source code and contact me at <A HREF="https://github.com/elcoco/static-rss">github</A>.</P>
                     </DIV>
-                    {{switch=php_buttons}}
                     <DIV class="php_buttons">
                         <H3>Options</H3>
+                        {{switch=php_mark_read}}
                         <DIV><A HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">Mark read</A></DIV>
+                        {{endswitch=php_mark_read}}
+                        {{switch=php_mark_all_read}}
                         <DIV><A HREF="$domain/php/mark_read.php?hash=all&amp;go_back=$go_back">Mark all read</A></DIV>
+                        {{endswitch=php_mark_all_read}}
+                        {{switch=php_update}}
                         <DIV><A HREF="$domain/php/update.php?go_back=$go_back">Update</A></DIV>
+                        {{endswitch=php_update}}
+                        {{switch=php_delete_feed}}
                         <DIV><A HREF="$domain/php/del_feed.php?hash=$feed_hash&amp;go_back=$domain">Delete feed</A></DIV>
+                        {{endswitch=php_delete_feed}}
                     </DIV>
-                    {{endswitch=php_buttons}}
                 </DIV>
             </DIV>
             <DIV id="content" class="scroll">
