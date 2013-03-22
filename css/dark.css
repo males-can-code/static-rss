@@ -91,8 +91,8 @@ h1, h2, h3, h4, h5 {
     float: left;
 }
 .menu .menu_group_title {
-    -webkit-border-radius: 5px;
-    border-radius:         5px;
+    -webkit-border-radius: 3px;
+    border-radius:         3px;
     text-align:           right;
     padding:               .25em;
 	border:                solid .1em #3e3e3e;
@@ -102,8 +102,8 @@ h1, h2, h3, h4, h5 {
 .menu .menu_group_content>div>a {display:block;}
 .menu .menu_group_content>div { text-indent:-1em;} 
 .menu .menu_group_content {
-    -webkit-border-radius: 5px;
-    border-radius:         5px;
+    -webkit-border-radius: 3px;
+    border-radius:         3px;
     padding:       .5em;
     display:       block;
     padding-left:  1.5em;
@@ -140,7 +140,7 @@ h1, h2, h3, h4, h5 {
     float:         left;
     margin-top:    .35em;
     margin-left:   .5em;
-    border-radius:  5px;
+    border-radius:  3px;
     font-size:      1.3em; 
     font-weight:    bold;
     text-transform: uppercase;
@@ -167,8 +167,8 @@ h1, h2, h3, h4, h5 {
 
 #top_menu { height:0em; overflow:hidden; }
 #feed_header:hover #top_menu {
-    -webkit-border-radius: 0px 0px 5px 5px;  
-    border-radius:         0px 0px 5px 5px;  
+    -webkit-border-radius: 0px 0px 3px 3px;  
+    border-radius:         0px 0px 3px 3px;  
     -webkit-box-shadow: 0px 5px 5px #212121;
     box-shadow:         0px 5px 5px #212121;
     transition:         height .3s;
@@ -208,16 +208,16 @@ h1, h2, h3, h4, h5 {
 .feed_active { background-color: #2E2E2E;}
 .entry_box:hover { background-color: #2F2E2E; border: solid .1em #2f2e2e;}
 .entry_box { 
-    -webkit-border-radius: 5px;
-    border-radius:         5px;
+    -webkit-border-radius: 3px;
+    border-radius:         3px;
     margin-top:1em; 
 	border: solid .1em #3e3e3e;
 } 
 
 .entry_header_wrapper.a {display:block;}
 .entry_header_wrapper{ 
-    -webkit-border-radius: 5px;
-    border-radius:         5px;
+    -webkit-border-radius: 3px;
+    border-radius:         3px;
     padding:          .5em;
     white-space:nowrap;
     overflow: hidden;
@@ -233,8 +233,8 @@ h1, h2, h3, h4, h5 {
     font-weight: bold;
 }
 .entry_content { 
-    -webkit-border-radius: 5px;
-    border-radius:         5px;
+    -webkit-border-radius: 3px;
+    border-radius:         3px;
     margin-left:  auto;
     margin-right: auto;
     text-align:   justify;

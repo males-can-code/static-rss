@@ -2,11 +2,11 @@ $(document).ready(function(){
     $(".menu div.menu_group_title").click(function() {
         if ($(this).siblings().is(":hidden")) {
             $(this).siblings().slideDown();
-            $.cookie($(this).parent().get(0).className, 'true', {path:'/'});
+            $.cookie($(this).parent().get(0).className, 'true', {expires: 30, path:'/'});
         }
         else {
             $(this).siblings().slideUp();
-            $.cookie($(this).parent().get(0).className, 'false', {path:'/'});
+            $.cookie($(this).parent().get(0).className, 'false', {expires: 30, path:'/'});
         }
     });
     // Restore state from cookie

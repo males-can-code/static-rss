@@ -790,7 +790,8 @@ class RSS(Database, GenerateHTML):
         entry_insert['entry_media'] = ''
         if len(entry.enclosures) > 0:
             for enclosure in entry.enclosures:
-                if 'audio' in enclosure['type']:
+                print('>>>>>>>>',enclosure)
+                if 'audio' in enclosure['type'] or 'image' in enclosure['type']:
                     entry_insert['entry_media'] = entry_insert['entry_media'] + enclosure['href'] + ','
         self.insert_row('entries', entry_insert)
 

@@ -9,8 +9,8 @@ class Config(object):
         self.max_entries_per_feed_in_db = 200      # Max amount of entries per feed before being deleted from database
 
         # List of blacklisted tags and attributes for content
-        self.invalid_tags = ['script', 'html', 'body', 'strong', 'hr']
-        self.invalid_attr = ['class', 'align', 'id', 'name', 'style', 'border', 'width', 'height']
+        self.invalid_tags = ['script', 'html', 'body', 'strong', 'hr', 'font']
+        self.invalid_attr = ['class', 'align', 'id', 'name', 'style', 'border', 'width', 'height', 'color']
 
         # This switches a couple of page elements on or off
         self.switch = {}
