@@ -39,7 +39,7 @@ class Config(object):
         self.path_php              = self.app_dir + '/php'
         self.path_js               = self.app_dir + '/js'
         self.path_pics             = self.app_dir + '/pics'
-        self.path_favicon          = self.app_dir + '/pics/favicon.ico'
+        self.path_favicon          = self.app_dir + '/favicon.ico'
 
         # Appart from just adding feeds to the database you can also enter them here as: ['url', 'group']
         # They will be automatically added to the database also if you remove them from the database
