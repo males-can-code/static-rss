@@ -17,6 +17,7 @@ from bs4 import BeautifulSoup
 # TODO After podcasts also videocasts should be supported
 # TODO Comments Comments Comments Comments
 # TODO When a feed updates its entry I get a new copy, for some feeds this is really ennoying, eg. reddit
+# TODO Maybe a PHP config page to configure which feed should be in what group and all
 
 
 class Log(object):
