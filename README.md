@@ -68,7 +68,7 @@ If the database is accessable to the webserver you can use them to mark your fee
 read or to update your feeds from the web.  
 
 #### TMPFS:    
-To make static-rss faster you can use a tmpfs.    
+To make static-rss faster you can use a tmpfs to hold your exported html files.    
 <pre>
 self.path_export_dir = '/tmp/static-rss/html'
 self.path_db = '/tmp/static-rss/database'   
