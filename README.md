@@ -2,6 +2,7 @@ StaticRSS
 =========
 StaticRSS is an rss reader written in python3 that outputs static html files.  
 This makes it ideal for webservers on slow connections.   
+See a working example at: http://rss.opentbc.nl
   
 **Disclaimer:** This script is a work in progress!!!  
 This means it will probably make your computer explode ;)  
