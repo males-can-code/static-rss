@@ -1,17 +1,17 @@
                     {{loop=entries}}
-                    <DIV class="entry_box">
-                        <DIV class="entry_header_wrapper">
-                            <A id="$entry_hash" class="entry_title $entry_read" HREF="$entry_url" target="$links_target">$entry_title</A>
-                            <DIV class="entry_date_published">$entry_date_published</DIV>
-                        </DIV>
-                        <DIV class="entry_content">
+                    <div class="entry_box">
+                        <div class="entry_header_wrapper">
+                            <a id="$entry_hash" class="entry_title $entry_read" HREF="$entry_url" target="$links_target">$entry_title</a>
+                            <div class="entry_date_published">$entry_date_published</div>
+                        </div>
+                        <div class="entry_content">
                             {{loop=media}}
-                            <DIV><AUDIO controls="controls" preload="metadata"> <SOURCE src="$entry_media" />Your browser does not support the HTML5 audio element</AUDIO></DIV>
-                            <A href="$entry_media">[Download media]</A>
+                            <div><AUDIO controls="controls" preload="metadata"> <source src="$entry_media" />Your browser does not support the HTML5 audio element</audio></div>
+                            <a href="$entry_media">[Download media]</a>
                             {{endloop=media}}
                             $entry_content
-                        </DIV>
-                    </DIV>
+                        </div>
+                    </div>
                     {{endloop=entries}}
                     {{switch=next}}
                     <div class="load_next"><a href="$page_next" class="next">more</a></div>

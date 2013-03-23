@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<HTML lang="en">
-    <HEAD>
-        <META charset="utf-8">
-        <TITLE>StaticRSS|$feed_title</TITLE>
-        <LINK rel="shortcut icon" href="$favicon">
-        <LINK rel="stylesheet" type="text/css" href="$css">
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>StaticRSS|$feed_title</title>
+        <link rel="shortcut icon" href="$favicon">
+        <link rel="stylesheet" type="text/css" href="$css">
         <link href="../../css/lightbox.css" rel="stylesheet" />  
         {{switch=auto_refresh}}
         <script> document.write("<meta http-equiv='refresh' content='$auto_refresh' >");</script>
@@ -30,51 +30,51 @@
                 });
             });
         </script>
-    </HEAD>
-    <BODY>
-        <DIV id="main_wrapper">
-            <A href="#" class="scrollup">Scroll</A>
-            <DIV id=sidebar><IFRAME id="menu" src="$domain/menu.html"></IFRAME></DIV>
-            <DIV id="feed_header">
-                <DIV id="feed_header_wrapper">
-                    <DIV id="feed_title">$feed_title</DIV>
-                    <DIV id="triangle" class="triangle"></DIV>
-                </DIV>
-                <DIV id="top_menu">
-                    <DIV class="col1">
-                        <H3>License</H3>
-                        <P>StaticRSS is released under GPLv3.</P>
-                        <P>Get source code and contact me at <A HREF="https://github.com/elcoco/static-rss">github</A>.</P>
-                        <P>Drag
-                        <A HREF="javascript:{var group=prompt('Enter group','default');window.location.href='$domain/php/subscribe.php?url='+document.URL+'&group='+group;}">this</A>
-                        link to the bookmarks bar to easily</P>
-                        <P>add links to StaticRSS.</P>
-                    </DIV>
-                    <DIV class="php_buttons">
-                        <H3>Options</H3>
+    </head>
+    <body>
+        <div id="main_wrapper">
+            <a href="#" class="scrollup">Scroll</a>
+            <div id=sidebar><iframe id="menu" src="$domain/menu.html"></iframe></div>
+            <div id="feed_header">
+                <div id="feed_header_wrapper">
+                    <div id="feed_title">$feed_title</div>
+                    <div id="triangle" class="triangle"></div>
+                </div>
+                <div id="top_menu">
+                    <div class="col1">
+                        <h3>License</h3>
+                        <p>StaticRSS is released under GPLv3.</p>
+                        <p>Get source code and contact me at <a HREF="https://github.com/elcoco/static-rss">github</a>.</p>
+                        <p>Drag
+                        <a HREF="javascript:{var group=prompt('Enter group','default');window.location.href='$domain/php/subscribe.php?url='+document.URL+'&group='+group;}">this</a>
+                        link to the bookmarks bar to easily</p>
+                        <p>add links to StaticRSS.</p>
+                    </div>
+                    <div class="php_buttons">
+                        <h3>Options</h3>
                         {{switch=php_mark_read}}
-                        <DIV><A HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">Mark read</A></DIV>
+                        <div><a HREF="$domain/php/mark_read.php?hash=$feed_hash&amp;go_back=$go_back">Mark read</a></div>
                         {{endswitch=php_mark_read}}
                         {{switch=php_mark_all_read}}
-                        <DIV><A HREF="$domain/php/mark_read.php?hash=all&amp;go_back=$go_back">Mark all read</A></DIV>
+                        <div><a HREF="$domain/php/mark_read.php?hash=all&amp;go_back=$go_back">Mark all read</a></div>
                         {{endswitch=php_mark_all_read}}
                         {{switch=php_update}}
-                        <DIV><A HREF="$domain/php/update.php?go_back=$go_back">Update</A></DIV>
+                        <div><a HREF="$domain/php/update.php?go_back=$go_back">Update</a></div>
                         {{endswitch=php_update}}
                         {{switch=php_delete_feed}}
-                        <DIV><A HREF="$domain/php/del_feed.php?hash=$feed_hash&amp;go_back=$domain">Delete feed</A></DIV>
+                        <div><a HREF="$domain/php/del_feed.php?hash=$feed_hash&amp;go_back=$domain">Delete feed</a></div>
                         {{endswitch=php_delete_feed}}
-                    </DIV>
-                </DIV>
-            </DIV>
-            <DIV id="content" class="scroll">
+                    </div>
+                </div>
+            </div>
+            <div id="content" class="scroll">
             {{loop=page}}
             <!-- Loop entries in the page template and insert here -->
             {{endloop=page}}
-            </DIV>
-        </DIV>
+            </div>
+        </div>
         {{switch=auto_mark_read}}
-        <IFRAME style="display:none" src="$domain/php/mark_read.php?hash=$feed_hash&amp;mode=silent"></IFRAME>
+        <iframe style="display:none" src="$domain/php/mark_read.php?hash=$feed_hash&amp;mode=silent"></iframe>
         {{endswitch=auto_mark_read}}
-    </BODY>
-</HTML>
+    </body>
+</html>
