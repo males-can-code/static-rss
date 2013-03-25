@@ -13,7 +13,6 @@ from string import Template
 from config import Config
 from bs4 import BeautifulSoup
 
-# TODO ! PHP files contain absolute paths to 'eco' homedir
 # TODO   After podcasts also videocasts should be supported
 # TODO   Comments Comments Comments Comments
 # TODO ? Maybe a PHP config page to configure which feed should be in what group and all
