@@ -13,11 +13,11 @@ from string import Template
 from config import Config
 from bs4 import BeautifulSoup
 
-# TODO Limit downloaded entries per parse, if we don't limit it it will download the complete feed and entry history 
 # TODO After podcasts also videocasts should be supported
 # TODO Comments Comments Comments Comments
 # TODO When a feed updates its entry I get a new copy, for some feeds this is really ennoying, eg. reddit
-# TODO Maybe a PHP config page to configure which feed should be in what group and all
+# TODO ? Maybe a PHP config page to configure which feed should be in what group and all
+# TODO ? Very simple user management
 
 
 class Log(object):
@@ -83,6 +83,7 @@ class Log(object):
         message = re.sub( 'Marking feed read:', self.color_red + 'Marking feed read:' + self.color_white, message )
         message = re.sub( 'Deleting entry:', self.color_red + 'Deleting entry:' + self.color_white, message )
         message = re.sub( 'Deleting feed:', self.color_red + 'Deleting feed:' + self.color_white, message )
+        message = re.sub( 'Entry updated => deleted old:', self.color_green + 'Entry updated => ' + self.color_red + 'deleted old:' + self.color_white, message )
 
         address = re.findall( r'[0-9]+(?:\.[0-9]+){3}', message )
         if address:
@@ -210,8 +211,8 @@ class GenerateHTML(object):
 
     def parse_template(self, template, data):
     # Parse a template file, input is a dict: {data to be replaced : data to replace with}
-    # Return is filled_template containing all the replaced lines
-    # You can put switches in loops to turn certain elements on and off, really handy
+    # Returns filled_template containing all the replaced lines
+    # You can put switches in loops to turn certain elements on and off
     # Also it is possible to put other loops inside loops... dawg
         filled_template = ''
         if type(template) != list:
@@ -681,6 +682,10 @@ class RSS(Database, GenerateHTML):
                     if 'updated' in entry:
                         print(entry['updated'], entry['title'])
                     if not self.check_in_table('entries', 'entry_hash', str(self.get_hash(entry['title'] + str(self.clean_HTML(entry['summary']))))):
+                        # If entry is updated, delete old entry to prevent doubles
+                        if self.check_in_table('entries', 'entry_url', str(entry['link'])):
+                            self.delete_row_by_value('entries', 'entry_hash', str(self.get_hash(entry['title'] + str(self.clean_HTML(entry['summary'])))))
+                            self.log.info('Entry updated => deleted old: %s'%entry['title'])
                         self.add_entry(entry, feed['feed_url'])
                         # Add feed_hash from feeds with unread messages to feeds_gen so we know which html should be regenerated
                         if feed['feed_hash'] not in feeds_gen:

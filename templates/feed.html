@@ -45,10 +45,12 @@
                         <h3>License</h3>
                         <p>StaticRSS is released under GPLv3.</p>
                         <p>Get source code and contact me at <a HREF="https://github.com/elcoco/static-rss">github</a>.</p>
+                        {{switch=php_subscribe}}
                         <p>Drag
                         <a HREF="javascript:{var group=prompt('Enter group','default');window.location.href='$domain/php/subscribe.php?url='+document.URL+'&group='+group;}">this</a>
                         link to the bookmarks bar to easily</p>
                         <p>add links to StaticRSS.</p>
+                        {{endswitch=php_subscribe}}
                     </div>
                     <div class="php_buttons">
                         <h3>Options</h3>
