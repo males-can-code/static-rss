@@ -13,11 +13,11 @@ from string import Template
 from config import Config
 from bs4 import BeautifulSoup
 
-# TODO After podcasts also videocasts should be supported
-# TODO Comments Comments Comments Comments
-# TODO When a feed updates its entry I get a new copy, for some feeds this is really ennoying, eg. reddit
+# TODO ! PHP files contain absolute paths to 'eco' homedir
+# TODO   After podcasts also videocasts should be supported
+# TODO   Comments Comments Comments Comments
 # TODO ? Maybe a PHP config page to configure which feed should be in what group and all
-# TODO ? Very simple user management
+# TODO ? Very simple login
 
 
 class Log(object):
@@ -209,8 +209,8 @@ class GenerateHTML(object):
             sys.exit()
 
 
-    def parse_template(self, template, data):
-    # Parse a template file, input is a dict: {data to be replaced : data to replace with}
+    def parse_template(self, template, data={}):
+    # Parse a template file, data is a dict: {data to be replaced : data to replace with}
     # Returns filled_template containing all the replaced lines
     # You can put switches in loops to turn certain elements on and off
     # Also it is possible to put other loops inside loops... dawg
@@ -423,6 +423,12 @@ class GenerateHTML(object):
                 cur_page = cur_page - 1
 
 
+    def generate_php(self, filename):
+        self.log.info('Generating: %s'%os.path.basename(filename))
+        filled_template = self.parse_template(filename, {'app_dir' : self.config.app_dir})
+        self.write_to_file('%s/php/%s'%(self.config.path_export_html, os.path.basename(filename)),filled_template)
+
+
     def gen_init(self, feeds, del_dir):
     # Create/remove/copy dirs and files, is always called before doing anything
         if del_dir: self.remove_dir(self.config.path_export_html)
@@ -434,12 +440,13 @@ class GenerateHTML(object):
         for feed in feeds:                      # Create all feed dirs which will store the entries
             self.check_dir(self.config.path_export_html + '/feeds/' + feed['feed_hash'])
 
+        # Parse the php templates
         self.check_dir(self.config.path_export_html + '/php')
-        if self.config.switch['php_mark_read']: self.copy_file(self.config.path_php + '/mark_read.php', self.config.path_export_html + '/php')
-        if self.config.switch['php_mark_all_read']: self.copy_file(self.config.path_php + '/mark_read.php', self.config.path_export_html + '/php')
-        if self.config.switch['php_update']: self.copy_file(self.config.path_php + '/update.php', self.config.path_export_html + '/php')
-        if self.config.switch['php_delete_feed']: self.copy_file(self.config.path_php + '/delete_feed.php', self.config.path_export_html + '/php')
-        if self.config.switch['php_subscribe']: self.copy_file(self.config.path_php + '/subscribe.php', self.config.path_export_html + '/php')
+        if self.config.switch['php_mark_read']: self.generate_php(self.config.path_php + '/mark_read.php')
+        if self.config.switch['php_mark_all_read']: self.generate_php(self.config.path_php + '/mark_read.php')
+        if self.config.switch['php_update']: self.generate_php(self.config.path_php + '/update.php')
+        if self.config.switch['php_delete_feed']: self.generate_php(self.config.path_php + '/del_feed.php')
+        if self.config.switch['php_subscribe']: self.generate_php(self.config.path_php + '/subscribe.php')
 
     def generate_HTML(self, del_dir=False, partial=True, feeds_gen='all'):
     # The main method that calls the other method in class

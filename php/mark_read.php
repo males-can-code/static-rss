@@ -5,11 +5,11 @@
 
     if ($hash == 'all') 
     {
-        $handle = popen("LANG=en_US.UTF-8 /home/eco/bin/apps/static-rss/static-rss --mark-all-read >> /tmp/StaticRSS.log 2>&1", 'r');
+        $handle = popen("LANG=en_US.UTF-8 $app_dir/static-rss --mark-all-read", 'r');
     }
     else 
     {
-        $handle = popen("LANG=en_US.UTF-8 /home/eco/bin/apps/static-rss/static-rss --mark-read=$hash >> /tmp/StaticRSS.log 2>&1", 'r');
+        $handle = popen("LANG=en_US.UTF-8 $app_dir/static-rss --mark-read=$hash", 'r');
     }
     pclose ($handle);
     
