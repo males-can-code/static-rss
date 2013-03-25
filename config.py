@@ -17,20 +17,19 @@ class Config(object):
         self.switch['auto_mark_read']     = True  # Automatically mark feed read on opening page
         self.switch['auto_refresh']       = 600   # Automatic page refresh in seconds or False to disable
         self.switch['menu']               = True  # An awesome jquery menu that remembers state using cookies
-        self.switch['php_mark_read']      = False # Add a PHP button
+        self.switch['php_mark_read']      = False # Add a PHP button (will also install PHP script)
         self.switch['php_mark_all_read']  = True  # 
         self.switch['php_update']         = False # 
         self.switch['php_delete_feed']    = False # 
         self.switch['php_subscribe']      = True  # Add PHP script to subscribe to a new feed
 
-        self.domain  = '//rss.opentbc.nl'         # eg: '//example.com' (leave the http: cause chromium will start complaining about insecure content
+        self.domain  = '//rss.opentbc.nl'         # eg: '//example.com' (Remove the 'http' bit: cause chromium will start complaining about insecure content
         self.app_dir = '/home/eco/bin/apps/static-rss' # Location of the program, eg: '/home/user/static-rss'
 
         # Should be something like '/var/www/static-rss'
         # If /tmp is tmpfs, you can also do '/tmp/static-rss' for speed improvements
         # Check README.md for a brief explanation about tmpfs
         self.path_export_html      = '/tmp/static-rss'          
-        self.path_export_html_tmp  = '/tmp/static-rss-tmp' # generate html to tmp dir and copy it to path_export_html
 
         # Where we can find certain files
         self.path_db               = self.app_dir + '/database/static-rss.sqlite' # Path to sqlite database
