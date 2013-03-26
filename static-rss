@@ -887,7 +887,7 @@ class RSS(Database, GenerateHTML):
         print('    -M, --mark-all-read            -mark all feeds as read')
         print('        --subscribe=<url>          -subscribe to feed')
         print('            --group=<group>        -group to add feed to')
-        print('        --del_feed=<hash>          -delete feed and all its entries')
+        print('        --del-feed=<hash>          -delete feed and all its entries')
         print()
         print('    -h, --help                     -this text')
                                                                  
