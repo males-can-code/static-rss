@@ -246,8 +246,8 @@ h1, h2, h3, h4, h5 {
     height:40px;
     opacity:0.3;
     position:fixed;
-    bottom:5em;
-    right:12em;
+    bottom:3em;
+    right:5em;
     display:none;
     text-indent:-9999px;
     background: url('../pics/icon_top.png') no-repeat;

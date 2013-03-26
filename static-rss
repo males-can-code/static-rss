@@ -690,7 +690,7 @@ class RSS(Database, GenerateHTML):
                     if not self.check_in_table('entries', 'entry_hash', str(self.get_hash(entry['title'] + str(self.clean_HTML(entry['summary']))))):
                         # If entry is updated, delete old entry to prevent doubles
                         if self.check_in_table('entries', 'entry_url', str(entry['link'])):
-                            self.delete_row_by_value('entries', 'entry_hash', str(self.get_hash(entry['title'] + str(self.clean_HTML(entry['summary'])))))
+                            self.delete_row_by_value('entries', 'entry_url', str(entry['link']))
                             self.log.info('Entry updated => deleted old: %s'%entry['title'])
                         self.add_entry(entry, feed['feed_url'])
                         # Add feed_hash from feeds with unread messages to feeds_gen so we know which html should be regenerated
