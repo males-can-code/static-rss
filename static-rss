@@ -907,7 +907,6 @@ class RSS(Database, GenerateHTML):
 
             for arg in sys.argv:
                 if '--subscribe=' in arg:
-                    print(arg)
                     x,url = arg.split('--subscribe=') 
                     for arg in sys.argv:
                         if '--group=' in arg:
