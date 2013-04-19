@@ -447,11 +447,13 @@ class GenerateHTML(object):
         if self.config.switch['php_delete_feed']: self.generate_php(self.config.path_php + '/del_feed.php')
         if self.config.switch['php_subscribe']: self.generate_php(self.config.path_php + '/subscribe.php')
 
-    def generate_HTML(self, del_dir=False, partial=True, feeds_gen='all'):
+        self.generate_index(feeds[0]['feed_hash'], template)   # Generate index.html
+
+    def generate_HTML(self, del_dir=False, partial=True, skip_init=False, feeds_gen='all'):
     # The main method that calls the other method in class
-        self.log.info('Generating HTML')
         feeds = self.get_table('feeds')     
-        self.gen_init(feeds, del_dir=del_dir)
+        if not skip_init:
+            self.gen_init(feeds, del_dir=del_dir)
 
         # Feed_template dict contains information to fill templates
         template = {}            
@@ -461,7 +463,6 @@ class GenerateHTML(object):
         template['css']          = self.config.domain + '/css/' + os.path.basename(self.config.path_stylesheet)
 
         self.generate_menu(template)                           # Generate menu
-        self.generate_index(feeds[0]['feed_hash'], template)   # Generate index.html
 
         for feed in feeds:              
             if feed['feed_hash'] in feeds_gen or feeds_gen == 'all':        # Only generate feed if it has new messages
@@ -861,18 +862,8 @@ class RSS(Database, GenerateHTML):
 
 
     def init(self):
-    # Create tables, input feeds from config file in table
-    # TODO are there feeds? what will happen if not?
         self.check_dir(os.path.dirname(self.config.path_db))
         self.create_tables()
-        self.cleanup_feeds()
-
-        if len(self.config.feeds) >= 1:
-            for feed in self.config.feeds:
-                if not self.check_in_table('feeds', 'feed_hash', str(self.get_hash(feed[0]))):
-                    self.add_feed(feed)
-        else:
-            self.log.error('No feeds in config file')
 
 
     def usage(self):
@@ -920,6 +911,7 @@ class RSS(Database, GenerateHTML):
                                 sys.exit()
                     
             if '--parse-feeds' in sys.argv or '-p' in sys.argv:
+                self.cleanup_feeds()
                 feeds_gen = self.parse_feeds()
                 self.generate_HTML(del_dir=False, partial=True, feeds_gen=feeds_gen)
 
@@ -931,7 +923,7 @@ class RSS(Database, GenerateHTML):
                 if '--mark-read=' in arg:
                     x,hash = arg.split('=') 
                     self.mark_read(hash)
-                    self.generate_HTML(del_dir=False, partial=False, feeds_gen=[hash])
+                    self.generate_HTML(del_dir=False, partial=False, skip_init=True, feeds_gen=[hash])
 
                 if '--del-feed=' in arg:
                     x,hash = arg.split('=') 
