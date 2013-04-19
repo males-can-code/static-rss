@@ -268,7 +268,7 @@ class GenerateHTML(object):
 
 
     def loop_feed_list(self, lines, data):
-    # Is called by parse_template, Generates the left sidebar links
+    # Is used by menu template, Generates the left sidebar links
         filled_template = ''
         feed_url = {}
         last_group = ''
@@ -279,17 +279,14 @@ class GenerateHTML(object):
             for feed in feeds:
                 data['group_title'] = group
 
-                # Count unread entries per feed
-                entries = self.get_rows_by_value('entries', 'entry_feed_hash', feed['feed_hash'], order_by='entry_date_published')
-                unread_counter = 0
-                for entry in entries:
-                    if entry['entry_read'] == 'unread': unread_counter = unread_counter + 1
+                # Get unread entries per feed
+                unread_count = self.get_n_rows_by_value('entries', 'entry_feed_hash', feed['feed_hash'], 'entry_read', 'unread', order_by='entry_date_published')
 
                 data['feed_link'] = feed['feed_title'] 
                 data['feed_url'] = self.config.domain + '/feeds/' + feed['feed_hash']
 
-                if unread_counter > 0:
-                    data['counter'] = '[' + str(unread_counter) + ']'
+                if unread_count > 0:
+                    data['counter'] = '[' + str(unread_count) + ']'
                     data['feed_read'] = 'unread'
                 else:
                     data['counter'] = ''
@@ -451,8 +448,6 @@ class GenerateHTML(object):
     def generate_HTML(self, del_dir=False, partial=True, skip_init=False, feeds_gen='all'):
     # The main method that calls the other method in class
         feeds = self.get_table('feeds')     
-        if not skip_init:
-            self.gen_init(feeds, del_dir=del_dir)
 
         # Feed_template dict contains information to fill templates
         template = {}            
@@ -462,7 +457,9 @@ class GenerateHTML(object):
         template['css']          = self.config.domain + '/css/' + os.path.basename(self.config.path_stylesheet)
 
         if not skip_init:
+            self.gen_init(feeds, del_dir=del_dir)
             self.generate_index(feeds[0]['feed_hash'], template)   # Generate index.html
+
         self.generate_menu(template)                           # Generate menu
 
         for feed in feeds:              
@@ -542,6 +539,14 @@ class Database(object):
 
         db.close()
         return rows_export
+
+
+    def get_n_rows_by_value(self, table, col, value, col2, value2, order_by):
+    # Get a number of rows containing a value
+        db = sqlite3.connect(self.config.path_db)
+        for row_count in db.execute('select Count(*) from %s where "%s" is "%s" and "%s" is "%s" order by "%s" desc'%(table, col, value, col2, value2, order_by)):
+            db.close()
+            return row_count[0]
 
 
     def insert_row(self, table, row):
