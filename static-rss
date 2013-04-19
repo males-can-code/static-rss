@@ -447,7 +447,6 @@ class GenerateHTML(object):
         if self.config.switch['php_delete_feed']: self.generate_php(self.config.path_php + '/del_feed.php')
         if self.config.switch['php_subscribe']: self.generate_php(self.config.path_php + '/subscribe.php')
 
-        self.generate_index(feeds[0]['feed_hash'], template)   # Generate index.html
 
     def generate_HTML(self, del_dir=False, partial=True, skip_init=False, feeds_gen='all'):
     # The main method that calls the other method in class
@@ -462,6 +461,8 @@ class GenerateHTML(object):
         template['favicon']      = self.config.domain + '/favicon.ico'
         template['css']          = self.config.domain + '/css/' + os.path.basename(self.config.path_stylesheet)
 
+        if not skip_init:
+            self.generate_index(feeds[0]['feed_hash'], template)   # Generate index.html
         self.generate_menu(template)                           # Generate menu
 
         for feed in feeds:              
